@@ -8,15 +8,12 @@ app.use(express.json());
 // Connect to MongoDB
 connectDB();
 
-app.get("/", (req, res) => {
-    res.send("API is running...");
-});
+// Routes
+app.use("/api/programs", require("./routes/programRoutes"));
+app.use("/api/resources", require("./routes/resourceRoutes"));
+app.use("/api/mentors", require("./routes/mentorRoutes"));
 
-const programRoutes = require("./routes/programRoutes");
-const resourceRoutes = require("./routes/resourceRoutes");
-
-app.use("/api/programs", programRoutes);
-app.use("/api/resources", resourceRoutes);
+app.get("/", (req, res) => res.send("Mentorship API Running"));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

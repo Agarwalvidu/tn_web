@@ -1,28 +1,27 @@
 const express = require("express");
 const Program = require("../models/Program");
-
+const protect = require("../middleware/authMentor");
 const router = express.Router();
 
-// Create a new program
-router.post("/", async (req, res) => {
-    try {
-        const { name } = req.body;
-        const newProgram = new Program({ name });
-        await newProgram.save();
-        res.status(201).json(newProgram);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+// @route   POST /api/programs (Protected)
+router.post("/", protect, async (req, res) => {
+  try {
+    const program = new Program({
+      name: req.body.name,
+      mentor: req.mentor._id
+    });
+
+    await program.save();
+    
+    // Add program to mentor's programs array
+    req.mentor.programs.push(program._id);
+    await req.mentor.save();
+
+    res.status(201).json(program);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// Get all programs
-router.get("/", async (req, res) => {
-    try {
-        const programs = await Program.find().populate("resources");
-        res.status(200).json(programs);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
+// Keep your existing GET /api/programs route
 module.exports = router;
