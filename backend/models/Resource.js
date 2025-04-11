@@ -1,11 +1,17 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const ResourceSchema = new mongoose.Schema({
-    heading: { type: String, required: true },
-    deadline: { type: Date, required: true },
-    assigned_score: { type: Number, required: true },
-    video_link: { type: String, required: true },
-    program: { type: mongoose.Schema.Types.ObjectId, ref: "Program", required: true },
-});
+  title: { type: String, required: true },
+  type: { type: String, enum: ['video', 'quiz', 'text'], required: true },
+  url: { type: String },
+  deadline: { type: Date },
+  maxScore: { type: Number, default: 10 },
+  program: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Program',
+    required: true 
+  },
+  isLocked: { type: Boolean, default: true }
+}, { timestamps: true });
 
-module.exports = mongoose.model("Resource", ResourceSchema);
+module.exports = mongoose.model('Resource', ResourceSchema);
