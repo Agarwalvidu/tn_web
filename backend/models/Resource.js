@@ -11,7 +11,7 @@ const ResourceSchema = new mongoose.Schema({
     ref: 'Program',
     required: true 
   },
-  isLocked: { type: Boolean, default: true }
+  isLocked: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Resource', ResourceSchema);

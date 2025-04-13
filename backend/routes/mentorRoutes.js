@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const Mentor = require('../models/Mentor');
 const Program = require('../models/Program');
 const Resource = require('../models/Resource');
+const Mentee = require('../models/Mentee')
 const { authenticate } = require('../middleware/authMentor');
 const router = express.Router();
 
@@ -99,6 +100,46 @@ router.post('/resources', authenticate, async (req, res) => {
     await program.save();
     
     res.status(201).json(resource);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Mentor adds a mentee (with auto-generated credentials)
+router.post('/mentees', authenticate, async (req, res) => {
+  try {
+    console.log("Creating mentee")
+    const { name, enrollmentNumber, programId } = req.body;
+    const mentor = req.mentor;
+
+    // Check if mentor is assigned to the program
+    const program = await Program.findById(programId);
+    console.log("okay checking")
+    if (!program.mentors.includes(mentor._id)) {
+      return res.status(403).json({ error: 'Not authorized for this program' });
+    }
+
+    // Generate a random password (or let mentor set one)
+    const tempPassword = Math.random().toString(36).slice(-8); // Example: "x7f9d2y"
+    console.log("salt")
+    const salt = await bcrypt.genSalt(10);
+    
+    const mentee = new Mentee({
+      name,
+      enrollmentNumber,
+      password: await bcrypt.hash(tempPassword, salt),
+      programs: [programId]
+    });
+
+    await mentee.save();
+
+    // Optional: Send email to mentee with credentials
+    // await sendWelcomeEmail(mentee.email, enrollmentNumber, tempPassword);
+
+    res.status(201).json({
+      mentee,
+      tempPassword // Mentor sees this (for manual sharing)
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
