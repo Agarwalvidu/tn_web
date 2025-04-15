@@ -27,6 +27,26 @@ router.post('/mentors', async (req, res) => {
   }
 });
 
+// Get all mentors
+router.get('/mentors', async (req, res) => {
+  try {
+    const mentors = await Mentor.find().populate('programs'); // Populate programs if you want the full program data
+    res.json(mentors);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get all programs
+router.get('/programs', async (req, res) => {
+  try {
+    const programs = await Program.find().populate('mentors'); // Populate mentors if you want the full mentor data
+    res.json(programs);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Mentor Login
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
