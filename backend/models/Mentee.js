@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 
 const MenteeSchema = new mongoose.Schema({
+  email: {type: String, required: true, unique: true},
   name: { type: String, required: true },
-  enrollmentNumber: { type: String, required: true, unique: true },
+  enrollmentNumber: { type: String, required: true },
   password: { type: String, required: true },
   programs: [{
     type: mongoose.Schema.Types.ObjectId,

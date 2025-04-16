@@ -48,7 +48,7 @@ router.get('/programs', async (req, res) => {
 });
 
 // Mentor Login
-router.post('/login', async (req, res) => {
+router.post('/mentors/login', async (req, res) => {
   const { email, password } = req.body;
   try {
     const mentor = await Mentor.findOne({ email });
@@ -56,12 +56,12 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
     const token = jwt.sign({ id: mentor._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
+    res.json({ token, mentor });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-//eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3Zjk2YzgyZDVlNjM4OTU1MTQ3YzY4MiIsImlhdCI6MTc0NDM5OTUyOCwiZXhwIjoxNzQ0NDAzMTI4fQ.9LYqa3feUHWM5vkNAyyaIdOnsXhtKBG18H0jIywHKTY
+
 // ==== PROGRAM MANAGEMENT ==== //
 // Create Program (Assign to Mentor)
 router.post('/programs', async (req, res) => {
@@ -128,13 +128,11 @@ router.post('/resources', authenticate, async (req, res) => {
 // Mentor adds a mentee (with auto-generated credentials)
 router.post('/mentees', authenticate, async (req, res) => {
   try {
-    console.log("Creating mentee")
-    const { name, enrollmentNumber, programId } = req.body;
+    const { email, name, enrollmentNumber, programId } = req.body;
     const mentor = req.mentor;
 
     // Check if mentor is assigned to the program
     const program = await Program.findById(programId);
-    console.log("okay checking")
     if (!program.mentors.includes(mentor._id)) {
       return res.status(403).json({ error: 'Not authorized for this program' });
     }
@@ -145,12 +143,12 @@ router.post('/mentees', authenticate, async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     
     const mentee = new Mentee({
+      email,
       name,
       enrollmentNumber,
       password: await bcrypt.hash(tempPassword, salt),
       programs: [programId]
     });
-
     await mentee.save();
 
     // Optional: Send email to mentee with credentials
@@ -160,6 +158,30 @@ router.post('/mentees', authenticate, async (req, res) => {
       mentee,
       tempPassword // Mentor sees this (for manual sharing)
     });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get all mentees for a program
+router.get('/:programId/mentees', async (req, res) => {
+  try {
+    const mentees = await Mentee.find({ programs: req.params.programId })
+      .select('-password') // Exclude sensitive data
+      .populate('completedResources.resource', 'title type'); // Optional: populate completed resources
+    
+    res.json(mentees);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/:programId/resources', async (req, res) => {
+  try {
+    const resources = await Resource.find({ program: req.params.programId })
+      .sort({ createdAt: -1 }); // Newest first
+    
+    res.json(resources);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
