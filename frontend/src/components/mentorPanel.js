@@ -1,12 +1,5 @@
 import { useState, useEffect } from 'react';
-import {
-  mentorLogin,
-  addMentee,
-  addResource,
-  getAllPrograms,
-  getProgramMentees,
-  getProgramResources
-} from '../lib/api';
+import { mentorLogin, addMentee, addResource, getAllPrograms, getProgramMentees, getProgramResources } from '../lib/api';
 
 export default function MentorPanel() {
   const [token, setToken] = useState('');
@@ -24,35 +17,60 @@ export default function MentorPanel() {
   const [mentees, setMentees] = useState([]);
   const [resources, setResources] = useState([]);
 
-  const handleLogin = async () => {
-    try {
-      // 1. Perform login and get mentor data
-      const { token, mentor } = await mentorLogin(email, password);
-      console.log("token", token, "mentor", mentor);
-      setToken(token);
+  useEffect(() => {
+    const savedToken = localStorage.getItem('token');
+    const savedMentor = JSON.parse(localStorage.getItem('mentor'));
+    const savedProgram = localStorage.getItem('selectedProgram');
+  
+    if (savedToken && savedMentor) {
+      setToken(savedToken);
       setLoggedIn(true);
   
-      // 2. Get all programs (we'll filter client-side)
+      // Optional: load programs here
+      getAllPrograms().then(allPrograms => {
+        const mentorPrograms = allPrograms.filter(program =>
+          savedMentor.programs.some(programId =>
+            programId.toString() === program._id.toString()
+          )
+        );
+        setPrograms(mentorPrograms);
+        if (savedProgram) {
+          setSelectedProgram(savedProgram); // 👈 Restore
+          handleProgramSelect(savedProgram); // 👈 Load its data
+        }
+      }).catch(err => {
+        console.error("Failed to load programs", err);
+      });
+    }
+  }, []);
+  
+  const handleLogin = async () => {
+    try {
+      const { token, mentor } = await mentorLogin(email, password);
+      setToken(token);
+      setLoggedIn(true);
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('mentor', JSON.stringify(mentor));
+
       const allPrograms = await getAllPrograms();
-  
-      // 3. Filter programs - TWO OPTIONS:
-  
-      // OPTION A: Using mentor's programs array (most direct)
       const mentorPrograms = allPrograms.filter(program => 
         mentor.programs.some(programId => 
           programId.toString() === program._id.toString()
         )
       );
   
-      // OPTION B: Using program's mentors array (also works)
-      // const mentorPrograms = allPrograms.filter(program =>
-      //   program.mentors.includes(mentor._id)
-      // );
-  
       setPrograms(mentorPrograms);
     } catch (err) {
       alert(err.message);
     }
+  };
+
+  const handleLogout = () => {
+    setToken('');
+    setLoggedIn(false);
+    localStorage.removeItem('token');
+    localStorage.removeItem('mentor');
   };
 
   const handleAddMentee = async () => {
@@ -64,6 +82,7 @@ export default function MentorPanel() {
         programId: selectedProgram,
       });
       alert(`Mentee added with password: ${result.tempPassword}`);
+      window.location.reload();
     } catch (err) {
       alert(err.message);
     }
@@ -71,7 +90,7 @@ export default function MentorPanel() {
 
   const handleProgramSelect = async (programId) => {
     setSelectedProgram(programId);
-    console.log(programId);
+    localStorage.setItem('selectedProgram', programId);
     try {
       const [menteesData, resourcesData] = await Promise.all([
         getProgramMentees(programId, token),
@@ -94,6 +113,7 @@ export default function MentorPanel() {
         program: selectedProgram,
       });
       alert('Resource added!');
+      window.location.reload();
     } catch (err) {
       alert(err.message);
     }
@@ -119,9 +139,10 @@ export default function MentorPanel() {
         </div>
       ) : (
         <div>
+          <button onClick={handleLogout}>Logout</button>
           <h2>Mentor Panel</h2>
           <h3>Programs</h3>
-          <select onChange={e => handleProgramSelect(e.target.value)}>
+          <select value={selectedProgram} onChange={e => handleProgramSelect(e.target.value)}>
             <option value="">Select Program</option>
             {programs.map(p => (
               <option key={p._id} value={p._id}>{p.name}</option>
