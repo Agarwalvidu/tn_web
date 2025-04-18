@@ -26,13 +26,53 @@ router.post('/login', async (req, res) => {
 router.get('/dashboard', authenticateMentee, async (req, res) => {
   try {
     const mentee = await Mentee.findById(req.mentee._id)
-      .populate('programs')
-      .populate('completedResources.resource');
-    
+    .populate({
+      path: 'programs',
+      populate: {
+        path: 'resources',
+        model: 'Resource'
+      }
+    })  
+    .populate({
+      path: 'completedResources.resource',
+      model: 'Resource'
+    });
+    // Map completedResources for quick lookup
+    const completedMap = new Map();
+    mentee.completedResources.forEach((item) => {
+      completedMap.set(item.resource._id.toString(), {
+        score: item.score,
+        completedOn: item.completedOn
+      });
+    });
+
+    let totalScore = 0;
+mentee.completedResources.forEach((item) => {
+  totalScore += item.score || 0;
+});
+
+    // Add completed status to each resource
+    const updatedPrograms = mentee.programs.map((program) => {
+      const updatedResources = program.resources.map((res) => {
+        const isCompleted = completedMap.has(res._id.toString());
+        return {
+          ...res.toObject(),
+          completed: isCompleted,
+          score: isCompleted ? completedMap.get(res._id.toString()).score : null,
+          completedOn: isCompleted ? completedMap.get(res._id.toString()).completedOn : null
+        };
+      });
+      return {
+        ...program.toObject(),
+        resources: updatedResources
+      };
+    });
     res.json({
       name: mentee.name,
       programs: mentee.programs,
       streak: mentee.streak,
+      totalScore,
+      programs: updatedPrograms,
       rank: await calculateRank(mentee._id), // Implement this helper
     //   resources: await getResourcesWithStatus(mentee) // Implement this
     });
@@ -48,7 +88,6 @@ router.post('/resources/:id/complete', authenticateMentee, async (req, res) => {
     const mentee = req.mentee;
 
     // Check if resource is unlocked
-    console.log(resource.isLocked);
     if (resource.isLocked) {
       return res.status(403).json({ error: 'Resource is locked' });
     }
@@ -60,10 +99,25 @@ router.post('/resources/:id/complete', authenticateMentee, async (req, res) => {
     const score = Math.max(0, resource.maxScore - latePenalty);
 
     // Update mentee's progress
-    mentee.completedResources.push({
+    const completedResource = {
       resource: resource._id,
-      score
-    });
+      score,
+      completedOn: new Date()
+    };
+
+    // Check if resource is already completed
+    const existingCompletion = mentee.completedResources.find(
+      (completed) => completed.resource.toString() === resource._id.toString()
+    );
+
+    if (existingCompletion) {
+      // If already completed, update the score and date
+      existingCompletion.score = score;
+      existingCompletion.completedOn = new Date();
+    } else {
+      // If not completed yet, push new completion entry
+      mentee.completedResources.push(completedResource);
+    }
 
     // Update streak (if active today)
     await updateStreak(mentee);
@@ -74,6 +128,7 @@ router.post('/resources/:id/complete', authenticateMentee, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // --- Project Submission --- //
 router.post('/resources/:id/submit-project', authenticateMentee, async (req, res) => {

@@ -12,9 +12,10 @@ const MenteeSchema = new mongoose.Schema({
   completedResources: [{
     resource: { type: mongoose.Schema.Types.ObjectId, ref: 'Resource' },
     completedOn: { type: Date, default: Date.now },
-    score: { type: Number }
+    score: { type: Number, default: 0 }
   }],
   streak: { type: Number, default: 0 },
+  totalScore: {type: Number, default: 0},
   lastActiveDate: { type: Date }, 
   projectSubmissions: [{
     resource: { type: mongoose.Schema.Types.ObjectId, ref: 'Resource' },
