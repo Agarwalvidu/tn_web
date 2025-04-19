@@ -4,7 +4,8 @@ const jwt = require('jsonwebtoken');
 const Mentor = require('../models/Mentor');
 const Program = require('../models/Program');
 const Resource = require('../models/Resource');
-const Mentee = require('../models/Mentee')
+const Mentee = require('../models/Mentee');
+const Quiz = require('../models/Quiz');
 const { authenticate } = require('../middleware/authMentor');
 const router = express.Router();
 
@@ -125,6 +126,50 @@ router.post('/resources', authenticate, async (req, res) => {
   }
 });
 
+router.post('/resources/quiz', authenticate, async (req, res) => {
+  try {
+    const { title, program, questions, startTime, endTime, maxScore } = req.body;
+
+    const programDoc = await Program.findById(program);
+    if (!programDoc.mentors.includes(req.mentor._id)) {
+      return res.status(403).json({ error: 'Not authorized for this program' });
+    }
+
+    // Step 1: Create the Resource with type 'quiz'
+    const resource = new Resource({
+      title,
+      type: 'quiz',
+      program,
+      maxScore,
+      isLocked: true, // locked by default, can be unlocked later
+      addedBy: req.mentor._id,
+      deadline: endTime // same as quiz endTime
+    });
+
+    await resource.save();
+
+    // Step 2: Create the Quiz
+    const quiz = new Quiz({
+      resource: resource._id,
+      questions,
+      startTime,
+      endTime
+    });
+
+    await quiz.save();
+
+    // Link quiz resource to the program
+    programDoc.resources.push(resource._id);
+    await programDoc.save();
+
+    res.status(201).json({ message: 'Quiz resource created', resource, quiz });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 // Mentor adds a mentee (with auto-generated credentials)
 router.post('/mentees', authenticate, async (req, res) => {
   try {
@@ -139,14 +184,12 @@ router.post('/mentees', authenticate, async (req, res) => {
 
     // Generate a random password (or let mentor set one)
     const tempPassword = Math.random().toString(36).slice(-8); // Example: "x7f9d2y"
-    console.log("salt")
-    const salt = await bcrypt.genSalt(10);
     
     const mentee = new Mentee({
       email,
       name,
       enrollmentNumber,
-      password: await bcrypt.hash(tempPassword, salt),
+      password: tempPassword,
       programs: [programId]
     });
     await mentee.save();
@@ -166,8 +209,7 @@ router.post('/mentees', authenticate, async (req, res) => {
 // Get all mentees for a program
 router.get('/:programId/mentees', async (req, res) => {
   try {
-    const mentees = await Mentee.find({ programs: req.params.programId })
-      .select('-password') // Exclude sensitive data
+    const mentees = await Mentee.find({ programs: req.params.programId }) // Exclude sensitive data
       .populate('completedResources.resource', 'title type'); // Optional: populate completed resources
     
     res.json(mentees);

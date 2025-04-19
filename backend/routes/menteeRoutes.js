@@ -2,6 +2,8 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Mentee = require('../models/Mentee');
+const Quiz = require('../models/Quiz');
+const QuizSubmission = require('../models/QuizSubmission');
 const Program = require('../models/Program');
 const Resource = require('../models/Resource');
 const { authenticateMentee } = require('../middleware/authMentor');
@@ -129,6 +131,86 @@ router.post('/resources/:id/complete', authenticateMentee, async (req, res) => {
   }
 });
 
+router.post('/resources/:id/quiz/submit', authenticateMentee, async (req, res) => {
+  try {
+    const resourceId = req.params.id;
+    const mentee = req.mentee;
+    const answers = req.body.answers; // [{ questionId, selectedOptionIndex }, ...]
+
+    const resource = await Resource.findById(resourceId).populate('quiz');
+    if (!resource || resource.type !== 'quiz') {
+      return res.status(400).json({ error: 'Invalid quiz resource' });
+    }
+
+    if (resource.isLocked) {
+      return res.status(403).json({ error: 'Quiz is locked' });
+    }
+
+    const quiz = await Quiz.findOne({resource:resourceId});
+    if (!quiz) {
+      return res.status(404).json({ error: 'Quiz not found' });
+    }
+
+    const now = new Date();
+    if (now < quiz.startTime || now > quiz.endTime) {
+      return res.status(403).json({ error: 'Quiz is not active at this time' });
+    }
+
+    // Prevent resubmission
+    const existing = await QuizSubmission.findOne({ quiz: quiz._id, mentee: mentee._id });
+    if (existing) {
+      return res.status(409).json({ error: 'Quiz already submitted' });
+    }
+
+    // Calculate score
+    let totalScore = 0;
+    for (const question of quiz.questions) {
+      const userAnswer = answers.find(ans => ans.questionId === question._id.toString());
+      if (userAnswer && userAnswer.selectedOptionIndex === question.correctOptionIndex) {
+        totalScore += question.marks || 1;
+      }
+    }
+
+    // Save submission
+    const submission = new QuizSubmission({
+      quiz: quiz._id,
+      resource: resourceId,
+      mentee: mentee._id,
+      answers,
+      score: totalScore,
+    });
+
+    await submission.save();
+
+    // Update mentee's resource progress
+    const completedResource = {
+      resource: resource._id,
+      score: totalScore,
+      completedOn: new Date()
+    };
+
+    const alreadyCompleted = mentee.completedResources.find(
+      (r) => r.resource.toString() === resource._id.toString()
+    );
+
+    if (alreadyCompleted) {
+      alreadyCompleted.score = totalScore;
+      alreadyCompleted.completedOn = new Date();
+    } else {
+      mentee.completedResources.push(completedResource);
+    }
+
+    // Update streak and total score
+    await updateStreak(mentee);
+    mentee.totalScore += totalScore;
+    await mentee.save();
+
+    res.status(200).json({ message: 'Quiz submitted successfully!', score: totalScore });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // --- Project Submission --- //
 router.post('/resources/:id/submit-project', authenticateMentee, async (req, res) => {

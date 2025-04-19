@@ -11,6 +11,10 @@ const ResourceSchema = new mongoose.Schema({
     ref: 'Program',
     required: true 
   },
+  quiz: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Quiz'
+  },
   isLocked: { type: Boolean, default: false }
 }, { timestamps: true });
 

@@ -192,7 +192,7 @@ export default function MentorPanel() {
       <ul>
         {mentees.map(mentee => (
           <li key={mentee._id}>
-            {mentee.name} - {mentee.enrollmentNumber}
+            {mentee.name} - {mentee.enrollmentNumber} - {mentee.password}
           </li>
         ))}
       </ul>
