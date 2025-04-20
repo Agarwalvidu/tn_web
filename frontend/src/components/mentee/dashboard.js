@@ -2,9 +2,11 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import QuizAttempt from './QuizAttempt';
 
 export default function MenteeDashboard() {
   const [mentee, setMentee] = useState(null);
+  const [activeQuizResource, setActiveQuizResource] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -75,6 +77,30 @@ export default function MenteeDashboard() {
                 <li key={res._id} style={{ marginBottom: '1rem' }}>
                   <strong>{res.title}</strong> ({res.type})
                   <br />
+                  {!res.completed && res.type === 'quiz' && !res.isLocked && (
+  activeQuizResource === res._id ? (
+    <QuizAttempt
+      resourceId={res._id}
+      onComplete={(score) => {
+        const updated = { ...mentee };
+        updated.programs.forEach((p) =>
+          p.resources.forEach((r) => {
+            if (r._id === res._id) {
+              r.completed = true;
+              r.score = score;
+              r.completedOn = new Date().toISOString();
+            }
+          })
+        );
+        setMentee(updated);
+        setActiveQuizResource(null);
+      }}
+    />
+  ) : (
+    <button onClick={() => setActiveQuizResource(res._id)}>Attempt Quiz</button>
+  )
+)}
+
                   <a href={res.url} target="_blank" rel="noopener noreferrer">View Resource</a>
                   <br />
                   <span>Score: {res.maxScore}</span> <br />

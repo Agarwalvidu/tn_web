@@ -17,7 +17,7 @@ router.post('/login', async (req, res) => {
     if (!mentee || !(await bcrypt.compare(password, mentee.password))) {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
-    const token = jwt.sign({ id: mentee._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: mentee._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
     res.json({ token });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -208,6 +208,36 @@ router.post('/resources/:id/quiz/submit', authenticateMentee, async (req, res) =
     res.status(200).json({ message: 'Quiz submitted successfully!', score: totalScore });
   } catch (err) {
     console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/resources/:id/quiz', authenticateMentee, async (req, res) => {
+  try {
+    const resourceId = req.params.id;
+    console.log(resourceId);
+    const resource = await Resource.findById(resourceId).populate('quiz');
+    if (!resource || resource.type !== 'quiz') {
+      return res.status(400).json({ error: 'Invalid resource or quiz not found' });
+    }
+
+    console.log(resource);
+    const quiz = await Quiz.findOne({ resource: resourceId });
+    console.log("quiz",quiz);
+    if (!quiz) {
+      return res.status(404).json({ error: 'Quiz not found' });
+    }
+
+    res.json({
+      title: resource.title,
+      description: resource.description,
+      questions: quiz.questions.map((q) => ({
+        id: q._id,
+        questionText: q.questionText,
+        options: q.options,
+      }))
+    });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });

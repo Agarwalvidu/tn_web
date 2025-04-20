@@ -9,7 +9,7 @@ const Quiz = require('../models/Quiz');
 const { authenticate } = require('../middleware/authMentor');
 const router = express.Router();
 
-// ==== MENTOR MANAGEMENT ==== //
+
 // Create Mentor (Directly via Thunder Client)
 router.post('/mentors', async (req, res) => {
   try {
@@ -31,7 +31,7 @@ router.post('/mentors', async (req, res) => {
 // Get all mentors
 router.get('/mentors', async (req, res) => {
   try {
-    const mentors = await Mentor.find().populate('programs'); // Populate programs if you want the full program data
+    const mentors = await Mentor.find().populate('programs'); 
     res.json(mentors);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -41,7 +41,7 @@ router.get('/mentors', async (req, res) => {
 // Get all programs
 router.get('/programs', async (req, res) => {
   try {
-    const programs = await Program.find().populate('mentors'); // Populate mentors if you want the full mentor data
+    const programs = await Program.find().populate('mentors'); 
     res.json(programs);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -63,7 +63,7 @@ router.post('/mentors/login', async (req, res) => {
   }
 });
 
-// ==== PROGRAM MANAGEMENT ==== //
+
 // Create Program (Assign to Mentor)
 router.post('/programs', async (req, res) => {
   try {
@@ -100,7 +100,7 @@ router.post('/programs/:programId/add-mentor', async (req, res) => {
   }
 });
 
-// ==== RESOURCE MANAGEMENT ==== //
+
 // Add Resource (Only for assigned programs)
 router.post('/resources', authenticate, async (req, res) => {
   try {
@@ -141,14 +141,13 @@ router.post('/resources/quiz', authenticate, async (req, res) => {
       type: 'quiz',
       program,
       maxScore,
-      isLocked: true, // locked by default, can be unlocked later
+      isLocked: true, 
       addedBy: req.mentor._id,
-      deadline: endTime // same as quiz endTime
+      deadline: endTime 
     });
 
     await resource.save();
 
-    // Step 2: Create the Quiz
     const quiz = new Quiz({
       resource: resource._id,
       questions,
@@ -158,7 +157,6 @@ router.post('/resources/quiz', authenticate, async (req, res) => {
 
     await quiz.save();
 
-    // Link quiz resource to the program
     programDoc.resources.push(resource._id);
     await programDoc.save();
 
@@ -209,8 +207,8 @@ router.post('/mentees', authenticate, async (req, res) => {
 // Get all mentees for a program
 router.get('/:programId/mentees', async (req, res) => {
   try {
-    const mentees = await Mentee.find({ programs: req.params.programId }) // Exclude sensitive data
-      .populate('completedResources.resource', 'title type'); // Optional: populate completed resources
+    const mentees = await Mentee.find({ programs: req.params.programId }) 
+      .populate('completedResources.resource', 'title type'); 
     
     res.json(mentees);
   } catch (err) {

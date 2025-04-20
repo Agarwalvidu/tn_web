@@ -66,19 +66,26 @@ export async function addMentee(token, { email, name, enrollmentNumber, programI
     return res.json(); // returns { mentee, tempPassword }
 }
 
-export async function addResource(token, resourceData) {
-    const res = await fetch(`${BASE_URL}/api/resources`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-         'x-auth-token': token,
-      },
-      body: JSON.stringify(resourceData), // includes title, type, url, program, etc.
-    });
-  
-    if (!res.ok) throw new Error('Failed to add resource');
-    return res.json(); // returns resource
+export async function addResource(token, resourceData, isQuiz = false) {
+  const endpoint = isQuiz ? '/api/resources/quiz' : '/api/resources';
+
+  const res = await fetch(`${BASE_URL}${endpoint}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-auth-token': token,
+    },
+    body: JSON.stringify(resourceData),
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || 'Failed to add resource');
+  }
+
+  return res.json(); // returns resource or quiz object
 }
+
   
 export async function getMentorDetails(token) {
     const res = await fetch(`${BASE_URL}/api/mentors/me`, {
