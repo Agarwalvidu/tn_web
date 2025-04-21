@@ -276,6 +276,7 @@ router.patch('/mentees/:menteeId/resources/:resourceId/verify', authenticate, as
 router.get('/unverified-projects', authenticate, async (req, res) => {
   try {
     const mentor = req.mentor;
+    console.log(mentor);
 
     // Find mentees having any completed resource which is a project & unverified
     const mentees = await Mentee.find({
@@ -284,16 +285,17 @@ router.get('/unverified-projects', authenticate, async (req, res) => {
       path: 'completedResources.resource',
       populate: { path: 'program' }
     });
-    console.log("MENTEES",mentees);
 
     const unverifiedProjects = [];
     mentees.forEach(mentee => {
       mentee.completedResources.forEach(resourceEntry => {
         const resObj = resourceEntry.resource;
+        console.log(resObj);
         if (
           resObj && 
           resObj.type === 'project' &&
-          resourceEntry.verified === false 
+          resourceEntry.verified === false &&
+          mentor.programs.map(p => p.toString()).includes(resObj.program._id.toString())
         ) {
           unverifiedProjects.push({
             menteeId: mentee._id,
@@ -305,7 +307,6 @@ router.get('/unverified-projects', authenticate, async (req, res) => {
             description: resourceEntry.description,
             submittedOn: resourceEntry.submittedOn
           });
-          console.log("unverified projects", unverifiedProjects);
         }
       });
     });
