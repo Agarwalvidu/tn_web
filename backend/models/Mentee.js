@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const MenteeSchema = new mongoose.Schema({
-  email: {type: String, required: true, unique: true},
+  email: { type: String, required: true, unique: true },
   name: { type: String, required: true },
   enrollmentNumber: { type: String, required: true },
   password: { type: String, required: true },
@@ -12,17 +12,18 @@ const MenteeSchema = new mongoose.Schema({
   completedResources: [{
     resource: { type: mongoose.Schema.Types.ObjectId, ref: 'Resource' },
     completedOn: { type: Date, default: Date.now },
-    score: { type: Number, default: 0 }
+    score: { type: Number, default: 0 },
+
+    // Optional fields for project resources
+    githubLink: { type: String },
+    deployedLink: { type: String },
+    description: { type: String },
+    submittedOn: { type: Date }
   }],
   streak: { type: Number, default: 0 },
-  totalScore: {type: Number, default: 0},
-  lastActiveDate: { type: Date }, 
-  projectSubmissions: [{
-    resource: { type: mongoose.Schema.Types.ObjectId, ref: 'Resource' },
-    link: { type: String, required: true },
-    submittedAt: { type: Date, default: Date.now },
-    verified: { type: Boolean, default: false }
-  }],
+  totalScore: { type: Number, default: 0 },
+  lastActiveDate: { type: Date },
+  
   createdBy: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'Mentor',

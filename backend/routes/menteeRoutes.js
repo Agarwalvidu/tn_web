@@ -242,23 +242,79 @@ router.get('/resources/:id/quiz', authenticateMentee, async (req, res) => {
   }
 });
 
-// --- Project Submission --- //
-router.post('/resources/:id/submit-project', authenticateMentee, async (req, res) => {
+// POST /api/m/resources/:resourceId/project
+router.post('/resources/:resourceId/project', authenticateMentee, async (req, res) => {
   try {
-    const { link } = req.body;
+    const { githubLink, deployedLink, description } = req.body;
+    const resource = await Resource.findById(req.params.resourceId);
     const mentee = req.mentee;
 
-    mentee.projectSubmissions.push({
-      resource: req.params.id,
-      link
-    });
+    if (!resource) {
+      return res.status(404).json({ error: 'Resource not found' });
+    }
 
+    if (resource.type !== 'project') {
+      return res.status(400).json({ error: 'Invalid resource type' });
+    }
+
+    if (resource.isLocked) {
+      return res.status(403).json({ error: 'Resource is locked' });
+    }
+
+    console.log(githubLink);
+      console.log(deployedLink);
+      console.log(description);
+      
+    // Validate inputs
+    if (!githubLink || !deployedLink || !description) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    if (description.trim().split(/\s+/).length < 300) {
+      return res.status(400).json({ error: 'Description must be at least 300 words' });
+    }
+
+    const deadline = resource.deadline;
+    const isLate = deadline && new Date() > deadline;
+    const latePenalty = isLate ? Math.floor((new Date() - deadline) / (1000 * 60 * 60 * 24)) : 0;
+    const baseScore = resource.maxScore;
+    const score = Math.max(0, baseScore - latePenalty);
+
+    // Create the completion entry
+    const projectCompletion = {
+      resource: resource._id,
+      githubLink,
+      deployedLink,
+      description,
+      score: 0, // Score to be updated by mentor later
+      submittedOn: new Date(),
+    };
+
+    // Check if already completed
+    const existing = mentee.completedResources.find(
+      (c) => c.resource.toString() === resource._id.toString()
+    );
+
+    if (existing) {
+      existing.githubLink = githubLink;
+      existing.deployedLink = deployedLink;
+      existing.description = description;
+      existing.submittedOn = new Date();
+      existing.score = 0;
+    } else {
+      mentee.completedResources.push(projectCompletion);
+    }
+
+    await updateStreak(mentee);
     await mentee.save();
-    res.json({ message: 'Project submitted for review!' });
+
+    res.json({ message: 'Project submitted successfully!' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
   }
 });
+
 
 // Helper: Calculate rank (example: based on total score)
 async function calculateRank(menteeId) {

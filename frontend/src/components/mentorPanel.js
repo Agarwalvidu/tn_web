@@ -237,7 +237,7 @@ export default function MentorPanel() {
       <select onChange={e => setResourceType(e.target.value)} value={resourceType}>
         <option value="video">Video</option>
         <option value="quiz">Quiz</option>
-        <option value="text">Text</option>
+        <option value="project">Project</option>
       </select><br />
 
       {resourceType === 'quiz' && (

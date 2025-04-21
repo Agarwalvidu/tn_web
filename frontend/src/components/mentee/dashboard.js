@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import QuizAttempt from './QuizAttempt';
+import ProjectSubmissionForm from './ProjectSubmission';
 
 export default function MenteeDashboard() {
   const [mentee, setMentee] = useState(null);
@@ -100,6 +101,25 @@ export default function MenteeDashboard() {
     <button onClick={() => setActiveQuizResource(res._id)}>Attempt Quiz</button>
   )
 )}
+{!res.completed && res.type === 'project' && !res.isLocked && (
+  <ProjectSubmissionForm
+    resourceId={res._id}
+    onSubmitted={(score) => {
+      const updated = { ...mentee };
+      updated.programs.forEach((p) =>
+        p.resources.forEach((r) => {
+          if (r._id === res._id) {
+            r.completed = true;
+            r.score = score;
+            r.completedOn = new Date().toISOString();
+          }
+        })
+      );
+      setMentee(updated);
+    }}
+  />
+)}
+
 
                   <a href={res.url} target="_blank" rel="noopener noreferrer">View Resource</a>
                   <br />
