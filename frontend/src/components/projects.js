@@ -61,7 +61,7 @@ const UnverifiedProjects = () => {
         type="number"
         value={proj.score || ''}
         onChange={(e) => {
-          const value = parseInt(e.target.value, 300);
+          const value = parseInt(e.target.value, 10);
           setProjects((prev) =>
             prev.map((p, i) =>
               i === index ? { ...p, score: isNaN(value) ? '' : value } : p

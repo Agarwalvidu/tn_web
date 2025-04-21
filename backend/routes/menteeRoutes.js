@@ -260,11 +260,6 @@ router.post('/resources/:resourceId/project', authenticateMentee, async (req, re
     if (resource.isLocked) {
       return res.status(403).json({ error: 'Resource is locked' });
     }
-
-    console.log(githubLink);
-      console.log(deployedLink);
-      console.log(description);
-
     // Validate inputs
     if (!githubLink || !deployedLink || !description) {
       return res.status(400).json({ error: 'All fields are required' });
@@ -304,8 +299,6 @@ router.post('/resources/:resourceId/project', authenticateMentee, async (req, re
     } else {
       mentee.completedResources.push(projectCompletion);
     }
-
-    await updateStreak(mentee);
     await mentee.save();
 
     res.json({ message: 'Project submitted successfully!' });
