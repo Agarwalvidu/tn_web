@@ -14,7 +14,7 @@ router.post('/login', async (req, res) => {
   const { enrollmentNumber, password } = req.body;
   try {
     const mentee = await Mentee.findOne({ enrollmentNumber });
-    if (!mentee || !(await bcrypt.compare(password, mentee.password))) {
+    if (!mentee || !(password === mentee.password)) {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
     const token = jwt.sign({ id: mentee._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
