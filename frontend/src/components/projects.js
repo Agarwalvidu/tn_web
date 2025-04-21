@@ -4,17 +4,16 @@ import axios from 'axios';
 const UnverifiedProjects = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [scoreInput, setScoreInput] = useState('');
 
   const fetchProjects = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/unverified-projects', {
-        headers: {
-          'x-auth-token': localStorage.getItem('token') // or however you're storing it
-        }
-      });
-      console.log("resdata",res.data);
+        const res = await axios.get('http://localhost:5000/api/unverified-projects', {
+            headers: {
+              'x-auth-token': localStorage.getItem('token') // or however you're storing it
+            }
+          });
       setProjects(res.data.unverifiedProjects);
-      console.log("projects", projects);
       setLoading(false);
     } catch (err) {
       console.error(err);
@@ -22,19 +21,21 @@ const UnverifiedProjects = () => {
     }
   };
 
-  const handleVerify = async (menteeId, resourceId) => {
+  const handleVerify = async (menteeId, resourceId, score) => {
     try {
-      await axios.post(`http://localhost:5000/api/m/verify-project`, { menteeId, resourceId }, {
+      await axios.patch(`http://localhost:5000/api/${menteeId}/resources/${resourceId}/verify`, {
+        score
+      }, {
         headers: {
           'x-auth-token': localStorage.getItem('mentorToken')
         }
       });
-      // Remove from list after verifying
       setProjects(prev => prev.filter(p => !(p.menteeId === menteeId && p.resourceId === resourceId)));
     } catch (err) {
       console.error(err);
     }
   };
+  
 
   useEffect(() => {
     fetchProjects();
@@ -56,8 +57,22 @@ const UnverifiedProjects = () => {
             <p><strong>Deployed:</strong> <a href={proj.deployedLink} className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">{proj.deployedLink}</a></p>
             <p><strong>Description:</strong> {proj.description}</p>
             <p><strong>Submitted On:</strong> {new Date(proj.submittedOn).toLocaleString()}</p>
+            <input
+        type="number"
+        value={proj.score || ''}
+        onChange={(e) => {
+          const value = parseInt(e.target.value, 300);
+          setProjects((prev) =>
+            prev.map((p, i) =>
+              i === index ? { ...p, score: isNaN(value) ? '' : value } : p
+            )
+          );
+        }}
+        placeholder="Enter score"
+        className="mt-2 px-3 py-1 border rounded"
+      />
             <button
-              onClick={() => handleVerify(proj.menteeId, proj.resourceId)}
+              onClick={() => handleVerify(proj.menteeId, proj.resourceId,proj.score)}
               className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
             >
               Verify ✅

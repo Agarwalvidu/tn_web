@@ -5,7 +5,7 @@ const ResourceSchema = new mongoose.Schema({
   type: { type: String, enum: ['video', 'quiz', 'project'], required: true },
   url: { type: String },
   deadline: { type: Date, default: () => new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
-  maxScore: { type: Number, default: 10 },
+  maxScore: { type: Number, default: 300 },
   program: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'Program',

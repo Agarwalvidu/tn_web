@@ -228,7 +228,7 @@ router.get('/:programId/resources', async (req, res) => {
 });
 
 // PATCH /mentees/:menteeId/resources/:resourceId/verify
-router.patch('/mentees/:menteeId/resources/:resourceId/verify', authenticate, async (req, res) => {
+router.patch('/:menteeId/resources/:resourceId/verify', authenticate, async (req, res) => {
   try {
     const { menteeId, resourceId } = req.params;
     const { score } = req.body;
@@ -276,7 +276,6 @@ router.patch('/mentees/:menteeId/resources/:resourceId/verify', authenticate, as
 router.get('/unverified-projects', authenticate, async (req, res) => {
   try {
     const mentor = req.mentor;
-    console.log(mentor);
 
     // Find mentees having any completed resource which is a project & unverified
     const mentees = await Mentee.find({
@@ -290,7 +289,6 @@ router.get('/unverified-projects', authenticate, async (req, res) => {
     mentees.forEach(mentee => {
       mentee.completedResources.forEach(resourceEntry => {
         const resObj = resourceEntry.resource;
-        console.log(resObj);
         if (
           resObj && 
           resObj.type === 'project' &&
