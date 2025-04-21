@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { mentorLogin, addMentee, addResource, getAllPrograms, getProgramMentees, getProgramResources } from '../lib/api';
+import UnverifiedProjects from './projects';
 
 export default function MentorPanel() {
   const [token, setToken] = useState('');
@@ -314,6 +315,7 @@ export default function MentorPanel() {
 )}
         </div>
       )}
+      <UnverifiedProjects/>
     </div>
   );
 }

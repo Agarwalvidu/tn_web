@@ -18,7 +18,8 @@ const MenteeSchema = new mongoose.Schema({
     githubLink: { type: String },
     deployedLink: { type: String },
     description: { type: String },
-    submittedOn: { type: Date }
+    submittedOn: { type: Date },
+    verified:{type: Boolean, default:false},
   }],
   streak: { type: Number, default: 0 },
   totalScore: { type: Number, default: 0 },

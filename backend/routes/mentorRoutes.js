@@ -227,4 +227,95 @@ router.get('/:programId/resources', async (req, res) => {
   }
 });
 
+// PATCH /mentees/:menteeId/resources/:resourceId/verify
+router.patch('/mentees/:menteeId/resources/:resourceId/verify', authenticate, async (req, res) => {
+  try {
+    const { menteeId, resourceId } = req.params;
+    const { score } = req.body;
+
+    const resource = await Resource.findById(resourceId);
+    if (!resource) return res.status(404).json({ error: 'Resource not found' });
+
+    if (resource.type !== 'project') {
+      return res.status(400).json({ error: 'Only project-type resources can be verified' });
+    }
+
+    if (resource.isLocked) {
+      return res.status(403).json({ error: 'Resource is currently locked' });
+    }
+
+    const mentee = await Mentee.findById(menteeId);
+    if (!mentee) return res.status(404).json({ error: 'Mentee not found' });
+
+    const submission = mentee.completedResources.find(
+      (entry) => entry.resource.toString() === resourceId
+    );
+
+    if (!submission) {
+      return res.status(400).json({ error: 'Project not yet submitted by this mentee' });
+    }
+
+    if (submission.verified) {
+      return res.status(400).json({ error: 'This project has already been verified' });
+    }
+
+    const finalScore = Math.min(score, resource.maxScore);
+    submission.score = finalScore;
+    submission.verified = true;
+
+    mentee.totalScore += finalScore;
+    await mentee.save();
+
+    res.json({ message: 'Project verified and scored', finalScore });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.get('/unverified-projects', authenticate, async (req, res) => {
+  try {
+    const mentor = req.mentor;
+
+    // Find mentees having any completed resource which is a project & unverified
+    const mentees = await Mentee.find({
+      'completedResources.verified': false
+    }).populate({
+      path: 'completedResources.resource',
+      populate: { path: 'program' }
+    });
+    console.log("MENTEES",mentees);
+
+    const unverifiedProjects = [];
+    mentees.forEach(mentee => {
+      mentee.completedResources.forEach(resourceEntry => {
+        const resObj = resourceEntry.resource;
+        if (
+          resObj && 
+          resObj.type === 'project' &&
+          resourceEntry.verified === false 
+        ) {
+          unverifiedProjects.push({
+            menteeId: mentee._id,
+            menteeName: mentee.name,
+            resourceId: resObj._id,
+            resourceTitle: resObj.title,
+            githubLink: resourceEntry.githubLink,
+            deployedLink: resourceEntry.deployedLink,
+            description: resourceEntry.description,
+            submittedOn: resourceEntry.submittedOn
+          });
+          console.log("unverified projects", unverifiedProjects);
+        }
+      });
+    });
+
+    res.json({ unverifiedProjects });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
 module.exports = router;

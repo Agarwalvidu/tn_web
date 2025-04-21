@@ -264,15 +264,15 @@ router.post('/resources/:resourceId/project', authenticateMentee, async (req, re
     console.log(githubLink);
       console.log(deployedLink);
       console.log(description);
-      
+
     // Validate inputs
     if (!githubLink || !deployedLink || !description) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
-    if (description.trim().split(/\s+/).length < 300) {
-      return res.status(400).json({ error: 'Description must be at least 300 words' });
-    }
+    // if (description.trim().split(/\s+/).length < 300) {
+    //   return res.status(400).json({ error: 'Description must be at least 300 words' });
+    // }
 
     const deadline = resource.deadline;
     const isLate = deadline && new Date() > deadline;

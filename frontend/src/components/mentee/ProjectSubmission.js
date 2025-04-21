@@ -11,9 +11,9 @@ export default function ProjectSubmissionForm({ resourceId, onSubmitted }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (description.trim().split(' ').length < 50) {
-      return alert('Please enter a description with at least 300 words (~50+ words).');
-    }
+    // if (description.trim().split(' ').length < 50) {
+    //   return alert('Please enter a description with at least 300 words (~50+ words).');
+    // }
 
     setSubmitting(true);
     try {
