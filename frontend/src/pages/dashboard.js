@@ -4,7 +4,6 @@ const Dashboard = dynamic(() => import('../components/mentee/dashboard'), { ssr:
 export default function Menteepage() {
   return (
     <div>
-      <h1>Mentee Page</h1>
       <Dashboard/>
     </div>
   );

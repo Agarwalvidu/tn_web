@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import QuizAttempt from './QuizAttempt';
 import ProjectSubmissionForm from './ProjectSubmission';
+import './mentee.css'
 
 export default function MenteeDashboard() {
   const [mentee, setMentee] = useState(null);
@@ -60,97 +61,123 @@ export default function MenteeDashboard() {
   // components/MenteeDashboard.js
 
   return (
-    <div>
-      <h1>Welcome, {mentee.name} 👋</h1>
-      <p>Rank: {mentee.rank}</p>
-      <p>Total Score: 🏆 {mentee.totalScore}</p>
-      <p>Streak: 🔥 {mentee.streak} days</p>
+    <div className="mentee-dashboard">
+      <div className="mentee-header">
+        <h1>Welcome, {mentee.name} 👋</h1>
+        <div className="stat-cards">
+  <div className="stat-card">
+    <h3>Rank</h3>
+    <span>🏅 {mentee.rank}</span>
+  </div>
+  <div className="stat-card">
+    <h3>Total Score</h3>
+    <span>🏆 {mentee.totalScore}</span>
+  </div>
+  <div className="stat-card">
+    <h3>Streak</h3>
+    <span>🔥 {mentee.streak} days</span>
+  </div>
+</div>
 
-      {mentee.programs.map((program) => (
-        <div key={program._id} style={{ marginTop: '2rem' }}>
+      </div>
+  
+      {mentee.programs.map(program => (
+        <div key={program._id} className="program-card">
           <h2>{program.name}</h2>
-
+  
           {program.resources.length === 0 ? (
             <p>No resources yet!</p>
           ) : (
-            <ul>
-              {program.resources.map((res) => (
-                <li key={res._id} style={{ marginBottom: '1rem' }}>
-                  <strong>{res.title}</strong> ({res.type})
-                  <br />
-                  {!res.completed && res.type === 'quiz' && !res.isLocked && (
-  activeQuizResource === res._id ? (
-    <QuizAttempt
-      resourceId={res._id}
-      onComplete={(score) => {
-        const updated = { ...mentee };
-        updated.programs.forEach((p) =>
-          p.resources.forEach((r) => {
-            if (r._id === res._id) {
-              r.completed = true;
-              r.score = score;
-              r.completedOn = new Date().toISOString();
-            }
-          })
-        );
-        setMentee(updated);
-        setActiveQuizResource(null);
-      }}
-    />
-  ) : (
-    <button onClick={() => setActiveQuizResource(res._id)}>Attempt Quiz</button>
-  )
-)}
-{!res.completed && res.type === 'project' && !res.isLocked && (
-  <ProjectSubmissionForm
-    resourceId={res._id}
-    onSubmitted={(score) => {
-      const updated = { ...mentee };
-      updated.programs.forEach((p) =>
-        p.resources.forEach((r) => {
-          if (r._id === res._id) {
-            r.completed = true;
-            r.score = score;
-            r.completedOn = new Date().toISOString();
-          }
-        })
-      );
-      setMentee(updated);
-    }}
-  />
-)}
+            <div className="responsive-table-wrapper">
+            <table className="responsive-table">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Type</th>
+      <th>Score</th>
+      <th>Status</th>
+      <th>Deadline</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {program.resources.map((res) => (
+      <tr key={res._id}>
+        <td>
+          <strong>{res.title}</strong><br />
+          <a href={res.url} target="_blank" rel="noopener noreferrer">🔗 View</a>
+        </td>
+        <td>{res.type}</td>
+        <td>{res.maxScore}</td>
+        <td>{res.isLocked ? '🔒 Locked' : '✅ Unlocked'}</td>
+        <td>{res.deadline}</td>
+        <td className="actions">
+          {!res.completed && res.type === 'quiz' && !res.isLocked && (
+            activeQuizResource === res._id ? (
+              <QuizAttempt
+                resourceId={res._id}
+                onComplete={(score) => {
+                  const updated = { ...mentee };
+                  updated.programs.forEach((p) =>
+                    p.resources.forEach((r) => {
+                      if (r._id === res._id) {
+                        r.completed = true;
+                        r.score = score;
+                        r.completedOn = new Date().toISOString();
+                      }
+                    })
+                  );
+                  setMentee(updated);
+                  setActiveQuizResource(null);
+                }}
+              />
+            ) : (
+              <button onClick={() => setActiveQuizResource(res._id)}>Attempt Quiz</button>
+            )
+          )}
 
+          {!res.completed && res.type === 'project' && !res.isLocked && (
+            <ProjectSubmissionForm
+              resourceId={res._id}
+              onSubmitted={(score) => {
+                const updated = { ...mentee };
+                updated.programs.forEach((p) =>
+                  p.resources.forEach((r) => {
+                    if (r._id === res._id) {
+                      r.completed = true;
+                      r.score = score;
+                      r.completedOn = new Date().toISOString();
+                    }
+                  })
+                );
+                setMentee(updated);
+              }}
+            />
+          )}
 
-                  <a href={res.url} target="_blank" rel="noopener noreferrer">View Resource</a>
-                  <br />
-                  <span>Score: {res.maxScore}</span> <br />
-                  <span>Status: {res.isLocked ? '🔒 Locked' : '✅ Unlocked'}</span> <br />
-                  <span>Deadline: {res.deadline}</span> <br />
-
-                  {res.completed ? (
-  <div>
-    <input type="checkbox" checked disabled />
-    <span> ✅ Completed</span>
-    <br />
-    <span>Completed on: {new Date(res.completedOn).toLocaleDateString()}</span>
-    <br />
-    <span>Score Achieved: {res.score}</span>
-  </div>
-) : (
-  !res.isLocked && (
-    <div>
-      <input type="checkbox" onChange={() => handleComplete(res._id)} />
-      Mark as Completed
-    </div>
-  )
-)}
-
-                </li>
-              ))}
-            </ul>
+          {res.completed ? (
+            <div className="completed-info">
+              ✅ Completed <br />
+              On: {new Date(res.completedOn).toLocaleDateString()}<br />
+              Score: {res.score}
+            </div>
+          ) : (
+            !res.isLocked && (
+              <div>
+                <input type="checkbox" onChange={() => handleComplete(res._id)} /> Mark as Completed
+              </div>
+            )
+          )}
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+</div>
           )}
         </div>
       ))}
     </div>
   );
+  
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { mentorLogin, addMentee, addResource, getAllPrograms, getProgramMentees, getProgramResources } from '../lib/api';
 import UnverifiedProjects from './projects';
+import './mentor.css'
 
 export default function MentorPanel() {
   const [token, setToken] = useState('');
@@ -171,151 +172,131 @@ export default function MentorPanel() {
   
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div className="container">
       {!loggedIn ? (
-        <div>
+        <div className="section">
           <h2>Mentor Login</h2>
-          <input
-            placeholder="Email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-          /><br />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-          /><br />
+          <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
+          <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
           <button onClick={handleLogin}>Login</button>
         </div>
       ) : (
         <div>
-          <button onClick={handleLogout}>Logout</button>
-          <h2>Mentor Panel</h2>
-          <h3>Programs</h3>
-          <select value={selectedProgram} onChange={e => handleProgramSelect(e.target.value)}>
-            <option value="">Select Program</option>
-            {programs.map(p => (
-              <option key={p._id} value={p._id}>{p.name}</option>
-            ))}
-          </select>
-
-          <h3>Add Mentee</h3>
-          <input
-            placeholder="Email"
-            value={menteeEmail}
-            onChange={e => setMenteeEmail(e.target.value)}
-          /><br />
-          <input
-            placeholder="Mentee Name"
-            value={menteeName}
-            onChange={e => setMenteeName(e.target.value)}
-          /><br />
-          <input
-            placeholder="Enrollment Number"
-            value={enrollmentNumber}
-            onChange={e => setEnrollmentNumber(e.target.value)}
-          /><br />
-          <button onClick={handleAddMentee}>Add Mentee</button>
-          <div>
-      <h3>Add Resource</h3>
-      <input
-        placeholder="Resource Title"
-        value={resourceTitle}
-        onChange={e => setResourceTitle(e.target.value)}
-      /><br />
-
-      {resourceType !== 'quiz' && (
-        <>
-        <input
-          placeholder="Resource URL"
-          value={resourceURL}
-          onChange={e => setResourceURL(e.target.value)}
-        /><br />
-        </>
-      )}
-
-      <select onChange={e => setResourceType(e.target.value)} value={resourceType}>
-        <option value="video">Video</option>
-        <option value="quiz">Quiz</option>
-        <option value="project">Project</option>
-      </select><br />
-
-      {resourceType === 'quiz' && (
-        <div style={{ border: '1px solid #ccc', padding: '1rem', marginTop: '1rem' }}>
-          <label>Start Time:</label>
-          <input type="datetime-local" value={startTime} onChange={e => setStartTime(e.target.value)} /><br />
-          <label>End Time:</label>
-          <input type="datetime-local" value={endTime} onChange={e => setEndTime(e.target.value)} /><br />
-          <label>Reveal Scores: </label>
-          <input type="checkbox" checked={revealScores} onChange={e => setRevealScores(e.target.checked)} /><br />
-
-          <h4>Questions</h4>
-          {questions.map((q, i) => (
-            <div key={i} style={{ marginBottom: '1rem', border: '1px dashed gray', padding: '1rem' }}>
-              <input
-                placeholder="Question Text"
-                value={q.questionText}
-                onChange={e => updateQuestion(i, 'questionText', e.target.value)}
-              /><br />
-              {q.options.map((opt, j) => (
-                <input
-                  key={j}
-                  placeholder={`Option ${j + 1}`}
-                  value={opt}
-                  onChange={e => updateOption(i, j, e.target.value)}
-                />
-              ))}<br />
-              <label>Correct Option Index:</label>
-              <input
-                type="number"
-                min="0"
-                max="3"
-                value={q.correctOptionIndex}
-                onChange={e => updateQuestion(i, 'correctOptionIndex', parseInt(e.target.value))}
-              /><br />
-              <label>Marks:</label>
-              <input
-                type="number"
-                value={q.marks}
-                onChange={e => updateQuestion(i, 'marks', parseInt(e.target.value))}
-              />
-            </div>
-          ))}
-          <button onClick={addQuestion}>+ Add Question</button>
-        </div>
-      )}
-
-      <button onClick={handleAddResource}>Add Resource</button>
-    </div>
+          <button className='logout-button' onClick={handleLogout}>Logout</button>
+          <div className="section">
+            <h2>Mentor Panel</h2>
+  
+            <h3>Programs</h3>
+            <select value={selectedProgram} onChange={e => handleProgramSelect(e.target.value)}>
+              <option value="">Select Program</option>
+              {programs.map(p => (
+                <option key={p._id} value={p._id}>{p.name}</option>
+              ))}
+            </select>
+          </div>
+  
+          <div className="section">
+            <h3>Add Mentee</h3>
+            <input placeholder="Email" value={menteeEmail} onChange={e => setMenteeEmail(e.target.value)} />
+            <input placeholder="Mentee Name" value={menteeName} onChange={e => setMenteeName(e.target.value)} />
+            <input placeholder="Enrollment Number" value={enrollmentNumber} onChange={e => setEnrollmentNumber(e.target.value)} />
+            <button onClick={handleAddMentee}>Add Mentee</button>
+          </div>
+  
+          <div className="section">
+            <h3>Add Resource</h3>
+            <input placeholder="Resource Title" value={resourceTitle} onChange={e => setResourceTitle(e.target.value)} />
+  
+            {resourceType !== 'quiz' && (
+              <input placeholder="Resource URL" value={resourceURL} onChange={e => setResourceURL(e.target.value)} />
+            )}
+  
+            <select onChange={e => setResourceType(e.target.value)} value={resourceType}>
+              <option value="video">Video</option>
+              <option value="quiz">Quiz</option>
+              <option value="project">Project</option>
+            </select>
+  
+            {resourceType === 'quiz' && (
+              <div className="quiz-section">
+                <label>Start Time:</label>
+                <input type="datetime-local" value={startTime} onChange={e => setStartTime(e.target.value)} />
+                <br/>
+                <label>End Time:</label>
+                <input type="datetime-local" value={endTime} onChange={e => setEndTime(e.target.value)} />
+                <label>Reveal Scores:</label>
+                <input type="checkbox" checked={revealScores} onChange={e => setRevealScores(e.target.checked)} />
+                <h4>Questions</h4>
+                {questions.map((q, i) => (
+                  <div key={i} className="question-block">
+                    <input placeholder="Question Text" value={q.questionText} onChange={e => updateQuestion(i, 'questionText', e.target.value)} />
+                    {q.options.map((opt, j) => (
+                      <input key={j} placeholder={`Option ${j + 1}`} value={opt} onChange={e => updateOption(i, j, e.target.value)} />
+                    ))}
+                    <label>Correct Option Index:</label>
+                    <input type="number" min="0" max="3" value={q.correctOptionIndex} onChange={e => updateQuestion(i, 'correctOptionIndex', parseInt(e.target.value))} />
+                    <label>Marks:</label>
+                    <input type="number" value={q.marks} onChange={e => updateQuestion(i, 'marks', parseInt(e.target.value))} />
+                  </div>
+                ))}
+                <button onClick={addQuestion}>+ Add Question</button>
+              </div>
+            )}
+  
+            <button onClick={handleAddResource}>Add Resource</button>
+          </div>
+  
           {selectedProgram && (
-  <div>
-    <h3>Mentees</h3>
-    {mentees.length > 0 ? (
-      <ul>
-        {mentees.map(mentee => (
-          <li key={mentee._id}>
-            {mentee.name} - {mentee.enrollmentNumber} - {mentee.password}
-          </li>
-        ))}
-      </ul>
-    ) : <p>No mentees in this program</p>}
-
-    <h3>Resources</h3>
-    {resources.length > 0 ? (
-      <ul>
-        {resources.map(resource => (
-          <li key={resource._id}>
-            {resource.title} ({resource.type})
-          </li>
-        ))}
-      </ul>
-    ) : <p>No resources in this program</p>}
-  </div>
-)}
+            <div className="section">
+              <h3>Mentees</h3>
+              {mentees.length > 0 ? (
+                <table className="responstable">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Enrollment Number</th>
+                      <th>Password</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {mentees.map(mentee => (
+                      <tr key={mentee._id}>
+                        <td>{mentee.name}</td>
+                        <td>{mentee.enrollmentNumber}</td>
+                        <td>{mentee.password}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : <p>No mentees in this program</p>}
+  
+              <h3>Resources</h3>
+              {resources.length > 0 ? (
+                <table className="responstable">
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Type</th>
+                      <th>URL</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {resources.map(resource => (
+                      <tr key={resource._id}>
+                        <td>{resource.title}</td>
+                        <td>{resource.type}</td>
+                        <td>{resource.url || 'N/A'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : <p>No resources in this program</p>}
+            </div>
+          )}
         </div>
       )}
-      <UnverifiedProjects/>
+      <UnverifiedProjects />
     </div>
   );
+  
 }

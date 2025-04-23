@@ -7,7 +7,6 @@ const MenteeLogin = dynamic(() => import('../components/mentee/login'), { ssr: f
 export default function Menteepage() {
   return (
     <div>
-      <h1>Mentee Page</h1>
       <MenteeLogin/>
     </div>
   );
