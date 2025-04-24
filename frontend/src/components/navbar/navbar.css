@@ -17,7 +17,7 @@ i {
 }
 .navbar-mainbg{
 	background-color: #5161ce;
-	padding: 0px;
+	padding: 0px !important;
   min-height: 58px;
 }
 #navbarSupportedContent{
