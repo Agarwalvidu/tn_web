@@ -28,15 +28,13 @@ const Footer = () => {
                   </figure>
                   <div className="text">
                     <p>
-                      Lorem ipsum dolor amet consectetur adipisicing elit sed
-                      eiusmod tempor incididunt ut labore et dolore magna
-                      aliqua. Enim ad minim veniam quis nostrud exercitation.
+                      TechNeeds IGDTUW is a community which fosters a motive of "all_you_need_to_know_about_tech". We offer Tech Introductory sessions, Mentorship Programs, Hackathons and a competitive environment to learn and grow together.
                     </p>
                   </div>
                   <ul className="footer-social">
                     <li>
                       <a href="#">
-                        <i className="fab fa-facebook-f"></i>
+                        <i className="fab fa-instagram"></i>
                       </a>
                     </li>
                     <li>
@@ -46,12 +44,12 @@ const Footer = () => {
                     </li>
                     <li>
                       <a href="#">
-                        <i className="fab fa-vimeo-v"></i>
+                        <i className="fab fa-linkedin-in"></i>
                       </a>
                     </li>
                     <li>
                       <a href="#">
-                        <i className="fab fa-google-plus-g"></i>
+                        <i className="fab fa-github"></i>
                       </a>
                     </li>
                   </ul>
@@ -59,22 +57,22 @@ const Footer = () => {
               </div>
               <div className="col-lg-3 col-md-6 col-sm-12 offset-lg-2 footer-column">
                 <div className="service-widget footer-widget">
-                  <div className="footer-title">Services</div>
+                  <div className="footer-title">Quick Links</div>
                   <ul className="list">
                     <li>
-                      <a href="#">Water Surve</a>
+                      <a href="/dashboard">TechBoard</a>
                     </li>
                     <li>
-                      <a href="#">Education for all</a>
+                      <a href="/profile">Profile</a>
                     </li>
                     <li>
-                      <a href="#">Food Serving</a>
+                      <a href="/events">Events</a>
                     </li>
                     <li>
-                      <a href="#">Animal Saves</a>
+                      <a href="/team">Team</a>
                     </li>
                     <li>
-                      <a href="#">Help Orphan</a>
+                      <a href="/faq">FAQs</a>
                     </li>
                   </ul>
                 </div>
@@ -83,9 +81,9 @@ const Footer = () => {
                 <div className="contact-widget footer-widget">
                   <div className="footer-title">Contacts</div>
                   <div className="text">
-                    <p>Lorem Ipsum, simply dummy text, printing, Chandigarh</p>
-                    <p>+2(784) 1223323</p>
-                    <p>info@example.com</p>
+                    <p>You can DM you query on our Whatsapp or you can directly mail us.</p>
+                    <a href="https://wa.me/8958898580"><p>+91 8958898580</p></a>
+                    <a href="mailto:techneedsigdtuw@gmail.com"><p>techneedsigdtuw@gmail.com</p></a>
                   </div>
                 </div>
               </div>
@@ -99,7 +97,7 @@ const Footer = () => {
           <div className="row">
             <div className="col-lg-6 col-md-6 col-sm-12 column">
               <div className="copyright">
-                <a href="#">Anup</a> &copy; 2019 All Right Reserved
+                <a href="#">TechNeeds IGDTUW</a> &copy; 2025 All Right Reserved
               </div>
             </div>
             <div className="col-lg-6 col-md-6 col-sm-12 column">

@@ -1,4 +1,4 @@
-import MentorPanel from '@/components/mentorPanel';
+import MentorPanel from '@/components/mentor/mentorPanel';
 
 export default function Mentorpage() {
   return (

@@ -534,7 +534,7 @@
 }
 
 #Test {
-  background: linear-gradient(#83dffd, #ffff);
+  background: linear-gradient(to right, #1961a54c, #ffff, #1961a54c);
   margin: auto;
   overflow: hidden; 
   width: 100%;
@@ -617,7 +617,7 @@
 #Glimpse{
   font-family: "Poppins";
   text-decoration: none;
-  background: linear-gradient(300deg,#83dffd 80%, #59b9ec 90%);
+  background: linear-gradient(to right, #1961a54c, #ffff, #1961a54c);
   padding: 5px;
   padding-bottom: 10px;
   animation: fadeIn 2s forwards;

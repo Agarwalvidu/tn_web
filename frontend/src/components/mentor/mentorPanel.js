@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { mentorLogin, addMentee, addResource, getAllPrograms, getProgramMentees, getProgramResources } from '../lib/api';
+import { mentorLogin, addMentee, addResource, getAllPrograms, getProgramMentees, getProgramResources } from '../../lib/api';
 import UnverifiedProjects from './projects';
 import './mentor.css'
 

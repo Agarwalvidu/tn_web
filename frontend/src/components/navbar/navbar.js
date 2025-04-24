@@ -3,15 +3,14 @@
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import './navbar.css'; 
-import logo from '../../assets/logo.png'
+import './navbar.css';
+import logo from '../../assets/logo.png';
 
 const Navbar = () => {
   const navRef = useRef(null);
-  const router = useRouter();
-
+  const pathname = usePathname();
 
   const animateSelector = () => {
     const nav = navRef.current;
@@ -28,47 +27,37 @@ const Navbar = () => {
   };
 
   useEffect(() => {
-    // Initial animation
-    animateSelector();
-
-    // Animate on window resize
-    const handleResize = () => setTimeout(animateSelector, 500);
-    window.addEventListener('resize', handleResize);
-
-    // Animate on route change or click
     const nav = navRef.current;
     const items = nav.querySelectorAll('li');
 
-    const handleClick = (e) => {
-      items.forEach((li) => li.classList.remove('active'));
-      e.currentTarget.classList.add('active');
-      animateSelector();
-    };
+    // Remove old active classes
+    items.forEach((li) => li.classList.remove('active'));
 
-    items.forEach((item) => item.addEventListener('click', handleClick));
-
-    // Highlight correct item based on URL
-    const currentPath = window.location.pathname.split('/').pop() || 'index.html';
-    const links = nav.querySelectorAll('a');
-    links.forEach((link) => {
-      if (link.getAttribute('href') === currentPath) {
-        link.parentElement.classList.add('active');
-        animateSelector();
+    // Add active class to current route
+    items.forEach((li) => {
+      const link = li.querySelector('a');
+      if (link && link.getAttribute('href') === pathname) {
+        li.classList.add('active');
       }
     });
 
+    animateSelector();
+
+    // Animate on resize
+    const handleResize = () => setTimeout(animateSelector, 500);
+    window.addEventListener('resize', handleResize);
+
     return () => {
       window.removeEventListener('resize', handleResize);
-      items.forEach((item) => item.removeEventListener('click', handleClick));
     };
-  }, [router.pathname]);
+  }, [pathname]);
 
   return (
     <nav className="navbar navbar-expand-custom navbar-mainbg">
-    <div className="logo">
-        {/* Use Image component to display the logo */}
+      <div className="logo">
         <Image src={logo} alt="Logo" width={80} height={80} />
       </div>
+
       <button
         className="navbar-toggler"
         type="button"
@@ -86,26 +75,46 @@ const Navbar = () => {
 
       <div className="collapse navbar-collapse" id="navbarSupportedContent" ref={navRef}>
         <ul className="navbar-nav ml-auto">
-          <div className="hori-selector"><div className="left"></div><div className="right"></div></div>
-          <li className="nav-item active">
-  <Link className="nav-link" href="/home"><i className="fas fa-home"></i> Home</Link>
-</li>
-<li className="nav-item">
-  <Link className="nav-link" href="/dashboard"><i className="fas fa-microchip"></i> Techboard</Link>
-</li>
-<li className="nav-item">
-  <Link className="nav-link" href="#"><i className="fas fa-users"></i> Team</Link>
-</li>
-<li className="nav-item">
-  <Link className="nav-link" href="#"><i className="fas fa-calendar-check"></i> Events</Link>
-</li>
-<li className="nav-item">
-  <Link className="nav-link" href="#"><i className="fas fa-question-circle"></i> FAQs</Link>
-</li>
-<li className="nav-item">
-  <Link className="nav-link" href="#"><i className="fas fa-user-circle"></i> Profile</Link>
-</li>
+          <div className="hori-selector">
+            <div className="left"></div>
+            <div className="right"></div>
+          </div>
 
+          <li className={`nav-item ${pathname === '/home' ? 'active' : ''}`}>
+            <Link className="nav-link" href="/home">
+              <i className="fas fa-home"></i> Home
+            </Link>
+          </li>
+
+          <li className={`nav-item ${pathname === '/dashboard' ? 'active' : ''}`}>
+            <Link className="nav-link" href="/dashboard">
+              <i className="fas fa-microchip"></i> Techboard
+            </Link>
+          </li>
+
+          <li className={`nav-item ${pathname === '/team' ? 'active' : ''}`}>
+            <Link className="nav-link" href="/team">
+              <i className="fas fa-users"></i> Team
+            </Link>
+          </li>
+
+          <li className="nav-item">
+            <Link className="nav-link" href="#">
+              <i className="fas fa-calendar-check"></i> Events
+            </Link>
+          </li>
+
+          <li className={`nav-item ${pathname === '/faq' ? 'active' : ''}`}>
+            <Link className="nav-link" href="/faq">
+              <i className="fas fa-question-circle"></i> FAQs
+            </Link>
+          </li>
+
+          <li className="nav-item">
+            <Link className="nav-link" href="#">
+              <i className="fas fa-user-circle"></i> Profile
+            </Link>
+          </li>
         </ul>
       </div>
     </nav>
