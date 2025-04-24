@@ -23,6 +23,7 @@ i {
     min-height: 56px;
     position: sticky !important;
     top: 0;
+	z-index:9999;
 }
 #navbarSupportedContent{
 	overflow: hidden;
@@ -179,7 +180,7 @@ i {
     margin-left: auto;
     position: absolute;
     right: 1rem;
-    /* top: 1rem; */
+    top: 1rem;
     z-index: 100;
   }
 }
