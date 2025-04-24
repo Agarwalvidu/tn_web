@@ -112,7 +112,7 @@ i {
     left: -25px;
 }
 
-@media(min-width: 992px){
+@media(min-width: 1025px){
 	.navbar-expand-custom {
 	    -ms-flex-flow: row nowrap;
 	    flex-flow: row nowrap;
@@ -187,14 +187,26 @@ i {
 }
 @media (max-width: 1450px){
   .navbar-expand-custom .navbar-collapse{
-    margin-left: 30%;
+    margin-left: 25%;
   }
 }
-@media (max-width: 1230px){
+@media (max-width: 1237px){
   .navbar-expand-custom .navbar-collapse{
-    margin-left: 15%;
+    margin-left: 13%;
   }
 }
 
+@media (max-width: 1066px){
+	.navbar-expand-custom .navbar-collapse{
+	  margin-left: 1%;
+	}
+  }
+
+  @media (max-width: 1066px){
+	.navbar-expand-custom .navbar-collapse{
+	  margin-left: 1%;
+	}
+  }
+  
 
 
