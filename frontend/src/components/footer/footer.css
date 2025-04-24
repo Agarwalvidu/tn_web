@@ -147,6 +147,20 @@
     padding: 25px 0px;
 }
 
+.footer-logo {
+    border-radius: 50%; /* Makes it rounded */
+    object-fit: cover; /* Ensures the image fills the area without distortion */
+    background-color: white; /* Optional: Adds a background color if logo has transparency */
+    padding: 5px; /* Adds padding around the logo */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* Optional: Adds a shadow for a modern look */
+    transition: transform 0.3s ease; /* Smooth transition for hover effect */
+  }
+  
+  .footer-logo:hover {
+    transform: scale(1.05); /* Slightly enlarges the logo on hover */
+  }
+  
+
 .footer-bottom .copyright,
 .footer-bottom .copyright a,
 .footer-bottom .footer-nav li a {
@@ -188,10 +202,10 @@
     display: none;
 }
 
-.logo-box img {
+/* .logo-box img {
     max-width: 220px;
-    filter: brightness(0) invert(1); /* Make white logo if needed */
-}
+    filter: brightness(0) invert(1); 
+} */
 
 /* Responsive adjustments */
 @media (max-width: 991px) {
