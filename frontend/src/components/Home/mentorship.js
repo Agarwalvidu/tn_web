@@ -20,7 +20,7 @@ const courses = [
     { title: 'DSA in Java', instructor: 'Tavleen Kaur', image: Java, backgroundColor: '#fffcdc' }
   ];
 
-const Mentorship = () => {
+  export default function Mentorship() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const coursesPerPage = 3;
     const totalPages = Math.ceil(courses.length / coursesPerPage);
@@ -71,6 +71,3 @@ const Mentorship = () => {
   );
 };
 
-
-
-export default Mentorship;

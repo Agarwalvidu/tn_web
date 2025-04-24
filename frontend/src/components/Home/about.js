@@ -16,7 +16,7 @@ import about4 from "../../assets/about4.png";
 
 
 
-const About = () => {
+export default function About () {
   
 
   return (
@@ -91,7 +91,3 @@ const About = () => {
     </div>
   );
 };
-
-
-
-export default About;
