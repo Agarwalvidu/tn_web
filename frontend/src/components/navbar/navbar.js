@@ -1,12 +1,17 @@
 'use client';
+
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import './navbar.css'; // Import the global CSS
+import './navbar.css'; 
 import logo from '../../assets/logo.png'
 
 const Navbar = () => {
   const navRef = useRef(null);
+  const router = useRouter();
+
 
   const animateSelector = () => {
     const nav = navRef.current;
@@ -56,7 +61,7 @@ const Navbar = () => {
       window.removeEventListener('resize', handleResize);
       items.forEach((item) => item.removeEventListener('click', handleClick));
     };
-  }, []);
+  }, [router.pathname]);
 
   return (
     <nav className="navbar navbar-expand-custom navbar-mainbg">
@@ -83,23 +88,24 @@ const Navbar = () => {
         <ul className="navbar-nav ml-auto">
           <div className="hori-selector"><div className="left"></div><div className="right"></div></div>
           <li className="nav-item active">
-            <a className="nav-link" href="#"><i className="fas fa-tachometer-alt"></i>Dashboard</a>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link" href="#"><i className="far fa-address-book"></i>Address Book</a>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link" href="#"><i className="far fa-clone"></i>Components</a>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link" href="#"><i className="far fa-calendar-alt"></i>Calendar</a>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link" href="#"><i className="far fa-chart-bar"></i>Charts</a>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link" href="#"><i className="far fa-copy"></i>Documents</a>
-          </li>
+  <Link className="nav-link" href="/home"><i className="fas fa-home"></i> Home</Link>
+</li>
+<li className="nav-item">
+  <Link className="nav-link" href="/dashboard"><i className="fas fa-microchip"></i> Techboard</Link>
+</li>
+<li className="nav-item">
+  <Link className="nav-link" href="#"><i className="fas fa-users"></i> Team</Link>
+</li>
+<li className="nav-item">
+  <Link className="nav-link" href="#"><i className="fas fa-calendar-check"></i> Events</Link>
+</li>
+<li className="nav-item">
+  <Link className="nav-link" href="#"><i className="fas fa-question-circle"></i> FAQs</Link>
+</li>
+<li className="nav-item">
+  <Link className="nav-link" href="#"><i className="fas fa-user-circle"></i> Profile</Link>
+</li>
+
         </ul>
       </div>
     </nav>
