@@ -16,7 +16,7 @@ i {
 	color: #fff;
 }
 .navbar-mainbg{
-	background-color: #5161ce;
+	background-color: #167F92;
 	padding: 0px !important;
   min-height: 58px;
 }
@@ -46,9 +46,10 @@ i {
     position: relative;
 }
 #navbarSupportedContent>ul>li.active>a{
-	color: #5161ce;
+	color: #167F92;
 	background-color: transparent;
 	transition: all 0.7s;
+	font-weight: 900;
 }
 #navbarSupportedContent a:not(:only-child):after {
 	content: "\f105";
@@ -60,7 +61,7 @@ i {
 	display: inline-block;
 	padding-right: 3px;
 	vertical-align: middle;
-	font-weight: 900;
+	font-weight: 700;
 	transition: 0.5s;
 }
 #navbarSupportedContent .active>a:not(:only-child):after {
@@ -100,7 +101,7 @@ i {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background-color: #5161ce;
+    background-color: #167F92;
 }
 .hori-selector .right:before{
 	bottom: 0;
@@ -131,7 +132,7 @@ i {
 	    display: flex!important;
 	    -ms-flex-preferred-size: auto;
 	    flex-basis: auto;
-      margin-left: 40%;
+      margin-left: 38%;
 	}
 }
 
