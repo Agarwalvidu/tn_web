@@ -3,7 +3,7 @@
 import './homepage.css' ;
 import './mobileview.css';
 
-const Testimonials = () => {
+export default function Testimonials() {
   
 
   return (
@@ -121,6 +121,3 @@ const Testimonials = () => {
   );
 };
 
-
-
-export default Testimonials;

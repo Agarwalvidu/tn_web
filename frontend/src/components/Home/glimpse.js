@@ -5,7 +5,7 @@ import './homepage.css' ;
 import './mobileview.css';
 import Glimpses from "../../assets/Glimpse.png";
 
-const Glimpse = () => {  
+export default function Glimpse (){  
 
   return (
     <div>
@@ -16,5 +16,3 @@ const Glimpse = () => {
     </div>
   );
 };
-
-export default Glimpse;
