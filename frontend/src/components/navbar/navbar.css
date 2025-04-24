@@ -20,7 +20,9 @@ i {
 .navbar-mainbg{
 	background-color:#296c9e;
 	padding: 0px !important;
-  min-height: 58px;
+    min-height: 56px;
+    position: sticky !important;
+    top: 0;
 }
 #navbarSupportedContent{
 	overflow: hidden;
