@@ -56,7 +56,7 @@
     bottom: 0;
     width: 50px;
     height: 2px;
-    background: #ff5e14; /* Accent underline */
+    background: #183d5b; /* Accent underline */
 }
 
 .footer-content .logo-widget .footer-social li {
@@ -82,7 +82,7 @@
 
 .footer-content .logo-widget .footer-social li a:hover {
     color: #fff;
-    background: #ff5e14;
+    background: #183d5b;
     transform: translateY(-3px); /* Add slight lift on hover */
 }
 
@@ -110,7 +110,7 @@
 }
 
 .footer-content .contact-widget p i {
-    color: #ff5e14;
+    color: #183d5b;
     position: absolute;
     left: 0;
     top: 5px;
@@ -155,7 +155,7 @@
 
 .footer-bottom .copyright a:hover,
 .footer-bottom .footer-nav li a:hover {
-    color: #ff5e14;
+    color: #183d5b;
 }
 
 .footer-bottom .footer-nav {
