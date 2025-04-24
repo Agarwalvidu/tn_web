@@ -10,13 +10,15 @@ body{
 i {
 	margin-right: 10px;
 }
-
+.navbar-collapse{
+	align-self: end;
+}
 .navbar-logo{
 	padding: 15px;
 	color: #fff;
 }
 .navbar-mainbg{
-	background-color: #167F92;
+	background-color: #569acd;
 	padding: 0px !important;
   min-height: 58px;
 }
@@ -46,7 +48,7 @@ i {
     position: relative;
 }
 #navbarSupportedContent>ul>li.active>a{
-	color: #167F92;
+	color: #569acd;
 	background-color: transparent;
 	transition: all 0.7s;
 	font-weight: 900;
@@ -101,7 +103,7 @@ i {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background-color: #167F92;
+    background-color: #569acd;
 }
 .hori-selector .right:before{
 	bottom: 0;

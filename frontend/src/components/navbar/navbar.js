@@ -1,7 +1,9 @@
 'use client';
+import Image from 'next/image';
 import { useEffect, useRef } from 'react';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './navbar.css'; // Import the global CSS
+import logo from '../../assets/logo.png'
 
 const Navbar = () => {
   const navRef = useRef(null);
@@ -58,7 +60,10 @@ const Navbar = () => {
 
   return (
     <nav className="navbar navbar-expand-custom navbar-mainbg">
-      <a className="navbar-brand navbar-logo" href="#">Navbar</a>
+    <div className="logo">
+        {/* Use Image component to display the logo */}
+        <Image src={logo} alt="Logo" width={80} height={80} />
+      </div>
       <button
         className="navbar-toggler"
         type="button"
