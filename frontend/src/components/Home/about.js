@@ -1,11 +1,14 @@
 "use client";
 
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import './homepage.css' ;
 import './mobileview.css';
 import rocket from "../../assets/rocket.png";
 import animation from "../../assets/animation.json";
-import Lottie from 'lottie-react';
+const Lottie = dynamic(() => import('lottie-react'), {
+  ssr: false // Disable SSR for this component
+});
 import about1 from "../../assets/about1.png";
 import about2 from "../../assets/about2.png";
 import about3 from "../../assets/about3.png";
