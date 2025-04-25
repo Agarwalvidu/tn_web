@@ -16,6 +16,9 @@ function Homepage() {
     <>
       <div id="home">
         <div className="hero-content">
+        <div className="hero-img">
+            <CrazyCubes/>
+          </div>
           <div className="Upgrade">
             <h2>Upgrade Yourself!</h2>
             <p className="para">
@@ -26,9 +29,7 @@ function Homepage() {
               <button type="button" id="Get"><a href="#Mentorship">Get Started</a></button>
             </div>
           </div>
-          <div className="hero-img">
-            <CrazyCubes/>
-          </div>
+          
         </div>
         <About/>
         <Mentorship/>
