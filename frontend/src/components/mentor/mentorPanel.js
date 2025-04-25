@@ -115,7 +115,7 @@ export default function MentorPanel() {
         enrollmentNumber,
         programId: selectedProgram,
       });
-      alert(`Mentee added with password: ${result.tempPassword}`);
+      alert(`Mentee added!`);
       window.location.reload();
     } catch (err) {
       alert(err.message);
@@ -295,9 +295,9 @@ export default function MentorPanel() {
               ) : <p>No resources in this program</p>}
             </div>
           )}
+        <UnverifiedProjects />
         </div>
       )}
-      <UnverifiedProjects />
     </div>
   );
   

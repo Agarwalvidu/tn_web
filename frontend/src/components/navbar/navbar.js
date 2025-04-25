@@ -86,8 +86,8 @@ const Navbar = () => {
             </Link>
           </li>
 
-          <li className={`nav-item ${pathname === '/dashboard' ? 'active' : ''}`}>
-            <Link className="nav-link" href="/dashboard">
+          <li className={`nav-item ${pathname === '/techboard' ? 'active' : ''}`}>
+            <Link className="nav-link" href="/techboard">
               <i className="fas fa-microchip"></i> Techboard
             </Link>
           </li>

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const MenteeSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true},
   name: { type: String, required: true },
   enrollmentNumber: { type: String, required: true },
   password: { type: String, required: true },
@@ -30,5 +30,7 @@ const MenteeSchema = new mongoose.Schema({
     ref: 'Mentor',
   }
 }, { timestamps: true });
+
+MenteeSchema.index({ email: 1, enrollmentNumber: 1 }, { unique: true });
 
 module.exports = mongoose.model('Mentee', MenteeSchema);
