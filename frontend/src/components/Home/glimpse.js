@@ -11,6 +11,7 @@ export default function Glimpse (){
     <div>
        <div id="Glimpse">
         <h2>Glimpse</h2>
+        <hr class="star-light"></hr>
         <Image src={Glimpses} alt="Glimpse" width={'auto'} height={'auto'} />
         </div>
     </div>
