@@ -10,7 +10,7 @@ export default function Testimonials() {
     <div>
        <div id="Test">
         <h2>What Our Students Say</h2>
-        <hr class="star-light"></hr>
+        <hr className="star-light"></hr>
           <div className="testimonials">
             <div className="testimonial1">
               <div className="testimonial-content">

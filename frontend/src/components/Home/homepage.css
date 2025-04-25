@@ -244,6 +244,48 @@ body {
    padding-left: 200px;
 }
 
+hr.star-light,
+hr.star-primary {
+    margin: 20px auto 30px;
+    padding: 0;
+    max-width: 250px;
+    border: 0;
+    border-top: solid 5px;
+    text-align: center;
+    opacity: 1;
+}
+
+hr.star-light:after,
+hr.star-primary:after {
+    content: "\f197";
+    display: inline-block;
+    position: relative;
+    top: -.8em;
+    padding: 0 .25em;
+    font-family: FontAwesome;
+    font-size: 2em;
+}
+
+hr.star-light {
+    border-color: #212121;
+    box-sizing: content-box;
+    overflow: visible;
+}
+
+hr.star-light:after {
+    color: #212121;
+    background-color: white;
+}
+
+hr.star-primary {
+    border-color: #212121;
+}
+
+hr.star-primary:after {
+    color: #212121;
+    background-color: white;
+}
+
 .box {
   display: flex;
   flex-direction: column;
