@@ -41,6 +41,7 @@ const courses = [
        <div id="Mentorship">
           <div className="Course">
             <h2>Our Mentorship Cohorts</h2>
+            <hr class="star-light"></hr>
             <div className="courses-container">
               <div className="courses-wrapper">
                 {currentCourses.map((course, index) => (
