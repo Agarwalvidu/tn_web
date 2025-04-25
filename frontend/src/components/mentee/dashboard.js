@@ -18,7 +18,7 @@ export default function MenteeDashboard() {
       if (!token) return router.push('/mentee');
 
       try {
-        const res = await axios.get('http://localhost:5000/api/m/dashboard', {
+        const res = await axios.get('https://tn-backend-1.onrender.com/api/m/dashboard', {
           headers: { 'x-auth-token': token }
         });
         setMentee(res.data);
@@ -36,7 +36,7 @@ export default function MenteeDashboard() {
     try {
       const token = localStorage.getItem('menteeToken');
       console.log(token);
-      const res = await axios.post(`http://localhost:5000/api/m/resources/${resourceId}/complete`, {}, {
+      const res = await axios.post(`hhttps://tn-backend-1.onrender.com/api/m/resources/${resourceId}/complete`, {}, {
         headers: { 'x-auth-token': token }
       });
       alert(res.data.message);

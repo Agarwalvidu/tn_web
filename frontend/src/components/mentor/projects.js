@@ -10,7 +10,7 @@ const UnverifiedProjects = () => {
 
   const fetchProjects = async () => {
     try {
-        const res = await axios.get('http://localhost:5000/api/unverified-projects', {
+        const res = await axios.get('https://tn-backend-1.onrender.com/api/unverified-projects', {
             headers: {
               'x-auth-token': localStorage.getItem('token') // or however you're storing it
             }
@@ -25,7 +25,7 @@ const UnverifiedProjects = () => {
 
   const handleVerify = async (menteeId, resourceId, score) => {
     try {
-      await axios.patch(`http://localhost:5000/api/${menteeId}/resources/${resourceId}/verify`, {
+      await axios.patch(`https://tn-backend-1.onrender.com/api/${menteeId}/resources/${resourceId}/verify`, {
         score
       }, {
         headers: {

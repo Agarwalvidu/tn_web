@@ -19,7 +19,7 @@ export default function ProjectSubmissionForm({ resourceId, onSubmitted }) {
     try {
       const token = localStorage.getItem('menteeToken');
       const res = await axios.post(
-        `http://localhost:5000/api/m/resources/${resourceId}/project`,
+        `hhttps://tn-backend-1.onrender.com/api/m/resources/${resourceId}/project`,
         { githubLink, deployedLink, description },
         { headers: { 'x-auth-token': token } }
       );

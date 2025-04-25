@@ -11,7 +11,7 @@ export default function QuizAttempt({ resourceId, onComplete }) {
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/m/resources/${resourceId}/quiz`, {
+        const res = await axios.get(`https://tn-backend-1.onrender.com/api/m/resources/${resourceId}/quiz`, {
           headers: { 'x-auth-token': token },
         });
         setQuiz(res.data);
@@ -33,7 +33,7 @@ export default function QuizAttempt({ resourceId, onComplete }) {
 
   const handleSubmit = async () => {
     try {
-      const res = await axios.post(`http://localhost:5000/api/m/resources/${resourceId}/quiz/submit`, {
+      const res = await axios.post(`https://tn-backend-1.onrender.com/api/m/resources/${resourceId}/quiz/submit`, {
         answers,
       }, {
         headers: { 'x-auth-token': token }
