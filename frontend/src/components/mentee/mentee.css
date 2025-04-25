@@ -1,12 +1,12 @@
 .mentee-dashboard {
-    padding: 2rem;
-    background-color: #f9f9f9;
+    padding: 7rem;
+    background: linear-gradient(to right, #b3d4e6, #FFFFFF, #b3d4e6);
     font-family: Arial, sans-serif;
     color: #024457;
   }
   
   .mentee-header h1 {
-    font-size: 2rem;
+    font-size: 4rem;
     color: #167F92;
   }
   
@@ -68,7 +68,8 @@
   
   .responsive-table th {
     background-color: #167F92;
-    color: #5f6fff;
+    color: #296c9e;
+    font-size: 1.3rem;
   }
   
   .responsive-table tr:nth-child(even) {
@@ -112,7 +113,7 @@
   }
   
   .stat-card {
-    background: #167F92;
+    background: linear-gradient(135deg, #296c9e 0%, #3e86b5 50%, #5078c8 100%);
     color: white;
     border-radius: 12px;
     padding: 1.5rem;
@@ -125,7 +126,7 @@
   
   .stat-card:hover {
     transform: scale(1.05);
-    background: #135f6d;
+    background: linear-gradient(135deg, #4d91c2, #6ba7dd);
   }
   
   .stat-card h3 {
