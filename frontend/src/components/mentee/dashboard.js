@@ -34,13 +34,17 @@ export default function MenteeDashboard() {
 
   const handleComplete = async (resourceId) => {
     try {
+      console.log("resId",resourceId);
       const token = localStorage.getItem('menteeToken');
-      console.log(token);
-      const res = await axios.post(`hhttps://tn-backend-1.onrender.com/api/m/resources/${resourceId}/complete`, {}, {
+      console.log("1");
+      console.log("token",token);
+      const res = await axios.post(`https://tn-backend-1.onrender.com/api/m/resources/${resourceId}/complete`, {}, {
         headers: { 'x-auth-token': token }
       });
+      console.log("2");
       alert(res.data.message);
       const updatedMentee = { ...mentee };
+      console.log("3");
       updatedMentee.programs.forEach((program) => {
         program.resources.forEach((resource) => {
           if (resource._id === resourceId) {
