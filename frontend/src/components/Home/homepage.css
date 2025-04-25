@@ -103,56 +103,87 @@ body {
 }
 
 #Know {
-  font-size: 20px;
-  font-weight: 700;
-  background: linear-gradient(135deg, #296c9e 0%, #3e86b5 50%, #5078c8 100%);
-  transition: transform 0.4s;
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px 0px;
+  background: linear-gradient(135deg, #296c9e 0%, #3e86b5 50%, #59a3e6 100%);
+  height: 48px;
+  width: 160px;
   border: none;
-  margin-left: 50px;
-  margin-right: 20px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 700;
+  font-size: 18px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  width: 150px;
-  height: 40px;
-  padding: 5px;
-  border-radius: 6px;
-  border: 2px solid var(--box-color);
+  transition: transform 0.2s ease, box-shadow 0.3s ease, background 0.4s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
 }
 
 #Know a {
-  color: var(--white);
+  color: inherit;
+  text-decoration: none;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #Know:hover {
-  background-color: #296c9e;
+  background: linear-gradient(135deg, #0f4b78 0%, #0b334d 60%, #0f5ea4 100%);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 6px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+#Know:active {
+  transform: scale(0.96) translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 #Get {
-  background: linear-gradient(135deg, #296c9e 0%, #3e86b5 50%, #5078c8 100%);
-  transition: transform 0.4s;
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px 0px;
-  height: 40px;
-  font-weight: 700;
-  width: 150px;
-  padding: 5px;
-  font-size: 20px;
+  background: linear-gradient(135deg, #296c9e 0%, #3e86b5 50%, #59a3e6 100%);
+  height: 48px;
+  width: 160px;
   border: none;
-  border-radius: 6px;
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px 0px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 700;
+  font-size: 18px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.3s ease, background 0.4s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
 }
 
 #Get:hover {
-  background-color: #296c9e;
-}
-
-#Get a {
-  color: var(--white);
+  background: linear-gradient(135deg, #0f4b78 0%, #0b334d 60%, #0f5ea4 100%);;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 6px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
 }
 
 #Get:active {
-  transform: scale(0.96);
+  transform: scale(0.96) translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+#Get a {
+  color: inherit;
+  text-decoration: none;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #about {
@@ -174,7 +205,7 @@ body {
 
 .lottie-animation {
   width: 50%;
-  margin-top: -100px;
+  margin-top: 50px;
   margin-right: -50px;
   margin-left: -20px;
 }
@@ -522,7 +553,7 @@ body {
 }
 
 .know-more-btn button {
-  background: linear-gradient(135deg, #296c9e 0%, #3e86b5 50%, #5078c8 100%);
+  background: linear-gradient(135deg, #296c9e 0%, #3e86b5 50%, #59a3e6 100%);
   color: white;
   border: none;
   border-radius: 50px; 
@@ -550,19 +581,36 @@ body {
 }
 
 .carousel-button {
+  /* Your original button styles */
   background-color: #296c9e;
+  height: 80px;
+  width: 80px;
   margin-left: -90px;
   margin-right: -90px;
-  color: white;
   border: none;
   border-radius: 50%;
-  padding: 20px; 
+  padding: 0; 
   cursor: pointer;
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 24px; 
   transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  font-size: 0;
+}
+
+.carousel-button::before {
+  content: "";
+  display: block;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 15px 0 15px 25px; 
+  border-color: transparent transparent transparent white;
+  margin-left: 3px; 
 }
 
 .carousel-button:hover {

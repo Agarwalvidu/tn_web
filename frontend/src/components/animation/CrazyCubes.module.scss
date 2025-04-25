@@ -76,13 +76,14 @@ $size: 200px;
 }
 
 .box {
+  margin-right: 150px;
   width: 400px;
   height: 400px;
-  background: transparent;
+  background: #4b92c7;
   display: flex;
   perspective: 500px;
   perspective-origin: 200px 200px;
-  box-shadow: 10px 10px 10px rgba(43, 95, 134, 0.25);
+  box-shadow: 60px 10px 40px rgba(43, 95, 134, 0.25);
 
   .cube {
     margin: auto;
