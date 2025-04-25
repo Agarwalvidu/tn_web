@@ -1,5 +1,14 @@
+:root {
+  --bg-primary: #93d0f5;
+}
+
 .svg-container {
-  background-color: #83dffd;
+  backdrop-filter: blur(0.5px);
+  background: linear-gradient(
+    135deg, 
+    var(--bg-primary) 0%, 
+    #a7d8f7 100%
+  );
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
@@ -32,32 +41,24 @@
      width: 100%;
   }
 
-.tri-1 {
-  fill: #728acb;
+  .tri-1 { fill: #e2eff7; }
+  .tri-2 { fill: #b6ddf8; }
+  .tri-3 { fill: #88cefd; }
+  .tri-4 { fill: #97d4ff; }
+  .tri-5 { fill: #a4d9ff; }
+  .tri-6 { fill: #67bdff; }
+  .tri-7 { fill: #93d0f5; }
+  
+
+/* Seamless Blending */
+.triangle {
+  mix-blend-mode: luminosity;
+  opacity: 0.98;
+  transition: opacity 0.5s ease-out;
 }
 
-.tri-2 {
-  fill: #7aa3e2;
-}
-
-.tri-3 {
-  fill: #609ee1;
-}
-
-.tri-4 {
-  fill: #53a7e8;
-}
-
-.tri-5 {
-  fill: #59b9ec;
-}
-
-.tri-6 {
-  fill: #53c2f1;
-}
-
-.tri-7 {
-  fill: #83dffd;
+.triangle:hover {
+  opacity: 1;
 }
 
 

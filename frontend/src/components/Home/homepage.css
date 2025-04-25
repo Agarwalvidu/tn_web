@@ -1,78 +1,111 @@
-@import url("https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap");
+/* homepage.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --box-color:rgb(95, 228, 252);
-  --bg-color: rgb(233, 253, 253);
-  --bg-color2: rgb(187, 253, 253);
-  --slider-dark: rgba(7, 97, 233, 0.808);
-  --back-grey: rgb(250, 250, 250);
-  --blue-dark: rgb(0, 0, 158);
-
+  --primary-blue: #2962ff;
+  --dark-blue: black;
+  --text-gray: #37474f;
+  --light-gray: #f5f7fa;
+  --white: #ffffff;
+  --shadow: 0 4px 12px rgba(41, 98, 255, 0.25);
 }
 
+/* Base Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--light-gray);
+  color: var(--text-gray);
+  line-height: 1.6;
+}
+
+/* Hero Section - Professional Redesign */
+.hero-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 120px 40px;
+  gap: 80px;
+}
+
+.Upgrade h2 {
+  font-weight: 700;
+  font-size: 3.5rem;
+  line-height: 1.2;
+  color: var(--dark-blue);
+  margin-bottom: 1.8rem;
+  position: relative;
+}
+
+.Upgrade h2::after {
+  content: "";
+  position: absolute;
+  bottom: -18px;
+  left: 0;
+  width: 140px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-blue), #00b0ff);
+  border-radius: 2px;
+}
+
+.para {
+  font-size: 1.2rem;
+  line-height: 1.8;
+  margin-bottom: 2.8rem;
+  max-width: 580px;
+  color: var(--text-gray);
+  font-weight: 400;
+}
+
+.home-btn {
+  display: flex;
+  gap: 24px;
+  margin-top: 1.5rem;
+}
+
+.hero-img {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.left-pic {
+  max-width: 100%;
+  height: auto;
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.12));
+  transition: transform 0.4s ease;
+}
+
+.left-pic:hover {
+  transform: scale(1.02);
+}
+
+/* Scrollbar (kept your original) */
 ::-webkit-scrollbar {
   width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-color2);
+  background: var(--light-gray);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--slider-dark);
+  background: rgba(7, 97, 233, 0.808);
   border-radius: 80px;
-}
-
-.hero-content {
-  height: 55%;
-  margin-left: 50px;
-  margin-top: 50px;
-  display: flex;
-  font-family: "Poppins", sans-serif;
-  text-decoration: none;
-}
-
-.hero-content h2 {
-  font-size: 55px;
-  margin-left: 40px;
-  position: relative;
-}
-
-.hero-content h2::after {
-  content: "";
-  position: absolute;
-  width: 450px;
-  left: 0;
-  top: 45px;
-  height: 10px;
-  background: linear-gradient(to bottom, transparent 60%,#0b95f7);
-}
-
-.hero-content p {
-  margin-left: 40px;
-  height: 280px;
-  width: 600px;
-  font-family:"Poppins", sans-serif;
-  text-decoration: none;
-  font-size: 22px;
-  color: var(--white);
-  line-height: 1.8;
-  font-weight: bolder;
-}
-
-.hero-img {
-  display: flex;
-  align-items: center;
-  padding: 0px;
-  margin-left:70px;
-  margin-top: 30px;
-  width: 90%;
 }
 
 #Know {
   font-size: 20px;
   font-weight: 700;
-  background: transparent;
+  background: #424290;
   border: none;
   margin-left: 50px;
   margin-right: 20px;
@@ -93,7 +126,7 @@
 }
 
 #Get {
-  background-color: var(--box-color);
+  background-color: #424290;
   height: 40px;
   font-weight: 700;
   width: 150px;
@@ -116,11 +149,11 @@
 
 #about {
   width: 100%;
-  font-family: "Poppins";
+  font-family: "Mulish";
   text-decoration: none;
-  margin-top: 70px;
-  background: linear-gradient(120deg, #83dffd 40%, #59b9ec 50%);
-  padding: 0px;
+  margin-top: -70px;
+  background: linear-gradient(to right, #b3d4e6, #FFFFFF, #b3d4e6);
+  padding: 40px;
   position: relative;
 }
 
@@ -155,12 +188,12 @@
   font-size: 50px;
   font-weight: 700;
   padding-top: 10px;
-  padding-left: 350px;
+  padding-left: 215px;
   margin: 2%;
   margin-top: 5%;
   font-size: 50px;
-  font-weight: 700;
-  font-family: 'Dancing Script', cursive;
+  font-weight: 500;
+  font-family: 'Playfair Display';
 
 }
 
@@ -168,8 +201,8 @@
   color: black;
   font-size: 20px;
   margin-bottom: 10px; 
-  font-family: cursive;
-   padding-left: 300px;
+  font-family: 'Libre Baskervile';
+   padding-left: 200px;
 }
 
 .box {
@@ -191,7 +224,7 @@
   cursor: pointer;
   transition: transform 0.4s;
   box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px 0px;
-  background: radial-gradient(circle , #3594fa 50%, #267ce4 100%);
+  background: linear-gradient(135deg, #296c9e 0%, #3e86b5 50%, #5078c8 100%);
   border-radius: 10px;
   margin-bottom: 15px;
   animation: moveGradient 5s infinite ease-in-out;
@@ -269,7 +302,7 @@
   cursor: pointer;
   border-radius: 10px;
   margin: 1%;
-  font-family: monospace;
+  font-family: Roboto;
   position: relative;
   overflow: hidden;
   z-index: 1;
@@ -283,7 +316,7 @@
   cursor: pointer;
   border-radius: 10px;
   margin: 1%;
-  font-family: monospace;
+  font-family: 'Roboto';
   position: relative;
   overflow: hidden;
   z-index: 1;
@@ -344,7 +377,7 @@
   top: 0;
   margin-left: -50%;
   margin-top: -70%;
-  background: linear-gradient(744deg,#5780f9,#0459c1 60%,#00ddeb);
+  background: linear-gradient(135deg, #296c9e 0%, #4289b6 50%, #3b74a7 100%);
   border-radius: 40%;
   animation: wave 55s infinite linear;
   z-index: -1;
@@ -372,8 +405,8 @@
 }
 
 #Mentorship {
-  padding: 10px 20px;
-  background: linear-gradient(-147deg, #59b9ec 40%, #83dffd 50%);
+  padding: 100px;
+  background: linear-gradient(to right, #b3d4e6, #FFFFFF, #b3d4e6);
   padding-bottom: 40px;
 }
 
@@ -398,7 +431,7 @@
   font-weight: 700;
   margin: 5px;
   margin-bottom: 25px;
-  font-family: 'Dancing Script', cursive;
+  font-family: 'Playfair Display';
 }
 
 .courses-wrapper {
@@ -509,6 +542,8 @@
 
 .carousel-button {
   background-color: #007bff;
+  margin-left: -90px;
+  margin-right: -90px;
   color: white;
   border: none;
   border-radius: 50%;
@@ -534,7 +569,7 @@
 }
 
 #Test {
-  background: linear-gradient(#83dffd, #ffff);
+  background: linear-gradient(to right, #b3d4e6, #FFFFFF, #b3d4e6);
   margin: auto;
   overflow: hidden; 
   width: 100%;
@@ -548,12 +583,12 @@
   font-weight: 700;
   margin: 5px;
   margin-bottom: 25px;
-  font-family: 'Dancing Script', cursive;
+  font-family: 'Playfair Display';
 }
 
 .testimonials {
   display: flex;
-  gap: 20px;
+  gap: 80px;
   align-items: center;
   width: calc(300px * 8 + 140px); 
   animation: scroll-right 45s linear infinite;
@@ -615,10 +650,10 @@
 }
 
 #Glimpse{
-  font-family: "Poppins";
+  font-family: "Mulish";
   text-decoration: none;
-  background: linear-gradient(300deg,#83dffd 80%, #59b9ec 90%);
-  padding: 5px;
+  background: linear-gradient(to right, #b3d4e6, #FFFFFF, #b3d4e6);
+  padding: 8%;
   padding-bottom: 10px;
   animation: fadeIn 2s forwards;
 
@@ -632,7 +667,7 @@
   font-weight: 700;
   margin-top: 0px;
   margin-bottom: 25px;
-  font-family: 'Dancing Script', cursive;
+  font-family: 'Playfair Display';
 }
 
 #Glimpse img{
