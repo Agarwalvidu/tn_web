@@ -1,12 +1,11 @@
+@use 'sass:math';
 @import url('https://fonts.googleapis.com/css?family=Quicksand&display=swap');
 
 .wrapper {
   margin: 0;
   display: flex;
-  justify-content: center;
+  justify-content:flex-end;
   align-items: center;
-  min-height: 100vh;
-  background: #1d82ff;
   flex-direction: column;
   font-family: "Quicksand", sans-serif;
   color: white;
@@ -79,10 +78,11 @@ $size: 200px;
 .box {
   width: 400px;
   height: 400px;
-  background: rgba(0, 0, 0, 0.5);
+  background: transparent;
   display: flex;
   perspective: 500px;
   perspective-origin: 200px 200px;
+  box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.25);
 
   .cube {
     margin: auto;
@@ -146,14 +146,21 @@ $size: 200px;
     top: 0;
     bottom: 0;
     transform-origin: center center calc($size / 2);
-    transform: translateZ(-#{$size / 4});
+    transform: translateZ(-#{math.div($size, 4)});
 
     .f6 {
-      transform: translateZ(-#{$size / 2}) rotateY(-180deg);
+        transform: translateZ(-#{math.div($size, 2)}) rotateY(-180deg);
     }
   }
 }
 
 .rad {
   border-radius: 500px;
+}
+
+@media (max-width: 480px) {
+    .box{
+        height: 300px;
+        width: 300px;   
+    }
 }
