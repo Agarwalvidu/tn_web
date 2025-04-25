@@ -13,11 +13,11 @@ import app from "../../assets/app.jpg";
 
 const courses = [
     { title: 'Web Development', instructor: 'Vidusi Agarwal', image: Web, backgroundColor: '#bfffd4' },
-    { title: 'App Development', instructor: 'Sunishka', image: app, backgroundColor: '#f6d8ff' },
-    { title: 'DSA in C/C++', instructor: 'Shefali', image: C, backgroundColor: '#ffe8c9' },
+    { title: 'DSA in C/C++', instructor: 'Shefali Kaushal', image: C, backgroundColor: '#ffe8c9' },
     { title: 'Machine Learning', instructor: 'Sripriya Aggarwal', image: ML, backgroundColor: '#ffecf4' },
+    { title: 'DSA in Java', instructor: 'Tavleen Kaur', image: Java, backgroundColor: '#fffcdc' },
     { title: 'AR/VR Mentorship', instructor: 'Snighdha', image: AR, backgroundColor: '#d4f5ff' },
-    { title: 'DSA in Java', instructor: 'Tavleen Kaur', image: Java, backgroundColor: '#fffcdc' }
+    { title: 'App Development', instructor: 'Muskan Manvi', image: app, backgroundColor: '#f6d8ff' }
   ];
 
   export default function Mentorship() {
@@ -48,7 +48,7 @@ const courses = [
                   <div
                     key={index}
                     className="course-card"
-                    style={{ backgroundColor: course.backgroundColor }}
+                    style={{ backgroundColor: '#64a0cc' }}
                   >
                     <div className="course-img">
                       <Image src={course.image} className="icon" alt={`${course.title} Image`} width={'auto'} height={'auto'} />&
