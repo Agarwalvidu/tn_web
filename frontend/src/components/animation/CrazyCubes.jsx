@@ -14,8 +14,9 @@ const CrazyCubes = () => {
 
   return (
     <div className={styles.wrapper}>
-<button  onClick={toggleAnimation}>
+
       <div className={`${styles.box} ${styles.rad}`}>
+      <button  onClick={toggleAnimation}>
         <div className={`${styles.cube} ${animationClass} ${styles.r3}`}>
           <div className={`${styles.face} ${styles.f1}`}><img src={logo.src} alt="logo" className={styles.logo} /></div>
           <div className={`${styles.face} ${styles.f2}`}><img src={logo.src} alt="logo" className={styles.logo} /></div>
@@ -42,8 +43,9 @@ const CrazyCubes = () => {
             <div className={`${styles.face} ${styles.f6} ${styles.rad}`}><img src={logo.src} alt="logo" className={styles.logo} /></div>
           </div>
         </div>
+        </button>
       </div>
-    </button>
+    
     </div>
   );
 };

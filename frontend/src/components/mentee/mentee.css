@@ -9,7 +9,7 @@ button {
   transition: 0.3s;
 }
 .mentee-dashboard {
-    padding: 7rem;
+    padding: 1rem;
     background: linear-gradient(to right, #b3d4e6, #FFFFFF, #b3d4e6);
     font-family: Arial, sans-serif;
     color: #024457;

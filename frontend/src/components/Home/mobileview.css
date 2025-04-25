@@ -118,7 +118,7 @@
     }
   
     .about-1, .about-2 {
-      width: 80%; 
+      width: 100%; 
       margin: 10px 0;
     }
   
@@ -174,7 +174,31 @@
     .about-list .about-li {
       font-size: 14px;
     }
-  
+    #about{
+      padding: 30px !important;
+    }
+    #Glimpse{
+      padding: 30px;
+    }
+    .carousel-button::before {
+      margin-left: 10px
+    }
+    .carousel-button.right,.carousel-button.left{
+      width: 40px;
+      height: 40px;
+    }
+    .carousel-button.right{
+      right: 48px;
+    }
+    .carousel-button.left{
+      left: 48px;
+    }
+    .carousel-button.left::before{
+      border-width: 10px 20px 10px 0;
+    }
+    .carousel-button.right::before{
+      border-width: 10px 0 10px 20px ;
+    }
     .box img {
       width: 60%;
       margin-right: 0;
@@ -189,11 +213,13 @@
   @media only screen and (max-width: 768px) {
     #Mentorship{
        margin-top: -5px;
+       padding: 30px;
        
     }
     .Course h2 {
       font-size: 30px;
       margin-bottom: 15px;
+      text-align: center;
     }
   
     .courses-wrapper {
@@ -242,6 +268,7 @@
   
   #Test h2{
     font-size: 30px;
-    
+    text-align: center;
+    margin-top: 80px;
   }
 }

@@ -99,7 +99,7 @@ const Navbar = () => {
           </li>
 
           <li className="nav-item">
-            <Link className="nav-link" href="#">
+            <Link className="nav-link" href="/eventspage">
               <i className="fas fa-calendar-check"></i> Events
             </Link>
           </li>
@@ -111,7 +111,7 @@ const Navbar = () => {
           </li>
 
           <li className="nav-item">
-            <Link className="nav-link" href="#">
+            <Link className="nav-link" href="/profile">
               <i className="fas fa-user-circle"></i> Profile
             </Link>
           </li>

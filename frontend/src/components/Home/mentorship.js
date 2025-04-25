@@ -64,7 +64,7 @@ const courses = [
               <button className="carousel-button right" onClick={handleNext}>&#9654;</button>
             </div>
             <div className="know-more-btn">
-              <button type="button" id="KnowMore"><a href="#about">Know More</a></button>
+              <button type="button" id="KnowMore"><a href="/techboard">Know More</a></button>
             </div>
           </div>
         </div>

@@ -654,6 +654,17 @@ hr.star-primary:after {
   border-color: transparent transparent transparent white;
   margin-left: 3px; 
 }
+.carousel-button.left::before{
+    content: "";
+    display: block;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 15px 25px 15px 0; 
+    border-color: transparent white transparent transparent;
+    margin-right:10px
+
+}
 
 .carousel-button:hover {
   background: linear-gradient(135deg, #4d91c2, #6ba7dd);
@@ -680,7 +691,6 @@ hr.star-primary:after {
   align-items: center;
   font-size: 50px;
   font-weight: 700;
-  margin: 130px;
   margin-bottom: 25px;
   font-family: 'Playfair Display';
 }
