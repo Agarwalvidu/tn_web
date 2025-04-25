@@ -28,7 +28,7 @@ export default function About () {
           <div className="about-content-container">
             <div className="about-content">
               <h2>About Us</h2>
-              <hr class="star-light"></hr>
+              <hr className="star-light"></hr>
               <p>IGDTUW Students' first Choice</p>
             </div>
             <div className="box">
