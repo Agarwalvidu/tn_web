@@ -233,7 +233,7 @@ body {
   cursor: pointer;
   transition: transform 0.4s;
   box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px 0px;
-  background: linear-gradient(135deg, #296c9e 0%, #3e86b5 50%, #5078c8 100%);
+  background: linear-gradient(135deg, #296c9e 0%, #3e86b5 50%, #59a3e6 100%);
   border-radius: 10px;
   margin-bottom: 15px;
   animation: moveGradient 5s infinite ease-in-out;

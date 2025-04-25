@@ -82,7 +82,7 @@ $size: 200px;
   display: flex;
   perspective: 500px;
   perspective-origin: 200px 200px;
-  box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.25);
+  box-shadow: 10px 10px 10px rgba(43, 95, 134, 0.25);
 
   .cube {
     margin: auto;
@@ -105,7 +105,7 @@ $size: 200px;
       position: absolute;
     }
 
-    .f1 { background: #89a6cdd6; }
+    .f1 { background: #90bbf4d6; }
     .f2 {
       left: 100%;
       transform-origin: left;
@@ -122,13 +122,13 @@ $size: 200px;
       right: 100%;
       transform-origin: right;
       transform: rotate3d(0, 1, 0, -90deg);
-      background: #bb99ffe0;
+      background: #99c2ffe0;
     }
     .f5 {
       top: 100%;
       transform-origin: top;
       transform: rotate3d(1, 0, 0, -90deg);
-      background: #5a5f73d9;
+      background: #5a7baad9;
     }
     .f6 {
       transform: translateZ(-$size) rotateY(-180deg);
