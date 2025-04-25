@@ -569,7 +569,11 @@ body {
 }
 
 #Test {
+<<<<<<< HEAD
   background: linear-gradient(to right, #b3d4e6, #FFFFFF, #b3d4e6);
+=======
+  background: linear-gradient(to right, #1961a54c, #ffff, #1961a54c);
+>>>>>>> bfc766e3c594e357bca623ee469eaf87a6d4a65f
   margin: auto;
   overflow: hidden; 
   width: 100%;
@@ -652,8 +656,13 @@ body {
 #Glimpse{
   font-family: "Mulish";
   text-decoration: none;
+<<<<<<< HEAD
   background: linear-gradient(to right, #b3d4e6, #FFFFFF, #b3d4e6);
   padding: 8%;
+=======
+  background: linear-gradient(to right, #1961a54c, #ffff, #1961a54c);
+  padding: 5px;
+>>>>>>> bfc766e3c594e357bca623ee469eaf87a6d4a65f
   padding-bottom: 10px;
   animation: fadeIn 2s forwards;
 
