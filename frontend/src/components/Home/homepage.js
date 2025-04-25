@@ -31,7 +31,7 @@ function Homepage() {
           </div>
         </div>
         <About/>
-        {/* <Mentorship/> */}
+        <Mentorship/>
         <Glimpse/>
         <Testimonials/>
       </div>

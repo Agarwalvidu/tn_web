@@ -22,7 +22,7 @@ const courses = [
 
   export default function Mentorship() {
     const [currentIndex, setCurrentIndex] = useState(0);
-    const coursesPerPage = 3;
+    const coursesPerPage = 2;
     const totalPages = Math.ceil(courses.length / coursesPerPage);
   
     const handleNext = () => {
