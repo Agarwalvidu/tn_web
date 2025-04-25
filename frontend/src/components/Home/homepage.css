@@ -227,7 +227,7 @@ body {
   font-size: 50px;
   font-weight: 700;
   padding-top: 10px;
-  padding-left: 215px;
+  padding-left: 235px;
   margin: 2%;
   margin-top: 5%;
   font-size: 50px;
@@ -567,15 +567,15 @@ hr.star-primary:after {
 .course-card .course-content h2 {
   font-size: 1.5em; 
   margin: 10px 0;
-  font-weight: 300;
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-weight: 900;
+  font-family: 'Roboto';
 }
 
 .course-card .course-content p {
   color: #555;
-  font-family: 'Dancing Script', cursive;
+  font-family: 'Mulish';
   font-size: 18px; 
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .course-card:hover .course-img img {
