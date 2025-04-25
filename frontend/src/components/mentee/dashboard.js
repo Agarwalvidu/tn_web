@@ -25,7 +25,7 @@ export default function MenteeDashboard() {
       } catch (err) {
         alert('Session expired. Please login again.');
         localStorage.removeItem('menteeToken');
-        router.push('/mentee/login');
+        router.push('/mentee');
       }
     };
 
@@ -57,12 +57,18 @@ export default function MenteeDashboard() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('menteeToken');
+    router.push('/mentee');
+  };
+
   if (!mentee) return <div>Loading...</div>;
   console.log(mentee);
   // components/MenteeDashboard.js
 
   return (
     <div className="mentee-dashboard">
+      <button onClick={handleLogout} className="logout-button">Logout</button>
       <div className="mentee-header">
         <h1>Welcome, {mentee.name} 👋</h1>
         <div className="stat-cards">

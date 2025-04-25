@@ -1,3 +1,13 @@
+button {
+  background-color: #167F92;
+  color: white;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  margin-top: 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
 .mentee-dashboard {
     padding: 7rem;
     background: linear-gradient(to right, #b3d4e6, #FFFFFF, #b3d4e6);
@@ -151,7 +161,12 @@
       opacity: 1;
     }
   }
-    
+  .logout-button{
+    position: relative;
+      width: 10%;
+      margin-left: 90%;
+    margin-bottom: 10px;
+  }
   .responsive-table-wrapper {
     overflow-x: auto;
     margin-top: 1rem;
@@ -191,3 +206,22 @@
     }
   }
   
+  @media (max-width: 980px) {
+    .logout-button{
+      padding: 10px;
+    }
+  }
+  
+  @media (max-width: 730px) {
+    .logout-button{
+      margin-left: 80%;
+          width: 20%;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .logout-button{
+      margin-left: 70%;
+          width: 30%;
+    }
+  }
