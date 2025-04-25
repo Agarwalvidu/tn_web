@@ -28,6 +28,7 @@ const ParticleAnimation = () => {
         this.changed = null;
         this.changedFrame = 0;
         this.maxChangedFrames = 50;
+        this.angle = random(0, 2 * Math.PI);
         return this;
       }
 
@@ -44,23 +45,18 @@ const ParticleAnimation = () => {
 
       update() {
         const point = pointRef.current;
-        if (this.changed) {
-          this.alpha *= 0.92;
-          this.size += 2;
-          this.changedFrame++;
-          if (this.changedFrame > this.maxChangedFrames) {
-            this.reset();
-          }
-        } else if (this.distance(point.x, point.y) < 50) {
-          this.changed = true;
-        } else {
+        
           let dx = point.x - this.x;
           let dy = point.y - this.y;
           let angle = atan2(dy, dx);
 
-          this.alpha += 0.01;
-          this.x += this.velocity * cos(angle);
-          this.y += this.velocity * sin(angle);
+          this.alpha = Math.min(this.alpha + 0.01, 1);
+  this.x += this.velocity * Math.cos(this.angle);
+  this.y += this.velocity * Math.sin(this.angle);
+
+
+        if(this.x < 0 || this.x > width || this.y < 0 || this.y > height){
+            this.reset();
         }
       }
 
