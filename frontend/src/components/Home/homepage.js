@@ -9,12 +9,14 @@ import Testimonials from './testimonials';
 import CrazyCubes from '../animation/CrazyCubes';
 import Mentorship from './mentorship';
 import Glimpse from './glimpse';
+import ParticleAnimation from '../heroanimation/hero';
 
 function Homepage() {
   
   return (
     <>
       <div id="home">
+        <ParticleAnimation/>
         <div className="hero-content">
         <div className="hero-img">
             <CrazyCubes/>

@@ -26,7 +26,7 @@ body {
 
 /* Hero Section - Professional Redesign */
 .hero-content {
-  background: linear-gradient(to right, #b3d4e6, #FFFFFF, #b3d4e6);
+  /* background: linear-gradient(to right, #b3d4e6, #FFFFFF, #b3d4e6); */
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: center;
@@ -191,7 +191,7 @@ body {
   font-family: "Mulish";
   text-decoration: none;
   margin-top: -70px;
-  background: linear-gradient(to right, #b3d4e6, #FFFFFF, #b3d4e6);
+  /* background: linear-gradient(to right, #b3d4e6, #FFFFFF, #b3d4e6); */
   padding: 80px 90px;
   position: relative;
 }
@@ -446,7 +446,7 @@ body {
 
 #Mentorship {
   padding: 100px;
-  background: linear-gradient(to right, #b3d4e6, #FFFFFF, #b3d4e6);
+  /* background: linear-gradient(to right, #b3d4e6, #FFFFFF, #b3d4e6); */
   padding-bottom: 40px;
 }
 
@@ -626,7 +626,7 @@ body {
 }
 
 #Test {
-  background: linear-gradient(to right, #b3d4e6, #FFFFFF, #b3d4e6);
+  /* background: linear-gradient(to right, #b3d4e6, #FFFFFF, #b3d4e6); */
   margin: auto;
   overflow: hidden; 
   width: 100%;
@@ -709,7 +709,7 @@ body {
 #Glimpse{
   font-family: "Mulish";
   text-decoration: none;
-  background: linear-gradient(to right, #b3d4e6, #FFFFFF, #b3d4e6);
+  /* background: linear-gradient(to right, #b3d4e6, #FFFFFF, #b3d4e6); */
   padding: 100px;
   padding-bottom: 10px;
   animation: fadeIn 2s forwards;

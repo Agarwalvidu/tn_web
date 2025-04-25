@@ -14,7 +14,7 @@ const CrazyCubes = () => {
 
   return (
     <div className={styles.wrapper}>
-
+<button  onClick={toggleAnimation}>
       <div className={`${styles.box} ${styles.rad}`}>
         <div className={`${styles.cube} ${animationClass} ${styles.r3}`}>
           <div className={`${styles.face} ${styles.f1}`}><img src={logo.src} alt="logo" className={styles.logo} /></div>
@@ -43,7 +43,7 @@ const CrazyCubes = () => {
           </div>
         </div>
       </div>
-      <button style={{background:'transparent', boxShadow:'10px 10px 10px rgba(0, 0, 0, 0.25)', fontWeight:'900', color:'darkgray'}} onClick={toggleAnimation}>Click Me!</button>
+    </button>
     </div>
   );
 };
