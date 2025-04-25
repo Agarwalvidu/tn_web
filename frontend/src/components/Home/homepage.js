@@ -6,8 +6,7 @@ import './homepage.css' ;
 import './mobileview.css';
 import About from './about';
 import Testimonials from './testimonials';
-import Image1 from '../../assets/logo.png';
-import TriangleAnimation from "./TriangleAnimation";
+import CrazyCubes from '../animation/CrazyCubes';
 import Mentorship from './mentorship';
 import Glimpse from './glimpse';
 
@@ -15,7 +14,6 @@ function Homepage() {
   
   return (
     <>
-      <TriangleAnimation />
       <div id="home">
         <div className="hero-content">
           <div className="Upgrade">
@@ -29,11 +27,11 @@ function Homepage() {
             </div>
           </div>
           <div className="hero-img">
-            <Image src={Image1} className="left-pic" alt="TechNeeds logo" width={'90%'} height={'auto'} />
+            <CrazyCubes/>
           </div>
         </div>
         <About/>
-        <Mentorship/>
+        {/* <Mentorship/> */}
         <Glimpse/>
         <Testimonials/>
       </div>

@@ -43,7 +43,7 @@ const CrazyCubes = () => {
           </div>
         </div>
       </div>
-      <button onClick={toggleAnimation}>Try another Mode</button>
+      <button style={{background:'transparent', boxShadow:'10px 10px 10px rgba(0, 0, 0, 0.25)', fontWeight:'900', color:'darkgray'}} onClick={toggleAnimation}>Click Me!</button>
     </div>
   );
 };
