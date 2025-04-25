@@ -513,7 +513,7 @@ body {
 }
 
 .know-more-btn button {
-  background: linear-gradient(135deg, #007bff, #01cde8); 
+  background: linear-gradient(135deg, #296c9e 0%, #3e86b5 50%, #5078c8 100%);
   color: white;
   border: none;
   border-radius: 50px; 
@@ -529,7 +529,7 @@ body {
 }
 
 .know-more-btn button:hover {
-  background: linear-gradient(135deg, #007bff, #7b70f5); 
+  background: linear-gradient(135deg, #4d91c2, #6ba7dd);
   transform: scale(1.05); 
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); 
 }
@@ -541,7 +541,7 @@ body {
 }
 
 .carousel-button {
-  background-color: #007bff;
+  background-color: #296c9e;
   margin-left: -90px;
   margin-right: -90px;
   color: white;
@@ -557,7 +557,7 @@ body {
 }
 
 .carousel-button:hover {
-  background-color: #0056b3;
+  background: linear-gradient(135deg, #4d91c2, #6ba7dd);
 }
 
 .carousel-button.left {
@@ -569,11 +569,7 @@ body {
 }
 
 #Test {
-<<<<<<< HEAD
-  background: linear-gradient(to right, #b3d4e6, #FFFFFF, #b3d4e6);
-=======
   background: linear-gradient(to right, #1961a54c, #ffff, #1961a54c);
->>>>>>> bfc766e3c594e357bca623ee469eaf87a6d4a65f
   margin: auto;
   overflow: hidden; 
   width: 100%;
@@ -585,7 +581,7 @@ body {
   align-items: center;
   font-size: 50px;
   font-weight: 700;
-  margin: 5px;
+  margin: 130px;
   margin-bottom: 25px;
   font-family: 'Playfair Display';
 }
@@ -637,7 +633,7 @@ body {
 .student-review {
   margin: 0;
   color: #333;
-  font-family: 'Arial', sans-serif;
+  font-family: 'Roboto';
   font-size: 14px;
   line-height: 1.5;
 }
@@ -645,7 +641,7 @@ body {
 .student-name {
   font-size: 1.2em;
   margin-top: 10px;
-  font-family: 'Dancing Script', cursive;
+  font-family: 'Roboto';
 }
 
 @keyframes scroll-right {
@@ -656,13 +652,8 @@ body {
 #Glimpse{
   font-family: "Mulish";
   text-decoration: none;
-<<<<<<< HEAD
   background: linear-gradient(to right, #b3d4e6, #FFFFFF, #b3d4e6);
-  padding: 8%;
-=======
-  background: linear-gradient(to right, #1961a54c, #ffff, #1961a54c);
-  padding: 5px;
->>>>>>> bfc766e3c594e357bca623ee469eaf87a6d4a65f
+  padding: 100px;
   padding-bottom: 10px;
   animation: fadeIn 2s forwards;
 
