@@ -82,7 +82,7 @@ const Footer = () => {
                   <div className="footer-title">Contacts</div>
                   <div className="text">
                     <p>You can DM you query on our Whatsapp or you can directly mail us.</p>
-                    <a href="https://wa.me/8958898580"><p>+91 8958898580</p></a>
+                    <a href="https://wa.me/918958898580"><p>+91 8958898580</p></a>
                     <a href="mailto:techneedsigdtuw@gmail.com"><p>techneedsigdtuw@gmail.com</p></a>
                   </div>
                 </div>

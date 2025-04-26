@@ -81,7 +81,7 @@ const Navbar = () => {
           </div>
 
           <li className={`nav-item ${pathname === '/home' ? 'active' : ''}`}>
-            <Link className="nav-link" href="/home">
+            <Link className="nav-link" href="/">
               <i className="fas fa-home"></i> Home
             </Link>
           </li>
