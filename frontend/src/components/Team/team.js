@@ -16,7 +16,7 @@ function MeetOurTeam() {
           <div className="meet-our-team">
             <h1 className="heading">Meet Our Team</h1>
           </div>
-          <h3 className="team-member-role">Leads</h3>
+          <h3 className="team-member-role">Founders</h3>
 
           <div className="team-members2">
             <div className="card">
@@ -56,7 +56,7 @@ function MeetOurTeam() {
                 <h2 className="team-member-name">Vidushi Agarwal </h2>
                 <br />
                 <div className="outer-position">
-                  <h6 className="team-member-position">President</h6>
+                  <h6 className="team-member-position">Founder</h6>
                 </div>
               </div>
             </div>
@@ -97,7 +97,7 @@ function MeetOurTeam() {
                 <h2 className="team-member-name">Saie Prakhar Pawar</h2>
                 <br />
                 <div className="outer-position">
-                  <h6 className="team-member-position">Vice President</h6>
+                  <h6 className="team-member-position">Founder</h6>
                 </div>
               </div>
             </div>
@@ -126,7 +126,7 @@ function MeetOurTeam() {
                 <h2 className="team-member-name">Avni Singh </h2>
                 <br />
                 <div className="outer-position">
-                  <h6 className="team-member-position">Vice President</h6>
+                  <h6 className="team-member-position">Founder</h6>
                 </div>
               </div>
             </div>
@@ -155,11 +155,10 @@ function MeetOurTeam() {
                 <h2 className="team-member-name">Chanda Jha</h2>
                 <br />
                 <div className="outer-position">
-                  <h6 className="team-member-position">Moderator</h6>
+                  <h6 className="team-member-position">Founder</h6>
                 </div>
               </div>
             </div>
-            
           </div>
           <div className="team-members">
             <div className="card">
@@ -199,7 +198,7 @@ function MeetOurTeam() {
                 <h2 className="team-member-name">Sonam</h2>
                 <br />
                 <div className="outer-position">
-                  <h6 className="team-member-position">Moderator</h6>
+                  <h6 className="team-member-position">Founder</h6>
                 </div>
               </div>
             </div>
@@ -240,157 +239,40 @@ function MeetOurTeam() {
                 <h2 className="team-member-name">Sripriya Agarwal </h2>
                 <br />
                 <div className="outer-position">
-                  <h6 className="team-member-position">Treasurer</h6>
+                  <h6 className="team-member-position">Founder</h6>
                 </div>
               </div>
             </div>
-            </div>
+          </div>
         </div>
       </div>
 
       <div className="bgbox-wrapper">
         <div className="bgbox">
-          <div className="meet-our-team">
-          </div>
-          <h3 className="team-member-role">New Leads</h3>
-<div className="team-members1">
-            <div className="card">
-              <div className="team-member">
-                <div className="image-container">
-                  <img
-                    className="rounded-avatar"
-                    src={
-                      "https://res.cloudinary.com/dcec61lxq/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_blue,b_rgb:262c35/v1724959621/Photo_d7ycqm.jpg"
-                    }
-                    alt="Shreya avatar"
-                  />
-                  <div className="social-media-icons">
-                    <a
-                      href="https://www.linkedin.com/in/shreya-kumari-2ba266269/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <FontAwesomeIcon icon={faLinkedin} aria-hidden="true" />
-                    </a>
-                    <a href="#" target="_blank" rel="noopener noreferrer">
-                      <FontAwesomeIcon icon={faInstagram} aria-hidden="true" />
-                    </a>
-                    <a href="#" target="_blank" rel="noopener noreferrer">
-                      <FontAwesomeIcon icon={faXTwitter} aria-hidden="true" />
-                    </a>
-                  </div>
-                </div>
-                <h2 className="team-member-name">Shreya </h2>
-                <br />
-                <div className="outer-position">
-                  <h6 className="team-member-position">Outreach Secretary</h6>
-                </div>
-              </div>
-            </div>
-            </div>
-            <div className="team-members1">
-            <div className="card">
-              <div className="team-member">
-                <div className="image-container">
-                  <img
-                    className="rounded-avatar"
-                    src={
-                      "https://res.cloudinary.com/dcec61lxq/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_blue,b_rgb:262c35/v1724959748/me_oqxnuy.jpg"
-                    }
-                    alt="Nandini Jain avatar"
-                  />
-                  <div className="social-media-icons">
-                    <a
-                      href="www.linkedin.com/in/nandini-jain-00967028b"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <FontAwesomeIcon icon={faLinkedin} aria-hidden="true" />
-                    </a>
-                    <a
-                      href="https://www.instagram.com/nandinijain004/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <FontAwesomeIcon icon={faInstagram} aria-hidden="true" />
-                    </a>
-                    <a
-                      href="https://x.com/Nandini8409"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <FontAwesomeIcon icon={faXTwitter} aria-hidden="true" />
-                    </a>
-                  </div>
-                </div>
-                <h2 className="team-member-name">Nandini Jain</h2>
-                <br />
-                <div className="outer-position">
-                  <h6 className="team-member-position">Mentorship Moderator</h6>
-                </div>
-              </div>
-            </div>
-            </div>
+          <div className="meet-our-team"></div>
+          <h3 className="team-member-role">Leads</h3>
+          {/* President */}
           <div className="team-members1">
-          <div className="card">
-              <div className="team-member">
-                <div className="image-container">
-                  <img
-                    className="rounded-avatar"
-                    src={
-                      "https://res.cloudinary.com/dcec61lxq/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_blue,b_rgb:262c35/v1724960312/WhatsApp_Image_2024-08-30_at_1.03.00_AM_tcbd0z.jpg"
-                    }
-                    alt="Areeba Khanam  avatar"
-                  />
-                  <div className="social-media-icons">
-                    <a
-                      href="https://www.linkedin.com/in/areeba-khan-70013128a"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <FontAwesomeIcon icon={faLinkedin} aria-hidden="true" />
-                    </a>
-                    <a
-                      href="https://www.instagram.com/al_.hayy?igsh=dnI3aDNtNDNtZml6"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <FontAwesomeIcon icon={faInstagram} aria-hidden="true" />
-                    </a>
-                    <a href="#" target="_blank" rel="noopener noreferrer">
-                      <FontAwesomeIcon icon={faXTwitter} aria-hidden="true" />
-                    </a>
-                  </div>
-                </div>
-                <h2 className="team-member-name">Areeba Khanam </h2>
-                <br />
-                <div className="outer-position">
-                  <h6 className="team-member-position">Mentorship Modirator</h6>
-                </div>
-              </div>
-            </div>
-            </div>
-            <div className="team-members1">
             <div className="card">
               <div className="team-member">
                 <div className="image-container">
                   <img
                     className="rounded-avatar"
                     src={
-                      "https://res.cloudinary.com/dcec61lxq/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_blue,b_rgb:262c35/v1724959125/Pari_wiuvo0.jpg"
+                      "https://res.cloudinary.com/dcec61lxq/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_blue,b_rgb:262c35/v1724959131/IMG_7050_duy2oc.png"
                     }
-                    alt="Pari avatar"
+                    alt="Joysa Jain avatar"
                   />
                   <div className="social-media-icons">
                     <a
-                      href="https://www.linkedin.com/in/pari-gupta-168564289/"
+                      href="https://www.linkedin.com/in/joysa-jain-86b589283/"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       <FontAwesomeIcon icon={faLinkedin} aria-hidden="true" />
                     </a>
                     <a
-                      href="https://www.instagram.com/parigupta9667/"
+                      href="https://www.instagram.com/joysajain.21?igsh=MXhnM3Y1ZWloMGRmYw%3D%3D&utm_source=qr"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -401,15 +283,58 @@ function MeetOurTeam() {
                     </a>
                   </div>
                 </div>
-                <h2 className="team-member-name">Pari Gupta</h2>
+                <h2 className="team-member-name">Joysa Jain</h2>
                 <br />
                 <div className="outer-position">
-                  <h6 className="team-member-position">Treasurer</h6>
+                  <h6 className="team-member-position">President</h6>
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Vice Presidents */}
+          <div className="team-members">
+            <div className="card">
+              <div className="team-member">
+                <div className="image-container">
+                  <img
+                    className="rounded-avatar"
+                    src={
+                      "https://res.cloudinary.com/dcec61lxq/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_blue,b_rgb:262c35/v1724959804/ef0car_tumptt.jpg"
+                    }
+                    alt="Kashish Rastogi  avatar"
+                  />
+                  <div className="social-media-icons">
+                    <a
+                      href="https://www.linkedin.com/in/kashish-rastogi-7a189b27a?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FontAwesomeIcon icon={faLinkedin} aria-hidden="true" />
+                    </a>
+                    <a
+                      href="https://www.instagram.com/brighttt4?igsh=MXV2cjViNGJ1aXN6Mw=="
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FontAwesomeIcon icon={faInstagram} aria-hidden="true" />
+                    </a>
+                    <a
+                      href="https://x.com/KashishRastog19?t=hd_blcVaiJJtAWVsTtmrYw&s=09"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FontAwesomeIcon icon={faXTwitter} aria-hidden="true" />
+                    </a>
+                  </div>
+                </div>
+                <h2 className="team-member-name">Kashish Rastogi </h2>
+                <br />
+                <div className="outer-position">
+                  <h6 className="team-member-position">Vice President</h6>
+                </div>
+              </div>
             </div>
-            <div className="team-members1">
             <div className="card">
               <div className="team-member">
                 <div className="image-container">
@@ -451,28 +376,29 @@ function MeetOurTeam() {
                 </div>
               </div>
             </div>
-            </div>
-            <div className="team-members1">
+          </div>
+          {/* Treasurer */}
+          <div className="team-members1">
             <div className="card">
               <div className="team-member">
                 <div className="image-container">
                   <img
                     className="rounded-avatar"
                     src={
-                      "https://res.cloudinary.com/dcec61lxq/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_blue,b_rgb:262c35/v1724959131/IMG_7050_duy2oc.png"
+                      "https://res.cloudinary.com/dcec61lxq/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_blue,b_rgb:262c35/v1724959125/Pari_wiuvo0.jpg"
                     }
-                    alt="Joysa Jain avatar"
+                    alt="Pari avatar"
                   />
                   <div className="social-media-icons">
                     <a
-                      href="https://www.linkedin.com/in/joysa-jain-86b589283/"
+                      href="https://www.linkedin.com/in/pari-gupta-168564289/"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       <FontAwesomeIcon icon={faLinkedin} aria-hidden="true" />
                     </a>
                     <a
-                      href="https://www.instagram.com/joysajain.21?igsh=MXhnM3Y1ZWloMGRmYw%3D%3D&utm_source=qr"
+                      href="https://www.instagram.com/parigupta9667/"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -483,42 +409,44 @@ function MeetOurTeam() {
                     </a>
                   </div>
                 </div>
-                <h2 className="team-member-name">Joysa Jain</h2>
+                <h2 className="team-member-name">Pari Gupta</h2>
                 <br />
                 <div className="outer-position">
-                  <h6 className="team-member-position">Vice President</h6>
+                  <h6 className="team-member-position">Treasurer</h6>
                 </div>
               </div>
             </div>
-            </div>
-          <div className="team-members1">
-          <div className="card">
+          </div>
+          {/* Mentorship Moderators */}
+
+          <div className="team-members">
+            <div className="card">
               <div className="team-member">
                 <div className="image-container">
                   <img
                     className="rounded-avatar"
                     src={
-                      "https://res.cloudinary.com/dcec61lxq/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_blue,b_rgb:262c35/v1724959804/ef0car_tumptt.jpg"
+                      "https://res.cloudinary.com/dcec61lxq/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_blue,b_rgb:262c35/v1724959748/me_oqxnuy.jpg"
                     }
-                    alt="Kashish Rastogi  avatar"
+                    alt="Nandini Jain avatar"
                   />
                   <div className="social-media-icons">
                     <a
-                      href="https://www.linkedin.com/in/kashish-rastogi-7a189b27a?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
+                      href="www.linkedin.com/in/nandini-jain-00967028b"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       <FontAwesomeIcon icon={faLinkedin} aria-hidden="true" />
                     </a>
                     <a
-                      href="https://www.instagram.com/brighttt4?igsh=MXV2cjViNGJ1aXN6Mw=="
+                      href="https://www.instagram.com/nandinijain004/"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       <FontAwesomeIcon icon={faInstagram} aria-hidden="true" />
                     </a>
                     <a
-                      href="https://x.com/KashishRastog19?t=hd_blcVaiJJtAWVsTtmrYw&s=09"
+                      href="https://x.com/Nandini8409"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -526,19 +454,131 @@ function MeetOurTeam() {
                     </a>
                   </div>
                 </div>
-                <h2 className="team-member-name">Kashish Rastogi </h2>
+                <h2 className="team-member-name">Nandini Jain</h2>
                 <br />
                 <div className="outer-position">
-                  <h6 className="team-member-position">President</h6>
+                  <h6 className="team-member-position">Mentorship Moderator</h6>
                 </div>
               </div>
             </div>
+
+            <div className="card">
+              <div className="team-member">
+                <div className="image-container">
+                  <img
+                    className="rounded-avatar"
+                    src={
+                      "https://res.cloudinary.com/dcec61lxq/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_blue,b_rgb:262c35/v1724960312/WhatsApp_Image_2024-08-30_at_1.03.00_AM_tcbd0z.jpg"
+                    }
+                    alt="Srishti Sudhakar avatar"
+                  />
+                  <div className="social-media-icons">
+                    <a
+                      href="https://www.linkedin.com/in/srishti-sudhakar-828250276?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FontAwesomeIcon icon={faLinkedin} aria-hidden="true" />
+                    </a>
+                    <a
+                      href="https://www.instagram.com/srishtisudhakar?igsh=MTk0b2puMGRhc3Fkcg=="
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FontAwesomeIcon icon={faInstagram} aria-hidden="true" />
+                    </a>
+                    <a
+                      href="https://x.com/SrishtiSud41882?t=q6pU5EOqP0wXBp-HJaQJPQ&s=09"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FontAwesomeIcon icon={faXTwitter} aria-hidden="true" />
+                    </a>
+                  </div>
+                </div>
+                <h2 className="team-member-name">Srishti Sudhakar </h2>
+                <br />
+                <div className="outer-position">
+                  <h6 className="team-member-position">Mentorship Moderator</h6>
+                </div>
+              </div>
             </div>
-            
-            
-            
-            
-            
+          </div>
+
+          {/* Team Manager and Outreach Secretary */}
+          <div className="team-members">
+            <div className="card">
+              <div className="team-member">
+                <div className="image-container">
+                  <img
+                    className="rounded-avatar"
+                    src={
+                      "https://res.cloudinary.com/dcec61lxq/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_blue,b_rgb:262c35/v1724960312/WhatsApp_Image_2024-08-30_at_1.03.00_AM_tcbd0z.jpg"
+                    }
+                    alt="Areeba Khanam  avatar"
+                  />
+                  <div className="social-media-icons">
+                    <a
+                      href="https://www.linkedin.com/in/areeba-khan-70013128a"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FontAwesomeIcon icon={faLinkedin} aria-hidden="true" />
+                    </a>
+                    <a
+                      href="https://www.instagram.com/al_.hayy?igsh=dnI3aDNtNDNtZml6"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FontAwesomeIcon icon={faInstagram} aria-hidden="true" />
+                    </a>
+                    <a href="#" target="_blank" rel="noopener noreferrer">
+                      <FontAwesomeIcon icon={faXTwitter} aria-hidden="true" />
+                    </a>
+                  </div>
+                </div>
+                <h2 className="team-member-name">Areeba Khanam </h2>
+                <br />
+                <div className="outer-position">
+                  <h6 className="team-member-position">Team Manager</h6>
+                </div>
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="team-member">
+                <div className="image-container">
+                  <img
+                    className="rounded-avatar"
+                    src={
+                      "https://res.cloudinary.com/dcec61lxq/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_blue,b_rgb:262c35/v1724959621/Photo_d7ycqm.jpg"
+                    }
+                    alt="Shreya avatar"
+                  />
+                  <div className="social-media-icons">
+                    <a
+                      href="https://www.linkedin.com/in/shreya-kumari-2ba266269/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FontAwesomeIcon icon={faLinkedin} aria-hidden="true" />
+                    </a>
+                    <a href="#" target="_blank" rel="noopener noreferrer">
+                      <FontAwesomeIcon icon={faInstagram} aria-hidden="true" />
+                    </a>
+                    <a href="#" target="_blank" rel="noopener noreferrer">
+                      <FontAwesomeIcon icon={faXTwitter} aria-hidden="true" />
+                    </a>
+                  </div>
+                </div>
+                <h2 className="team-member-name">Shreya </h2>
+                <br />
+                <div className="outer-position">
+                  <h6 className="team-member-position">Outreach Secretary</h6>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -962,50 +1002,46 @@ function MeetOurTeam() {
                 </div>
               </div>
             </div>
-            
           </div>
           <div className="team-members1">
             <div className="card">
-                <div className="team-member">
-                  <div className="image-container">
-                    <img
-                      className="rounded-avatar"
-                      src={
-                        "https://res.cloudinary.com/dcec61lxq/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_blue,b_rgb:262c35/v1724960312/WhatsApp_Image_2024-08-30_at_1.03.00_AM_tcbd0z.jpg"
-                      }
-                      alt="Khushi avatar"
-                    />
-                    <div className="social-media-icons">
-                      <a
-                        href="https://www.linkedin.com/in/sonali-yadav17/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <FontAwesomeIcon icon={faLinkedin} aria-hidden="true" />
-                      </a>
-                      <a href="#" target="_blank" rel="noopener noreferrer">
-                        <FontAwesomeIcon
-                          icon={faInstagram}
-                          aria-hidden="true"
-                        />
-                      </a>
-                      <a
-                        href="https://x.com/Sonali_yadav17"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <FontAwesomeIcon icon={faXTwitter} aria-hidden="true" />
-                      </a>
-                    </div>
-                  </div>
-                  <h2 className="team-member-name">Sonali Yadav</h2>
-                  <br />
-                  <div className="outer-position">
-                    <h6 className="team-member-position">Head Coordinator</h6>
+              <div className="team-member">
+                <div className="image-container">
+                  <img
+                    className="rounded-avatar"
+                    src={
+                      "https://res.cloudinary.com/dcec61lxq/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_blue,b_rgb:262c35/v1724960312/WhatsApp_Image_2024-08-30_at_1.03.00_AM_tcbd0z.jpg"
+                    }
+                    alt="Khushi avatar"
+                  />
+                  <div className="social-media-icons">
+                    <a
+                      href="https://www.linkedin.com/in/sonali-yadav17/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FontAwesomeIcon icon={faLinkedin} aria-hidden="true" />
+                    </a>
+                    <a href="#" target="_blank" rel="noopener noreferrer">
+                      <FontAwesomeIcon icon={faInstagram} aria-hidden="true" />
+                    </a>
+                    <a
+                      href="https://x.com/Sonali_yadav17"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FontAwesomeIcon icon={faXTwitter} aria-hidden="true" />
+                    </a>
                   </div>
                 </div>
+                <h2 className="team-member-name">Sonali Yadav</h2>
+                <br />
+                <div className="outer-position">
+                  <h6 className="team-member-position">Head Coordinator</h6>
+                </div>
               </div>
-              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1047,48 +1083,6 @@ function MeetOurTeam() {
                   </div>
                 </div>
                 <h2 className="team-member-name">Pari Gupta</h2>
-                <br />
-                <div className="outer-position">
-                  <h6 className="team-member-position">Head</h6>
-                </div>
-              </div>
-            </div>
-
-            <div className="card">
-              <div className="team-member">
-                <div className="image-container">
-                  <img
-                    className="rounded-avatar"
-                    src={
-                      "https://res.cloudinary.com/dcec61lxq/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_blue,b_rgb:262c35/v1724960312/WhatsApp_Image_2024-08-30_at_1.03.00_AM_tcbd0z.jpg"
-                    }
-                    alt="Srishti Sudhakar avatar"
-                  />
-                  <div className="social-media-icons">
-                    <a
-                      href="https://www.linkedin.com/in/srishti-sudhakar-828250276?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <FontAwesomeIcon icon={faLinkedin} aria-hidden="true" />
-                    </a>
-                    <a
-                      href="https://www.instagram.com/srishtisudhakar?igsh=MTk0b2puMGRhc3Fkcg=="
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <FontAwesomeIcon icon={faInstagram} aria-hidden="true" />
-                    </a>
-                    <a
-                      href="https://x.com/SrishtiSud41882?t=q6pU5EOqP0wXBp-HJaQJPQ&s=09"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <FontAwesomeIcon icon={faXTwitter} aria-hidden="true" />
-                    </a>
-                  </div>
-                </div>
-                <h2 className="team-member-name">Srishti Sudhakar </h2>
                 <br />
                 <div className="outer-position">
                   <h6 className="team-member-position">Head</h6>
@@ -1652,7 +1646,6 @@ function MeetOurTeam() {
                 </div>
               </div>
             </div>
-            
           </div>
           <div className="team-member1">
             <div className="card">
@@ -1688,7 +1681,7 @@ function MeetOurTeam() {
                 </div>
               </div>
             </div>
-            </div>
+          </div>
         </div>
       </div>
 
@@ -1845,7 +1838,7 @@ function MeetOurTeam() {
                 </div>
               </div>
             </div>
-            </div>
+          </div>
         </div>
       </div>
     </div>

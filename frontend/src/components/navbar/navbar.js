@@ -81,37 +81,61 @@ const Navbar = () => {
           </div>
 
           <li className={`nav-item ${pathname === '/home' ? 'active' : ''}`}>
-            <Link className="nav-link" href="/">
+            <Link className="nav-link" href="/" onClick={() => {
+    const collapse = document.getElementById('navbarSupportedContent');
+    if (window.innerWidth <= 768) collapse.style.display = 'none';
+  }}
+> 
               <i className="fas fa-home"></i> Home
             </Link>
           </li>
 
           <li className={`nav-item ${pathname === '/techboard' ? 'active' : ''}`}>
-            <Link className="nav-link" href="/techboard">
+            <Link className="nav-link" href="/techboard" onClick={() => {
+    const collapse = document.getElementById('navbarSupportedContent');
+    if (window.innerWidth <= 768) collapse.style.display = 'none';
+  }}
+>
               <i className="fas fa-microchip"></i> Techboard
             </Link>
           </li>
 
           <li className={`nav-item ${pathname === '/team' ? 'active' : ''}`}>
-            <Link className="nav-link" href="/team">
+            <Link className="nav-link" href="/team" onClick={() => {
+    const collapse = document.getElementById('navbarSupportedContent');
+    if (window.innerWidth <= 768) collapse.style.display = 'none';
+  }}
+>
               <i className="fas fa-users"></i> Team
             </Link>
           </li>
 
           <li className="nav-item">
-            <Link className="nav-link" href="/eventspage">
+            <Link className="nav-link" href="/eventspage" onClick={() => {
+    const collapse = document.getElementById('navbarSupportedContent');
+    if (window.innerWidth <= 768) collapse.style.display = 'none';
+  }}
+>
               <i className="fas fa-calendar-check"></i> Events
             </Link>
           </li>
 
           <li className={`nav-item ${pathname === '/faq' ? 'active' : ''}`}>
-            <Link className="nav-link" href="/faq">
+            <Link className="nav-link" href="/faq" onClick={() => {
+    const collapse = document.getElementById('navbarSupportedContent');
+    if (window.innerWidth <= 768) collapse.style.display = 'none';
+  }}
+>
               <i className="fas fa-question-circle"></i> FAQs
             </Link>
           </li>
 
           <li className="nav-item">
-            <Link className="nav-link" href="/profile">
+            <Link className="nav-link" href="/profile" onClick={() => {
+    const collapse = document.getElementById('navbarSupportedContent');
+    if (window.innerWidth <= 768) collapse.style.display = 'none';
+  }}
+>
               <i className="fas fa-user-circle"></i> Profile
             </Link>
           </li>

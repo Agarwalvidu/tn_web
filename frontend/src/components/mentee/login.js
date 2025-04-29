@@ -45,6 +45,7 @@ export default function MenteeLogin() {
           border-radius: 10px;
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
           transition: all 0.3s ease;
+              margin: 2rem;
         }
         
         .login-card:hover {
