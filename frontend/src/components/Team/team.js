@@ -60,107 +60,7 @@ function MeetOurTeam() {
                 </div>
               </div>
             </div>
-            <div className="card">
-              <div className="team-member">
-                <div className="image-container">
-                  <img
-                    className="rounded-avatar"
-                    src={
-                      "https://res.cloudinary.com/dcec61lxq/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_blue,b_rgb:262c35/v1724958407/SaiePic_SquareFit_wh1gyn.jpg"
-                    }
-                    alt="Saie avatar"
-                  />
-                  <div className="social-media-icons">
-                    <a
-                      href="https://www.linkedin.com/in/saie-pawar-96b27a262"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <FontAwesomeIcon icon={faLinkedin} aria-hidden="true" />
-                    </a>
-                    <a
-                      href="https://instagram.com/_.saiee?igshid=MzMyNGUyNmU2YQ=="
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <FontAwesomeIcon icon={faInstagram} aria-hidden="true" />
-                    </a>
-                    <a
-                      href="https://x.com/Saie__Pawar"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <FontAwesomeIcon icon={faXTwitter} aria-hidden="true" />
-                    </a>
-                  </div>
-                </div>
-                <h2 className="team-member-name">Saie Prakhar Pawar</h2>
-                <br />
-                <div className="outer-position">
-                  <h6 className="team-member-position">Founder</h6>
-                </div>
-              </div>
-            </div>
-            <div className="card">
-              <div className="team-member">
-                <div className="image-container">
-                  <img
-                    className="rounded-avatar"
-                    src={
-                      "https://res.cloudinary.com/dzwfmydmx/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_blue,b_rgb:262c35/v1724998586/photo_6235583440917479616_x_vnz0tk.jpg"
-                    }
-                    alt="Avni Singh avatar"
-                  />
-                  <div className="social-media-icons">
-                    <a href="#" target="_blank" rel="noopener noreferrer">
-                      <FontAwesomeIcon icon={faLinkedin} aria-hidden="true" />
-                    </a>
-                    <a href="#" target="_blank" rel="noopener noreferrer">
-                      <FontAwesomeIcon icon={faInstagram} aria-hidden="true" />
-                    </a>
-                    <a href="#" target="_blank" rel="noopener noreferrer">
-                      <FontAwesomeIcon icon={faXTwitter} aria-hidden="true" />
-                    </a>
-                  </div>
-                </div>
-                <h2 className="team-member-name">Avni Singh </h2>
-                <br />
-                <div className="outer-position">
-                  <h6 className="team-member-position">Founder</h6>
-                </div>
-              </div>
-            </div>
-            <div className="card">
-              <div className="team-member">
-                <div className="image-container">
-                  <img
-                    className="rounded-avatar"
-                    src={
-                      "https://res.cloudinary.com/dcec61lxq/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_blue,b_rgb:262c35/v1724992377/58cc173a-2806-4dd4-9426-f37bafd91105_lekkdl.jpg"
-                    }
-                    alt="Chanda Jha avatar"
-                  />
-                  <div className="social-media-icons">
-                    <a href="#" target="_blank" rel="noopener noreferrer">
-                      <FontAwesomeIcon icon={faLinkedin} aria-hidden="true" />
-                    </a>
-                    <a href="#" target="_blank" rel="noopener noreferrer">
-                      <FontAwesomeIcon icon={faInstagram} aria-hidden="true" />
-                    </a>
-                    <a href="#" target="_blank" rel="noopener noreferrer">
-                      <FontAwesomeIcon icon={faXTwitter} aria-hidden="true" />
-                    </a>
-                  </div>
-                </div>
-                <h2 className="team-member-name">Chanda Jha</h2>
-                <br />
-                <div className="outer-position">
-                  <h6 className="team-member-position">Founder</h6>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="team-members">
+            
             <div className="card">
               <div className="team-member">
                 <div className="image-container">
@@ -237,6 +137,108 @@ function MeetOurTeam() {
                   </div>
                 </div>
                 <h2 className="team-member-name">Sripriya Agarwal </h2>
+                <br />
+                <div className="outer-position">
+                  <h6 className="team-member-position">Founder</h6>
+                </div>
+              </div>
+            </div>
+            <div className="card">
+              <div className="team-member">
+                <div className="image-container">
+                  <img
+                    className="rounded-avatar"
+                    src={
+                      "https://res.cloudinary.com/dcec61lxq/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_blue,b_rgb:262c35/v1724958407/SaiePic_SquareFit_wh1gyn.jpg"
+                    }
+                    alt="Saie avatar"
+                  />
+                  <div className="social-media-icons">
+                    <a
+                      href="https://www.linkedin.com/in/saie-pawar-96b27a262"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FontAwesomeIcon icon={faLinkedin} aria-hidden="true" />
+                    </a>
+                    <a
+                      href="https://instagram.com/_.saiee?igshid=MzMyNGUyNmU2YQ=="
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FontAwesomeIcon icon={faInstagram} aria-hidden="true" />
+                    </a>
+                    <a
+                      href="https://x.com/Saie__Pawar"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FontAwesomeIcon icon={faXTwitter} aria-hidden="true" />
+                    </a>
+                  </div>
+                </div>
+                <h2 className="team-member-name">Saie Prakhar Pawar</h2>
+                <br />
+                <div className="outer-position">
+                  <h6 className="team-member-position">Founder</h6>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="team-members">
+            
+            <div className="card">
+              <div className="team-member">
+                <div className="image-container">
+                  <img
+                    className="rounded-avatar"
+                    src={
+                      "https://res.cloudinary.com/dzwfmydmx/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_blue,b_rgb:262c35/v1724998586/photo_6235583440917479616_x_vnz0tk.jpg"
+                    }
+                    alt="Avni Singh avatar"
+                  />
+                  <div className="social-media-icons">
+                    <a href="#" target="_blank" rel="noopener noreferrer">
+                      <FontAwesomeIcon icon={faLinkedin} aria-hidden="true" />
+                    </a>
+                    <a href="#" target="_blank" rel="noopener noreferrer">
+                      <FontAwesomeIcon icon={faInstagram} aria-hidden="true" />
+                    </a>
+                    <a href="#" target="_blank" rel="noopener noreferrer">
+                      <FontAwesomeIcon icon={faXTwitter} aria-hidden="true" />
+                    </a>
+                  </div>
+                </div>
+                <h2 className="team-member-name">Avni Singh </h2>
+                <br />
+                <div className="outer-position">
+                  <h6 className="team-member-position">Founder</h6>
+                </div>
+              </div>
+            </div>
+            <div className="card">
+              <div className="team-member">
+                <div className="image-container">
+                  <img
+                    className="rounded-avatar"
+                    src={
+                      "https://res.cloudinary.com/dcec61lxq/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_blue,b_rgb:262c35/v1724992377/58cc173a-2806-4dd4-9426-f37bafd91105_lekkdl.jpg"
+                    }
+                    alt="Chanda Jha avatar"
+                  />
+                  <div className="social-media-icons">
+                    <a href="#" target="_blank" rel="noopener noreferrer">
+                      <FontAwesomeIcon icon={faLinkedin} aria-hidden="true" />
+                    </a>
+                    <a href="#" target="_blank" rel="noopener noreferrer">
+                      <FontAwesomeIcon icon={faInstagram} aria-hidden="true" />
+                    </a>
+                    <a href="#" target="_blank" rel="noopener noreferrer">
+                      <FontAwesomeIcon icon={faXTwitter} aria-hidden="true" />
+                    </a>
+                  </div>
+                </div>
+                <h2 className="team-member-name">Chanda Jha</h2>
                 <br />
                 <div className="outer-position">
                   <h6 className="team-member-position">Founder</h6>
