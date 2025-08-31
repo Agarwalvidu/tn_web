@@ -9,13 +9,10 @@ const Faq = () => {
 
     const faqs = [
         { question: "What is TechNeeds?", answer: "TechNeeds is a platform that provides technology solutions and support for various needs." },
-        { question: "How can I contact support?", answer: "You can contact support via our contact form or email us at support@techneeds.com." },
-        { question: "What services do you offer?", answer: "We offer a range of services including tech support, consulting, and hardware solutions." },
-        { question: "Where is TechNeeds located?", answer: "TechNeeds is based in the heart of Silicon Valley, California." },
-        { question: "Can I track my support request?", answer: "Yes, you can track your support request through our online portal." },
-        { question: "Do you offer international support?", answer: "Yes, we provide support services to clients globally." },
-        { question: "How can I request a quote?", answer: "You can request a quote by filling out the form on our website or contacting our sales team directly." },
-        { question: "What is your refund policy?", answer: "We offer a 30-day refund policy for most of our services. Please check our terms and conditions for more details." }
+        { question: "How can I contact support?", answer: "You can contact support via our official WhatsApp group or email us at techneedsigdtuw@gmail.com." },
+        { question: "What services do you offer?", answer: "We offer a range of services including hackathon, tech introductory sessions, mentorship programs, tech engagement competition and speaker sessions." },
+        { question: "Where is TechNeeds located?", answer: "TechNeeds is based in the heart of IGDTUW founded in 2023." },
+        { question: "Can I track my mentorship journey?", answer: "Yes, you can track your journey through our online portal." },
     ];
 
     const toggleFAQ = (index) => {

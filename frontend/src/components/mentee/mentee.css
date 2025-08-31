@@ -89,11 +89,11 @@ button {
     background-color: #e6f7f8;
   }
   
-  .responsive-table .actions {
+  /* .responsive-table .actions {
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
-  }
+  } */
   
   .responsive-table button {
     background-color: #167F92;
@@ -194,9 +194,9 @@ button {
     white-space: nowrap;
   }
   
-  .responsive-table td {
+  /* .responsive-table td {
     white-space: nowrap;
-  }
+  } */
   
   @media (max-width: 768px) {
     .responsive-table th,
@@ -225,3 +225,33 @@ button {
           width: 30%;
     }
   }
+
+.load-wrapp {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+.ring-1 {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto;
+  padding: 10px;
+  border: 7px dashed #4b9cdb;
+  border-radius: 100%;
+}
+.load-4 .ring-1 {
+  animation: loadingD 1.5s 0.3s cubic-bezier(0.17, 0.37, 0.43, 0.67) infinite;
+}
+
+@keyframes loadingD {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

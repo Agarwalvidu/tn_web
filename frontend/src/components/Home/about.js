@@ -36,14 +36,14 @@ export default function About () {
                 <div className="box11">
                   <Image src={about1} alt="Trained Mentees" width={'auto'} height={'auto'} />
                   <div className="box-cont">
-                    <h2>600+</h2>
+                    <h2>1200+</h2>
                     <p>Trained Mentee</p>
                   </div>
                 </div>
                 <div className="box12">
                   <Image src={about2} alt="Professional Mentors" width={'auto'} height={'auto'} />
                   <div className="box-cont">
-                    <h2>10+</h2>
+                    <h2>50+</h2>
                     <p>Professional Mentors</p>
                   </div>
                 </div>
@@ -52,14 +52,14 @@ export default function About () {
                 <div className="box21">
                   <Image src={about3} alt="Mentorship Cohorts" width={'auto'} height={'auto'} />
                   <div className="box-cont">
-                    <h2>7+</h2>
+                    <h2>10+</h2>
                     <p>Mentorship Cohorts</p>
                   </div>
                 </div>
                 <div className="box22">
                   <Image src={about4} alt="Amazing Events" width={'auto'} height={'auto'} />
                   <div className="box-cont">
-                    <h2>10+</h2>
+                    <h2>100+</h2>
                     <p>Amazing Events</p>
                   </div>
                 </div>

@@ -202,7 +202,7 @@ router.post('/resources/:id/quiz/submit', authenticateMentee, async (req, res) =
 
     // Update streak and total score
     await updateStreak(mentee);
-    mentee.totalScore += totalScore;
+    // mentee.totalScore += totalScore;
     await mentee.save();
 
     res.status(200).json({ message: 'Quiz submitted successfully!', score: totalScore });
@@ -311,9 +311,47 @@ router.post('/resources/:resourceId/project', authenticateMentee, async (req, re
 
 // Helper: Calculate rank (example: based on total score)
 async function calculateRank(menteeId) {
-  const mentee = await Mentee.findById(menteeId);
-  const allMentees = await Mentee.find().sort({ 'completedResources.score': -1 });
-  return allMentees.findIndex(m => m._id.equals(mentee._id)) + 1;
+  const me = await Mentee.findById(menteeId)
+    .select('streak lastActiveDate completedResources.score')
+    .lean();
+
+  if (!me) return null;
+
+  const myScore = (me.completedResources || [])
+    .reduce((s, c) => s + (c?.score || 0), 0);
+  const myStreak = me.streak || 0;
+  const myLast   = me.lastActiveDate || new Date(0);
+
+  // Count how many are strictly "better" in the same sort order
+  const better = await Mentee.aggregate([
+    {
+      $project: {
+        streak: { $ifNull: ['$streak', 0] },
+        lastActiveDate: 1,
+        totalScore: {
+          $sum: {
+            $map: {
+              input: { $ifNull: ['$completedResources', []] },
+              as: 'cr',
+              in: { $ifNull: ['$$cr.score', 0] }
+            }
+          }
+        }
+      }
+    },
+    {
+      $match: {
+        $or: [
+          { totalScore: { $gt: myScore } },
+          { totalScore: myScore, streak: { $gt: myStreak } },
+          { totalScore: myScore, streak: myStreak, lastActiveDate: { $gt: myLast } }
+        ]
+      }
+    },
+    { $count: 'cnt' }
+  ]);
+
+  return (better[0]?.cnt || 0) + 1;
 }
 
 // Helper: Update streak
@@ -328,5 +366,53 @@ async function updateStreak(mentee) {
     mentee.lastActiveDate = new Date();
   }
 }
+
+// --- Public Leaderboard --- //
+// --- Public Leaderboard (same calc as dashboard) --- //
+router.get('/leaderboard', async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit || '50', 10), 200);
+    const skip  = Math.max(parseInt(req.query.skip  || '0', 10), 0);
+
+    // Compute totalScore = sum(completedResources.score)
+    const rows = await Mentee.aggregate([
+      {
+        $project: {
+          name: 1,
+          streak: { $ifNull: ['$streak', 0] },
+          lastActiveDate: 1,
+          totalScore: {
+            $sum: {
+              $map: {
+                input: { $ifNull: ['$completedResources', []] },
+                as: 'cr',
+                in: { $ifNull: ['$$cr.score', 0] }
+              }
+            }
+          }
+        }
+      },
+      // same ordering everywhere: score desc, streak desc, lastActive desc, _id asc (stable)
+      { $sort: { totalScore: -1, streak: -1, lastActiveDate: -1, _id: 1 } },
+      { $skip: skip },
+      { $limit: limit }
+    ]);
+
+    // Attach 1-based rank consistent with global order + skip
+    const leaderboard = rows.map((m, i) => ({
+      rank: skip + i + 1,
+      name: m.name,
+      totalScore: m.totalScore || 0,
+      streak: m.streak || 0
+    }));
+
+    res.json(leaderboard);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
 
 module.exports = router;

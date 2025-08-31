@@ -110,13 +110,23 @@ const Navbar = () => {
             </Link>
           </li>
 
-          <li className="nav-item">
+          {/* <li className="nav-item">
             <Link className="nav-link" href="/eventspage" onClick={() => {
     const collapse = document.getElementById('navbarSupportedContent');
     if (window.innerWidth <= 768) collapse.style.display = 'none';
   }}
 >
               <i className="fas fa-calendar-check"></i> Events
+            </Link>
+          </li> */}
+
+          <li className="nav-item">
+            <Link className="nav-link" href="/leaderboard" onClick={() => {
+    const collapse = document.getElementById('navbarSupportedContent');
+    if (window.innerWidth <= 768) collapse.style.display = 'none';
+  }}
+>
+              <i className="fa-solid fa-ranking-star"></i> Leaderboard
             </Link>
           </li>
 
