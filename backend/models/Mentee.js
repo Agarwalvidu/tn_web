@@ -9,7 +9,8 @@ const aiProfileSchema = new mongoose.Schema({
     reason: { type: String }
   }],
   generatedAt: { type: Date },
-  statsSnapshot: { type: String }
+  statsSnapshot: { type: String },
+  source: { type: String, enum: ['ai', 'template'] }
 }, { _id: false });
 
 const MenteeSchema = new mongoose.Schema({

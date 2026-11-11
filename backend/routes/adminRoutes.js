@@ -9,6 +9,7 @@ const MentorRequest = require('../models/MentorRequest');
 const Quiz = require('../models/Quiz');
 const QuizSubmission = require('../models/QuizSubmission');
 const { requireRole } = require('../middleware/requireRole');
+const { loadCohortData } = require('../utils/standings');
 const router = express.Router();
 
 // All admin routes require admin role
@@ -48,13 +49,18 @@ router.post('/mentor-requests/:id/approve', adminAuth, async (req, res) => {
       return res.status(400).json({ error: 'Request already processed' });
     }
 
+    const email = String(request.email).trim().toLowerCase();
+    if (await Mentor.findOne({ email })) {
+      return res.status(409).json({ error: 'A mentor with this email already exists' });
+    }
+
     // Generate 8-char temp password
     const tempPassword = crypto.randomBytes(4).toString('hex'); // 8 hex chars
 
     const hashedPassword = await bcrypt.hash(tempPassword, 10);
     const mentor = new Mentor({
       name: request.name,
-      email: request.email,
+      email,
       password: hashedPassword,
       role: 'mentor',
       status: 'approved',
@@ -111,7 +117,9 @@ router.get('/cohorts', adminAuth, async (req, res) => {
 // POST /api/admin/cohorts
 router.post('/cohorts', adminAuth, async (req, res) => {
   try {
-    const { name, description, syllabus } = req.body;
+    const { description, syllabus } = req.body;
+    const name = String(req.body.name || req.body.title || '').trim();
+    if (!name) return res.status(400).json({ error: 'Cohort name is required' });
     const program = new Program({
       name,
       description,
@@ -128,7 +136,9 @@ router.post('/cohorts', adminAuth, async (req, res) => {
 // PUT /api/admin/cohorts/:id
 router.put('/cohorts/:id', adminAuth, async (req, res) => {
   try {
-    const { name, description, syllabus } = req.body;
+    const { description, syllabus } = req.body;
+    const name = String(req.body.name || req.body.title || '').trim();
+    if (!name) return res.status(400).json({ error: 'Cohort name is required' });
     const program = await Program.findByIdAndUpdate(
       req.params.id,
       { name, description, syllabus },
@@ -200,42 +210,24 @@ router.post('/cohorts/:id/remove-mentor', adminAuth, async (req, res) => {
 });
 
 // GET /api/admin/cohorts/:id/analytics
+// avgQuizScore = mean quiz percentage; completionRate = mean % of the cohort's videos + quizzes each mentee has finished
 router.get('/cohorts/:id/analytics', adminAuth, async (req, res) => {
   try {
-    const programId = req.params.id;
-    const program = await Program.findById(programId);
-    if (!program) return res.status(404).json({ error: 'Cohort not found' });
+    const data = await loadCohortData(req.params.id);
+    if (!data) return res.status(404).json({ error: 'Cohort not found' });
 
-    const mentees = await Mentee.find({ programs: programId });
-    const menteeCount = mentees.length;
+    const menteeCount = data.mentees.length;
+    const pcts = data.submissions.map((s) => (s.maxScore > 0 ? (s.score / s.maxScore) * 100 : 0));
+    const avgQuizScore = pcts.length ? parseFloat((pcts.reduce((a, b) => a + b, 0) / pcts.length).toFixed(1)) : 0;
 
-    // Find all quiz resources in this program
-    const Resource = require('../models/Resource');
-    const quizResources = await Resource.find({ program: programId, type: 'quiz' });
-    const quizResourceIds = quizResources.map(r => r._id);
-
-    // Find quizzes for those resources
-    const quizzes = await Quiz.find({ resource: { $in: quizResourceIds } });
-    const quizIds = quizzes.map(q => q._id);
-
-    // Get all submissions for those quizzes
-    const submissions = await QuizSubmission.find({ quiz: { $in: quizIds } });
-
-    let avgQuizScore = 0;
-    if (submissions.length > 0) {
-      const totalScore = submissions.reduce((sum, s) => sum + (s.score || 0), 0);
-      avgQuizScore = parseFloat((totalScore / submissions.length).toFixed(2));
+    const totalItems = data.resources.filter((r) => r.type === 'video' || r.type === 'quiz').length;
+    let completionRate = 0;
+    if (menteeCount > 0 && totalItems > 0) {
+      const done = data.rows.reduce((s, r) => s + r.quizzesCompleted + r.videosCompleted, 0);
+      completionRate = parseFloat(((done / (menteeCount * totalItems)) * 100).toFixed(1));
     }
 
-    // Completion rate: mentees who completed at least one resource in this program
-    const menteeIds = mentees.map(m => m._id.toString());
-    const programResourceIds = program.resources.map(r => r.toString());
-    const completedCount = mentees.filter(m =>
-      m.completedResources.some(cr => programResourceIds.includes(cr.resource.toString()))
-    ).length;
-    const completionRate = menteeCount > 0 ? parseFloat((completedCount / menteeCount * 100).toFixed(2)) : 0;
-
-    res.json({ menteeCount, avgQuizScore, completionRate });
+    res.json({ menteeCount, avgQuizScore, completionRate, quizzes: data.quizMeta.size, topMentee: data.rows[0] ? { name: data.rows[0].name, points: data.rows[0].points } : null });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

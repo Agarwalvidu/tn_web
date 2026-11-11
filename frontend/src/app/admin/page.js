@@ -166,7 +166,7 @@ export default function AdminPage() {
 
   const openEditCohort = (cohort) => {
     setEditingCohort(cohort);
-    setCohortForm({ title: cohort.title || '', description: cohort.description || '', syllabus: cohort.syllabus || '' });
+    setCohortForm({ title: cohort.name || cohort.title || '', description: cohort.description || '', syllabus: cohort.syllabus || '' });
     setCohortFormError('');
     setShowCohortModal(true);
   };
@@ -481,7 +481,7 @@ export default function AdminPage() {
                     <tbody>
                       {cohorts.map((cohort) => (
                         <tr key={cohort._id || cohort.id}>
-                          <td className="fw-semibold">{cohort.title}</td>
+                          <td className="fw-semibold">{cohort.name || cohort.title}</td>
                           <td style={{ maxWidth: '200px' }}>
                             <span title={cohort.description}>{cohort.description?.substring(0, 60)}{cohort.description?.length > 60 ? '…' : ''}</span>
                           </td>
@@ -584,7 +584,7 @@ export default function AdminPage() {
                           <td>
                             {mentor.cohorts?.length > 0
                               ? mentor.cohorts.map((c, i) => (
-                                  <span key={i} className="badge bg-secondary me-1" style={{ background: '#296c9e !important' }}>{c.title || c}</span>
+                                  <span key={i} className="badge bg-secondary me-1" style={{ background: '#296c9e !important' }}>{c.name || c.title || c}</span>
                                 ))
                               : <span className="text-muted">None</span>
                             }
@@ -685,7 +685,7 @@ export default function AdminPage() {
           <div className="modal-box">
             <button className="modal-close" onClick={() => setAnalyticsModal(null)}>×</button>
             <h5 className="modal-title">
-              <i className="fas fa-chart-bar me-2"></i>Analytics: {analyticsModal.title}
+              <i className="fas fa-chart-bar me-2"></i>Analytics: {analyticsModal.name || analyticsModal.title}
             </h5>
             {analyticsLoading ? (
               <div className="text-center py-4">

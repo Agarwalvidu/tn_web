@@ -1,0 +1,32 @@
+.rm-section { padding: 4rem 1rem; background: #f5f7fa; color: #1f2d3d; }
+.rm-title { text-align: center; font-size: 2.2rem; font-weight: 700; color: #1a3a5c; margin: 0 0 0.4rem; }
+.rm-sub { text-align: center; color: #5b6b7b; margin: 0 0 2.5rem; }
+.rm-path { list-style: none; max-width: 860px; margin: 0 auto; padding: 0; position: relative; }
+/* the dashed centre line the steps zigzag around */
+.rm-path::before { content: ''; position: absolute; left: 50%; top: 20px; bottom: 20px; border-left: 3px dashed #7fb0d3; transform: translateX(-50%); }
+.rm-step { position: relative; width: 50%; padding: 0 2.2rem 2rem; box-sizing: border-box; opacity: 0; transform: translateY(24px); animation: rm-in 0.6s ease forwards; animation-delay: calc(var(--i) * 0.12s); }
+.rm-step.left { left: 0; text-align: right; }
+.rm-step.right { left: 50%; }
+.rm-step::after { content: ''; position: absolute; top: 28px; width: 16px; height: 16px; border-radius: 50%; background: #296c9e; border: 3px solid #fff; box-shadow: 0 0 0 2px #296c9e; }
+.rm-step.left::after { right: -8px; }
+.rm-step.right::after { left: -8px; }
+.rm-card { position: relative; display: flex; gap: 1rem; align-items: center; background: #fff; border-radius: 14px; padding: 1.1rem 1.25rem; box-shadow: 0 4px 16px rgba(26, 58, 92, 0.1); text-align: left; }
+.rm-step.left .rm-card { flex-direction: row-reverse; text-align: right; }
+.rm-card h3 { font-size: 1.1rem; margin: 0 0 0.2rem; color: #1a3a5c; font-weight: 700; }
+.rm-card p { margin: 0; color: #5b6b7b; font-size: 0.92rem; line-height: 1.5; }
+.rm-icon { flex: 0 0 52px; width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: #fff; background: linear-gradient(135deg, #296c9e, #167F92); }
+.rm-num { position: absolute; top: -10px; left: -10px; width: 26px; height: 26px; border-radius: 50%; background: #ff6b4a; color: #fff; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.rm-step.left .rm-num { left: auto; right: -10px; }
+.rm-cta { text-align: center; margin-top: 1rem; }
+.rm-btn { display: inline-flex; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, #296c9e, #167F92); color: #fff !important; padding: 0.8rem 1.8rem; border-radius: 50px; font-weight: 700; text-decoration: none; box-shadow: 0 6px 18px rgba(41, 108, 158, 0.35); }
+.rm-btn:hover { opacity: 0.92; }
+@keyframes rm-in { to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .rm-step { animation: none; opacity: 1; transform: none; } }
+@media (max-width: 700px) {
+  .rm-path::before { left: 18px; }
+  .rm-step, .rm-step.left, .rm-step.right { width: 100%; left: 0; padding: 0 0 1.5rem 3rem; text-align: left; }
+  .rm-step.left::after, .rm-step.right::after { left: 10px; right: auto; }
+  .rm-step.left .rm-card { flex-direction: row; text-align: left; }
+  .rm-step.left .rm-num { right: auto; left: -10px; }
+  .rm-title { font-size: 1.7rem; }
+}

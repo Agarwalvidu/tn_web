@@ -217,12 +217,23 @@ async function seed() {
         email: d.email,
         enrollmentNumber: `TN26-${String(i + 1).padStart(4, '0')}`,
         password: hashedPass,
-        mustChangePassword: true,
+        mustChangePassword: i >= 2, // first two demo mentees can log straight in
         programs: d.programs
       });
       await mentee.save();
       mentees.push(mentee);
     }
+    // Some video completions + streaks so points and the leaderboard look alive
+    const markVideos = async (mentee, resources, streak) => {
+      mentee.completedResources.push(...resources.map((r) => ({ resource: r._id, score: 5, completedOn: new Date() })));
+      mentee.streak = streak;
+      mentee.lastActiveDate = new Date();
+      await mentee.save();
+    };
+    await markVideos(mentees[0], [videoResources[0], videoResources[1]], 4); // Aarav: both web videos
+    await markVideos(mentees[1], [videoResources[0]], 2);                    // Diya
+    await markVideos(mentees[4], [videoResources[2], videoResources[3]], 3); // Kabir: both DSA videos
+    await markVideos(mentees[7], [videoResources[4]], 5);                    // Prisha
     console.log('Mentees created.');
 
     // ── 8. Quiz Submissions ───────────────────────────────────────────────────
@@ -284,7 +295,7 @@ async function seed() {
     console.log(`Admin:    admin@techneeds.in / Admin@2026`);
     console.log(`Mentor 1: priya.sharma@techneeds.in / Mentor@001`);
     console.log(`Mentor 2: ankit.verma@techneeds.in  / Mentor@002`);
-    console.log(`Mentees:  (enrollmentNumber) / Pass@1234  [mustChangePassword=true]`);
+    console.log(`Mentees:  (enrollmentNumber) / Pass@1234  [TN26-0003 onwards must change password on first login]`);
     mentees.forEach(m => {
       console.log(`  ${m.enrollmentNumber} — ${m.name}`);
     });

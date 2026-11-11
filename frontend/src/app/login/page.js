@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -10,6 +10,13 @@ import { setAuth } from '../../lib/auth';
 
 export default function LoginPage() {
   const router = useRouter();
+
+  // Cohort chosen on /cohorts (optional)
+  const [joinCohort, setJoinCohort] = useState(null);
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    if (q.get('cohort') && /^[a-f\d]{24}$/i.test(q.get('cohort'))) setJoinCohort({ id: q.get('cohort'), name: q.get('name') || 'your cohort' });
+  }, []);
 
   // Login form state
   const [role, setRole] = useState('mentee');
@@ -44,7 +51,7 @@ export default function LoginPage() {
 
       if (data.user.role === 'admin') router.push('/admin');
       else if (data.user.role === 'mentor') router.push('/mentor');
-      else router.push('/dashboard');
+      else router.push(joinCohort ? `/cohort/${joinCohort.id}` : '/dashboard');
     } catch (err) {
       setError(err.message || 'Login failed. Please check your credentials.');
     } finally {
@@ -119,6 +126,12 @@ export default function LoginPage() {
             <h1 className="site-title">TechNeeds</h1>
             <p className="site-subtitle">Sign in to your account</p>
           </div>
+
+          {joinCohort && (
+            <div className="alert alert-info py-2 mb-3" role="status">
+              <i className="fas fa-layer-group me-2"></i>Logging in to <strong>{joinCohort.name}</strong>. Mentees use the enrollment number and password their mentor gave them.
+            </div>
+          )}
 
           {/* Role Selector */}
           <div className="role-selector">

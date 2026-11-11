@@ -1,411 +1,247 @@
 const express = require('express');
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const Mentor = require('../models/Mentor');
+const Mentee = require('../models/Mentee');
 const Program = require('../models/Program');
 const Resource = require('../models/Resource');
-const Mentee = require('../models/Mentee');
 const Quiz = require('../models/Quiz');
-const { authenticate } = require('../middleware/authMentor');
 const { requireRole } = require('../middleware/requireRole');
+const { loadCohortData, nextEnrollmentNumbers } = require('../utils/standings');
+const { buildProfile } = require('../utils/profileService');
+
 const router = express.Router();
+const mentorAuth = requireRole('mentor');
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// readable alphabet: no 0/O, 1/l/I
+const PW_ALPHABET = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const genPassword = (len = 8) =>
+  Array.from(crypto.randomBytes(len), (b) => PW_ALPHABET[b % PW_ALPHABET.length]).join('');
 
-// Create Mentor (Admin only)
-router.post('/mentors', requireRole('admin'), async (req, res) => {
-  try {
-    console.log("Creating mentor...");
-    const { name, email, password } = req.body;
-    const salt = await bcrypt.genSalt(10);
-    const mentor = new Mentor({
-      name,
-      email,
-      password: await bcrypt.hash(password, salt),
-      role: 'mentor',
-      status: 'approved'
-    });
-    await mentor.save();
-    res.status(201).json(mentor);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Get all mentors
-router.get('/mentors', async (req, res) => {
-  try {
-    const mentors = await Mentor.find().populate('programs'); 
-    res.json(mentors);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Get all programs
-router.get('/programs', async (req, res) => {
-  try {
-    const programs = await Program.find().populate('mentors'); 
-    res.json(programs);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Mentor Login (legacy — kept for backward compat)
-router.post('/mentors/login', async (req, res) => {
-  const { email, password } = req.body;
-  try {
-    const mentor = await Mentor.findOne({ email });
-    if (!mentor || !(await bcrypt.compare(password, mentor.password))) {
-      return res.status(400).json({ error: 'Invalid credentials' });
-    }
-    const token = jwt.sign(
-      { id: mentor._id, role: 'mentor', name: mentor.name },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-    res.json({ token, mentor });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-
-// Create Program (Assign to Mentor)
-router.post('/programs', async (req, res) => {
-  try {
-    const program = new Program({
-      name: req.body.name
-    });
-    await program.save();
-    
-    res.status(201).json(program);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Add Mentor to Program (Manual via Thunder Client)
-router.post('/programs/:programId/add-mentor', async (req, res) => {
-  try {
-    const program = await Program.findById(req.params.programId);
-    const mentor = await Mentor.findById(req.body.mentorId);
-    
-    if (!program || !mentor) {
-      return res.status(404).json({ error: 'Program/Mentor not found' });
-    }
-    
-    program.mentors.push(mentor._id);
-    mentor.programs.push(program._id);
-    
-    await program.save();
-    await mentor.save();
-    
-    res.json({ program, mentor });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-
-// Add Resource (Only for assigned programs)
-router.post('/resources', authenticate, async (req, res) => {
-  try {
-    const program = await Program.findById(req.body.program);
-    if (!program.mentors.includes(req.mentor._id)) {
-      return res.status(403).json({ error: 'Not authorized for this program' });
-    }
-
-    const resource = new Resource({
-      ...req.body,
-      addedBy: req.mentor._id
-    });
-
-    await resource.save();
-
-    program.resources.push(resource._id);
-
-    await program.save();
-    
-    res.status(201).json(resource);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-router.post('/resources/quiz', authenticate, async (req, res) => {
-  try {
-    const { title, program, questions, startTime, endTime, maxScore } = req.body;
-
-    const programDoc = await Program.findById(program);
-    if (!programDoc.mentors.includes(req.mentor._id)) {
-      return res.status(403).json({ error: 'Not authorized for this program' });
-    }
-
-    // Step 1: Create the Resource with type 'quiz'
-    const resource = new Resource({
-      title,
-      type: 'quiz',
-      program,
-      maxScore,
-      isLocked: true, 
-      addedBy: req.mentor._id,
-      deadline: endTime 
-    });
-
-    await resource.save();
-
-    const quiz = new Quiz({
-      resource: resource._id,
-      questions,
-      startTime,
-      endTime
-    });
-
-    await quiz.save();
-
-    programDoc.resources.push(resource._id);
-    await programDoc.save();
-
-    res.status(201).json({ message: 'Quiz resource created', resource, quiz });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-
-// Mentor adds a mentee (with auto-generated credentials)
-router.post('/mentees', authenticate, async (req, res) => {
-  try {
-    const { email, name, programId } = req.body;
-    let { enrollmentNumber } = req.body;
-    const mentor = req.mentor;
-
-    // Check if mentor is assigned to the program
-    const program = await Program.findById(programId);
-    if (!program.mentors.includes(mentor._id)) {
-      return res.status(403).json({ error: 'Not authorized for this program' });
-    }
-
-    // Auto-generate enrollment number if not provided
-    if (!enrollmentNumber) {
-      const count = await Mentee.countDocuments();
-      enrollmentNumber = `TN26-${String(count + 1).padStart(4, '0')}`;
-    }
-
-    // Generate a random password
-    const tempPassword = Math.random().toString(36).slice(-8);
-    const hashedPassword = await bcrypt.hash(tempPassword, 10);
-    
-    const mentee = new Mentee({
-      email,
-      name,
-      enrollmentNumber,
-      password: hashedPassword,
-      programs: [programId],
-      mustChangePassword: true,
-      createdBy: mentor._id
-    });
-    await mentee.save();
-
-    // Optional: Send email to mentee with credentials
-    // await sendWelcomeEmail(mentee.email, enrollmentNumber, tempPassword);
-
-    res.status(201).json({
-      mentee,
-      tempPassword // Mentor sees this (for manual sharing)
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Get all mentees for a program
-router.get('/:programId/mentees', async (req, res) => {
-  try {
-    const mentees = await Mentee.find({ programs: req.params.programId }) 
-      .populate('completedResources.resource', 'title type'); 
-    
-    res.json(mentees);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-router.get('/:programId/resources', async (req, res) => {
-  try {
-    const resources = await Resource.find({ program: req.params.programId })
-      .sort({ createdAt: -1 }); // Newest first
-    
-    res.json(resources);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// PATCH /mentees/:menteeId/resources/:resourceId/verify
-router.patch('/:menteeId/resources/:resourceId/verify', authenticate, async (req, res) => {
-  try {
-    const { menteeId, resourceId } = req.params;
-    const { score } = req.body;
-
-    const resource = await Resource.findById(resourceId);
-    if (!resource) return res.status(404).json({ error: 'Resource not found' });
-
-    if (resource.type !== 'project') {
-      return res.status(400).json({ error: 'Only project-type resources can be verified' });
-    }
-
-    if (resource.isLocked) {
-      return res.status(403).json({ error: 'Resource is currently locked' });
-    }
-
-    const mentee = await Mentee.findById(menteeId);
-    if (!mentee) return res.status(404).json({ error: 'Mentee not found' });
-
-    const submission = mentee.completedResources.find(
-      (entry) => entry.resource.toString() === resourceId
-    );
-
-    if (!submission) {
-      return res.status(400).json({ error: 'Project not yet submitted by this mentee' });
-    }
-
-    if (submission.verified) {
-      return res.status(400).json({ error: 'This project has already been verified' });
-    }
-
-    const finalScore = Math.min(score, resource.maxScore);
-    submission.score = finalScore;
-    submission.verified = true;
-
-    mentee.totalScore += finalScore;
-    await mentee.save();
-
-    res.json({ message: 'Project verified and scored', finalScore });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-router.get('/unverified-projects', authenticate, async (req, res) => {
-  try {
-    const mentor = req.mentor;
-
-    // Find mentees having any completed resource which is a project & unverified
-    const mentees = await Mentee.find({
-      'completedResources.verified': false
-    }).populate({
-      path: 'completedResources.resource',
-      populate: { path: 'program' }
-    });
-
-    const unverifiedProjects = [];
-    mentees.forEach(mentee => {
-      mentee.completedResources.forEach(resourceEntry => {
-        const resObj = resourceEntry.resource;
-        if (
-          resObj && 
-          resObj.type === 'project' &&
-          resourceEntry.verified === false &&
-          mentor.programs.map(p => p.toString()).includes(resObj.program._id.toString())
-        ) {
-          unverifiedProjects.push({
-            menteeId: mentee._id,
-            menteeName: mentee.name,
-            resourceId: resObj._id,
-            resourceTitle: resObj.title,
-            githubLink: resourceEntry.githubLink,
-            deployedLink: resourceEntry.deployedLink,
-            description: resourceEntry.description,
-            submittedOn: resourceEntry.submittedOn
-          });
-        }
-      });
-    });
-
-    res.json({ unverifiedProjects });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// --- New Mentor Routes (TechNeeds 2.0) ---
+const ownsCohort = (mentorId, cohortId) => Program.findOne({ _id: cohortId, mentors: mentorId });
 
 // GET /api/mentor/me
-router.get('/mentor/me', requireRole('mentor'), async (req, res) => {
-  try {
-    const mentor = await Mentor.findById(req.user._id).select('-password').populate('programs');
-    res.json(mentor);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+router.get('/me', mentorAuth, async (req, res) => {
+  const mentor = await Mentor.findById(req.user._id).select('-password').lean();
+  res.json(mentor);
 });
 
-// GET /api/mentor/cohorts
-router.get('/mentor/cohorts', requireRole('mentor'), async (req, res) => {
-  try {
-    const programs = await Program.find({ mentors: req.user._id }).populate('mentors', '-password');
-    res.json(programs);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+// GET /api/mentor/cohorts  - only the cohorts this mentor is assigned to
+router.get('/cohorts', mentorAuth, async (req, res) => {
+  const programs = await Program.find({ mentors: req.user._id }).select('name description syllabus resources').lean();
+  const counts = await Mentee.aggregate([
+    { $unwind: '$programs' },
+    { $match: { programs: { $in: programs.map((p) => p._id) } } },
+    { $group: { _id: '$programs', count: { $sum: 1 } } },
+  ]);
+  const map = new Map(counts.map((c) => [String(c._id), c.count]));
+  res.json(
+    programs.map((p) => ({
+      _id: p._id,
+      name: p.name,
+      description: p.description || '',
+      menteeCount: map.get(String(p._id)) || 0,
+      resourceCount: (p.resources || []).length,
+    }))
+  );
 });
 
-// POST /api/mentor/mentees/bulk
-// Body: { cohortId, lines: "name,email\nname,email" }
-router.post('/mentor/mentees/bulk', requireRole('mentor'), async (req, res) => {
-  try {
-    const { cohortId, lines } = req.body;
-    if (!cohortId || !lines) {
-      return res.status(400).json({ error: 'cohortId and lines are required' });
+// GET /api/mentor/cohorts/:id/overview  - mentees with live points/rank, videos and quizzes
+router.get('/cohorts/:id/overview', mentorAuth, async (req, res) => {
+  if (!(await ownsCohort(req.user._id, req.params.id))) {
+    return res.status(403).json({ error: 'Not authorized for this cohort' });
+  }
+  const data = await loadCohortData(req.params.id);
+  if (!data) return res.status(404).json({ error: 'Cohort not found' });
+
+  const emailById = new Map(data.mentees.map((m) => [String(m._id), m.email]));
+  const mentees = data.rows.map((r) => ({
+    _id: r.menteeId,
+    rank: r.rank,
+    name: r.name,
+    email: emailById.get(r.menteeId) || '',
+    enrollmentNumber: r.enrollmentNumber,
+    points: r.points,
+    quizzesCompleted: r.quizzesCompleted,
+    videosCompleted: r.videosCompleted,
+    streak: r.streak,
+  }));
+
+  const subCount = new Map();
+  data.submissions.forEach((s) => subCount.set(String(s.resource), (subCount.get(String(s.resource)) || 0) + 1));
+  const metaByResource = new Map([...data.quizMeta.values()].map((m) => [String(m.resourceId), m]));
+
+  const resources = data.resources
+    .filter((r) => r.type === 'video' || r.type === 'quiz')
+    .map((r) => {
+      const meta = metaByResource.get(String(r._id));
+      return {
+        _id: r._id,
+        type: r.type,
+        title: r.title,
+        url: r.url,
+        createdAt: r.createdAt,
+        endTime: meta ? meta.endTime : undefined,
+        startTime: meta ? meta.startTime : undefined,
+        maxScore: meta ? meta.max : undefined,
+        submissions: r.type === 'quiz' ? subCount.get(String(r._id)) || 0 : undefined,
+      };
+    });
+
+  res.json({
+    cohort: { _id: data.program._id, name: data.program.name, description: data.program.description || '', syllabus: data.program.syllabus || '' },
+    mentees,
+    resources,
+  });
+});
+
+// POST /api/mentor/mentees/bulk   Body: { cohortId, lines: "name,email\nname,email" }
+// Creates mentees with an auto-generated enrollment number and password.
+// Existing mentees (same email) are just added to the cohort, with no new password.
+router.post('/mentees/bulk', mentorAuth, async (req, res) => {
+  const { cohortId, lines } = req.body;
+  if (!cohortId || !lines || typeof lines !== 'string') {
+    return res.status(400).json({ error: 'cohortId and lines are required' });
+  }
+  const program = await ownsCohort(req.user._id, cohortId);
+  if (!program) return res.status(403).json({ error: 'Not authorized for this cohort' });
+
+  const parsed = [];
+  const seen = new Set();
+  for (const raw of lines.split('\n').map((l) => l.trim()).filter(Boolean)) {
+    const parts = raw.split(/[,\t]/).map((s) => s.trim());
+    const name = parts[0];
+    const email = (parts[1] || '').toLowerCase();
+    if (!name || !EMAIL_RE.test(email)) {
+      parsed.push({ raw, error: 'Expected "Name, email@college.edu"' });
+    } else if (seen.has(email)) {
+      parsed.push({ name, email, error: 'Duplicate in this list' });
+    } else {
+      seen.add(email);
+      parsed.push({ name, email });
     }
+  }
+  if (parsed.length > 200) return res.status(400).json({ error: 'Add at most 200 mentees at a time' });
 
-    const program = await Program.findById(cohortId);
-    if (!program) return res.status(404).json({ error: 'Cohort not found' });
-    if (!program.mentors.map(m => m.toString()).includes(req.user._id.toString())) {
-      return res.status(403).json({ error: 'Not authorized for this cohort' });
+  const valid = parsed.filter((p) => !p.error);
+  const existing = await Mentee.find({ email: { $in: valid.map((v) => v.email) } }).select('email programs').lean();
+  const existingByEmail = new Map(existing.map((m) => [m.email, m]));
+  const newOnes = valid.filter((v) => !existingByEmail.has(v.email));
+  const numbers = await nextEnrollmentNumbers(newOnes.length);
+  let nextIdx = 0;
+
+  const results = [];
+  for (const p of parsed) {
+    if (p.error) {
+      results.push({ name: p.name || '', email: p.email || p.raw, status: 'error', error: p.error });
+      continue;
     }
-
-    const rows = lines.trim().split('\n').map(l => l.trim()).filter(Boolean);
-    const results = [];
-    let count = await Mentee.countDocuments();
-
-    for (const row of rows) {
-      const parts = row.split(',').map(s => s.trim());
-      const name = parts[0];
-      const email = parts[1];
-      if (!name || !email) continue;
-
-      count++;
-      const enrollmentNumber = `TN26-${String(count).padStart(4, '0')}`;
-      const tempPassword = Math.random().toString(36).slice(-8);
-      const hashedPassword = await bcrypt.hash(tempPassword, 10);
-
-      try {
-        const mentee = new Mentee({
-          name,
-          email,
+    const ex = existingByEmail.get(p.email);
+    try {
+      if (ex) {
+        const already = (ex.programs || []).some((id) => String(id) === String(cohortId));
+        if (!already) await Mentee.updateOne({ _id: ex._id }, { $addToSet: { programs: cohortId } });
+        results.push({ name: p.name, email: p.email, status: already ? 'already-enrolled' : 'added-existing' });
+      } else {
+        const enrollmentNumber = numbers[nextIdx++];
+        const tempPassword = genPassword();
+        await Mentee.create({
+          name: p.name,
+          email: p.email,
           enrollmentNumber,
-          password: hashedPassword,
+          password: await bcrypt.hash(tempPassword, 10),
           programs: [cohortId],
           mustChangePassword: true,
-          createdBy: req.user._id
+          createdBy: req.user._id,
         });
-        await mentee.save();
-        results.push({ name, email, enrollmentNumber, tempPassword });
-      } catch (saveErr) {
-        results.push({ name, email, error: saveErr.message });
+        results.push({ name: p.name, email: p.email, enrollmentNumber, tempPassword, status: 'created' });
       }
+    } catch (err) {
+      results.push({ name: p.name, email: p.email, status: 'error', error: err.message });
     }
-
-    res.status(201).json(results);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
   }
+  res.status(201).json(results);
+});
+
+// POST /api/mentor/videos   Body: { cohortId, title, url }
+router.post('/videos', mentorAuth, async (req, res) => {
+  const { cohortId, title, url } = req.body;
+  if (!cohortId || !title || !url) return res.status(400).json({ error: 'cohortId, title and url are required' });
+  if (!/^https?:\/\/\S+$/i.test(url)) return res.status(400).json({ error: 'url must start with http:// or https://' });
+  if (!(await ownsCohort(req.user._id, cohortId))) return res.status(403).json({ error: 'Not authorized for this cohort' });
+
+  const resource = await Resource.create({
+    title: String(title).trim().slice(0, 150),
+    type: 'video',
+    url: url.trim(),
+    program: cohortId,
+    isLocked: false,
+    maxScore: 5,
+    addedBy: req.user._id,
+  });
+  await Program.updateOne({ _id: cohortId }, { $push: { resources: resource._id } });
+  res.status(201).json(resource);
+});
+
+// POST /api/mentor/quizzes   Body: { cohortId, title, questions[], startTime?, endTime }
+router.post('/quizzes', mentorAuth, async (req, res) => {
+  const { cohortId, title, questions, startTime, endTime } = req.body;
+  if (!cohortId || !title) return res.status(400).json({ error: 'cohortId and title are required' });
+  if (!(await ownsCohort(req.user._id, cohortId))) return res.status(403).json({ error: 'Not authorized for this cohort' });
+  if (!Array.isArray(questions) || questions.length < 1 || questions.length > 50) {
+    return res.status(400).json({ error: 'Add between 1 and 50 questions' });
+  }
+
+  const cleaned = [];
+  for (let i = 0; i < questions.length; i++) {
+    const q = questions[i];
+    const text = String(q.questionText || '').trim();
+    const options = (Array.isArray(q.options) ? q.options : []).map((o) => String(o || '').trim());
+    const correct = Number(q.correctOptionIndex);
+    const marks = Number(q.marks) || 1;
+    if (!text) return res.status(400).json({ error: `Question ${i + 1}: text is required` });
+    if (options.length < 2 || options.some((o) => !o)) return res.status(400).json({ error: `Question ${i + 1}: fill in every option (at least 2)` });
+    if (!Number.isInteger(correct) || correct < 0 || correct >= options.length) return res.status(400).json({ error: `Question ${i + 1}: choose the correct option` });
+    if (marks < 1 || marks > 100) return res.status(400).json({ error: `Question ${i + 1}: marks must be 1-100` });
+    cleaned.push({ questionText: text, options, correctOptionIndex: correct, marks });
+  }
+
+  const start = startTime ? new Date(startTime) : new Date();
+  const end = new Date(endTime);
+  if (Number.isNaN(end.getTime())) return res.status(400).json({ error: 'A valid deadline is required' });
+  if (Number.isNaN(start.getTime())) return res.status(400).json({ error: 'Invalid start time' });
+  if (end <= start) return res.status(400).json({ error: 'Deadline must be after the start time' });
+  if (end <= new Date()) return res.status(400).json({ error: 'Deadline must be in the future' });
+
+  const maxScore = cleaned.reduce((s, q) => s + q.marks, 0);
+  const resource = await Resource.create({
+    title: String(title).trim().slice(0, 150),
+    type: 'quiz',
+    program: cohortId,
+    maxScore,
+    deadline: end,
+    isLocked: false,
+    addedBy: req.user._id,
+  });
+  const quiz = await Quiz.create({ resource: resource._id, questions: cleaned, startTime: start, endTime: end });
+  await Resource.updateOne({ _id: resource._id }, { $set: { quiz: quiz._id } });
+  await Program.updateOne({ _id: cohortId }, { $push: { resources: resource._id } });
+
+  res.status(201).json({ message: 'Quiz created', resource, quizId: quiz._id, maxScore });
+});
+
+// GET /api/mentor/mentees/:id/profile  - read-only AI Profile of a mentee in one of my cohorts
+router.get('/mentees/:id/profile', mentorAuth, async (req, res) => {
+  const mentee = await Mentee.findById(req.params.id).select('programs').lean();
+  if (!mentee) return res.status(404).json({ error: 'Mentee not found' });
+  const mine = await Program.find({ mentors: req.user._id }).select('_id').lean();
+  const mineIds = new Set(mine.map((p) => String(p._id)));
+  if (!(mentee.programs || []).some((p) => mineIds.has(String(p)))) {
+    return res.status(403).json({ error: 'This mentee is not in one of your cohorts' });
+  }
+  const out = await buildProfile(req.params.id);
+  res.json(out);
 });
 
 module.exports = router;

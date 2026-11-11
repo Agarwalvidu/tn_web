@@ -110,6 +110,13 @@ const Navbar = () => {
             </Link>
           </li>
 
+          {/* Always visible: Cohorts */}
+          <li className={`nav-item ${pathname === '/cohorts' ? 'active' : ''}`}>
+            <Link className="nav-link" href="/cohorts" onClick={handleCollapseClose}>
+              <i className="fas fa-layer-group"></i> Cohorts
+            </Link>
+          </li>
+
           {/* Always visible: Techboard */}
           <li className={`nav-item ${pathname === '/techboard' ? 'active' : ''}`}>
             <Link className="nav-link" href="/techboard" onClick={handleCollapseClose}>

@@ -20,15 +20,15 @@ router.post('/login', async (req, res) => {
     let user = null;
 
     if (role === 'admin') {
-      user = await Admin.findOne({ email: email.toLowerCase() });
+      user = await Admin.findOne({ email: email.trim().toLowerCase() });
     } else if (role === 'mentor') {
-      user = await Mentor.findOne({ email: email.toLowerCase() });
+      user = await Mentor.findOne({ email: email.trim().toLowerCase() });
     } else if (role === 'mentee') {
       // Allow login by enrollment number (starts with TN) or email
-      if (email.toUpperCase().startsWith('TN')) {
-        user = await Mentee.findOne({ enrollmentNumber: email.toUpperCase() });
+      if (/^TN\d{2}-\d+$/i.test(email.trim())) {
+        user = await Mentee.findOne({ enrollmentNumber: email.trim().toUpperCase() });
       } else {
-        user = await Mentee.findOne({ email: email.toLowerCase() });
+        user = await Mentee.findOne({ email: email.trim().toLowerCase() });
       }
     } else {
       return res.status(400).json({ error: 'Invalid role. Must be admin, mentor or mentee.' });
