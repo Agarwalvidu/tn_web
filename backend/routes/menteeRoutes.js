@@ -1,418 +1,261 @@
 const express = require('express');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const Mentee = require('../models/Mentee');
+const Mentor = require('../models/Mentor');
 const Quiz = require('../models/Quiz');
 const QuizSubmission = require('../models/QuizSubmission');
-const Program = require('../models/Program');
 const Resource = require('../models/Resource');
-const { authenticateMentee } = require('../middleware/authMentor');
+const { requireRole } = require('../middleware/requireRole');
+const { POINTS, quizPoints } = require('../utils/points');
+const { loadCohortData, getMenteeFacts, quizTotalMarks } = require('../utils/standings');
+const { buildProfile } = require('../utils/profileService');
+const { AVATARS } = require('../utils/avatars');
+
 const router = express.Router();
+const menteeAuth = requireRole('mentee');
 
+const isEnrolled = (mentee, programId) =>
+  (mentee.programs || []).some((p) => String(p) === String(programId));
 
-router.post('/login', async (req, res) => {
-  const { enrollmentNumber, password } = req.body;
-  try {
-    const mentee = await Mentee.findOne({ enrollmentNumber });
-    if (!mentee || !(password === mentee.password)) {
-      return res.status(400).json({ error: 'Invalid credentials' });
-    }
-    const token = jwt.sign({ id: mentee._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// --- Mentee Dashboard --- //
-router.get('/dashboard', authenticateMentee, async (req, res) => {
-  try {
-    const mentee = await Mentee.findById(req.mentee._id)
-    .populate({
-      path: 'programs',
-      populate: {
-        path: 'resources',
-        model: 'Resource'
-      }
-    })  
-    .populate({
-      path: 'completedResources.resource',
-      model: 'Resource'
-    });
-    // Map completedResources for quick lookup
-    const completedMap = new Map();
-    mentee.completedResources.forEach((item) => {
-      completedMap.set(item.resource._id.toString(), {
-        score: item.score,
-        completedOn: item.completedOn
-      });
-    });
-
-    let totalScore = 0;
-mentee.completedResources.forEach((item) => {
-  totalScore += item.score || 0;
-});
-
-    // Add completed status to each resource
-    const updatedPrograms = mentee.programs.map((program) => {
-      const updatedResources = program.resources.map((res) => {
-        const isCompleted = completedMap.has(res._id.toString());
-        return {
-          ...res.toObject(),
-          completed: isCompleted,
-          score: isCompleted ? completedMap.get(res._id.toString()).score : null,
-          completedOn: isCompleted ? completedMap.get(res._id.toString()).completedOn : null
-        };
-      });
-      return {
-        ...program.toObject(),
-        resources: updatedResources
-      };
-    });
-    res.json({
-      name: mentee.name,
-      programs: mentee.programs,
-      streak: mentee.streak,
-      totalScore,
-      programs: updatedPrograms,
-      rank: await calculateRank(mentee._id), // Implement this helper
-    //   resources: await getResourcesWithStatus(mentee) // Implement this
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// --- Resource Completion --- //
-router.post('/resources/:id/complete', authenticateMentee, async (req, res) => {
-  try {
-    const resource = await Resource.findById(req.params.id);
-    const mentee = req.mentee;
-
-    // Check if resource is unlocked
-    if (resource.isLocked) {
-      return res.status(403).json({ error: 'Resource is locked' });
-    }
-
-    // Calculate score (deduct for late submission)
-    const deadline = resource.deadline;
-    const isLate = deadline && new Date() > deadline;
-    const latePenalty = isLate ? Math.floor((new Date() - deadline) / (1000 * 60 * 60 * 24)) : 0; // 1 point/day
-    const score = Math.max(0, resource.maxScore - latePenalty);
-
-    // Update mentee's progress
-    const completedResource = {
-      resource: resource._id,
-      score,
-      completedOn: new Date()
-    };
-
-    // Check if resource is already completed
-    const existingCompletion = mentee.completedResources.find(
-      (completed) => completed.resource.toString() === resource._id.toString()
-    );
-
-    if (existingCompletion) {
-      // If already completed, update the score and date
-      existingCompletion.score = score;
-      existingCompletion.completedOn = new Date();
-    } else {
-      // If not completed yet, push new completion entry
-      mentee.completedResources.push(completedResource);
-    }
-
-    // Update streak (if active today)
-    await updateStreak(mentee);
-    await mentee.save();
-
-    res.json({ message: 'Resource marked as completed!', score });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-router.post('/resources/:id/quiz/submit', authenticateMentee, async (req, res) => {
-  try {
-    const resourceId = req.params.id;
-    const mentee = req.mentee;
-    const answers = req.body.answers; // [{ questionId, selectedOptionIndex }, ...]
-
-    const resource = await Resource.findById(resourceId).populate('quiz');
-    if (!resource || resource.type !== 'quiz') {
-      return res.status(400).json({ error: 'Invalid quiz resource' });
-    }
-
-    if (resource.isLocked) {
-      return res.status(403).json({ error: 'Quiz is locked' });
-    }
-
-    const quiz = await Quiz.findOne({resource:resourceId});
-    if (!quiz) {
-      return res.status(404).json({ error: 'Quiz not found' });
-    }
-
-    const now = new Date();
-    if (now < quiz.startTime || now > quiz.endTime) {
-      return res.status(403).json({ error: 'Quiz is not active at this time' });
-    }
-
-    // Prevent resubmission
-    const existing = await QuizSubmission.findOne({ quiz: quiz._id, mentee: mentee._id });
-    if (existing) {
-      return res.status(409).json({ error: 'Quiz already submitted' });
-    }
-
-    // Calculate score
-    let totalScore = 0;
-    for (const question of quiz.questions) {
-      const userAnswer = answers.find(ans => ans.questionId === question._id.toString());
-      if (userAnswer && userAnswer.selectedOptionIndex === question.correctOptionIndex) {
-        totalScore += question.marks || 1;
-      }
-    }
-
-    // Save submission
-    const submission = new QuizSubmission({
-      quiz: quiz._id,
-      resource: resourceId,
-      mentee: mentee._id,
-      answers,
-      score: totalScore,
-    });
-
-    await submission.save();
-
-    // Update mentee's resource progress
-    const completedResource = {
-      resource: resource._id,
-      score: totalScore,
-      completedOn: new Date()
-    };
-
-    const alreadyCompleted = mentee.completedResources.find(
-      (r) => r.resource.toString() === resource._id.toString()
-    );
-
-    if (alreadyCompleted) {
-      alreadyCompleted.score = totalScore;
-      alreadyCompleted.completedOn = new Date();
-    } else {
-      mentee.completedResources.push(completedResource);
-    }
-
-    // Update streak and total score
-    await updateStreak(mentee);
-    // mentee.totalScore += totalScore;
-    await mentee.save();
-
-    res.status(200).json({ message: 'Quiz submitted successfully!', score: totalScore });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-router.get('/resources/:id/quiz', authenticateMentee, async (req, res) => {
-  try {
-    const resourceId = req.params.id;
-    console.log(resourceId);
-    const resource = await Resource.findById(resourceId).populate('quiz');
-    if (!resource || resource.type !== 'quiz') {
-      return res.status(400).json({ error: 'Invalid resource or quiz not found' });
-    }
-
-    console.log(resource);
-    const quiz = await Quiz.findOne({ resource: resourceId });
-    console.log("quiz",quiz);
-    if (!quiz) {
-      return res.status(404).json({ error: 'Quiz not found' });
-    }
-
-    res.json({
-      title: resource.title,
-      description: resource.description,
-      questions: quiz.questions.map((q) => ({
-        id: q._id,
-        questionText: q.questionText,
-        options: q.options,
-      }))
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// POST /api/m/resources/:resourceId/project
-router.post('/resources/:resourceId/project', authenticateMentee, async (req, res) => {
-  try {
-    const { githubLink, deployedLink, description } = req.body;
-    const resource = await Resource.findById(req.params.resourceId);
-    const mentee = req.mentee;
-
-    if (!resource) {
-      return res.status(404).json({ error: 'Resource not found' });
-    }
-
-    if (resource.type !== 'project') {
-      return res.status(400).json({ error: 'Invalid resource type' });
-    }
-
-    if (resource.isLocked) {
-      return res.status(403).json({ error: 'Resource is locked' });
-    }
-    // Validate inputs
-    if (!githubLink || !deployedLink || !description) {
-      return res.status(400).json({ error: 'All fields are required' });
-    }
-
-    // if (description.trim().split(/\s+/).length < 300) {
-    //   return res.status(400).json({ error: 'Description must be at least 300 words' });
-    // }
-
-    const deadline = resource.deadline;
-    const isLate = deadline && new Date() > deadline;
-    const latePenalty = isLate ? Math.floor((new Date() - deadline) / (1000 * 60 * 60 * 24)) : 0;
-    const baseScore = resource.maxScore;
-    const score = Math.max(0, baseScore - latePenalty);
-
-    // Create the completion entry
-    const projectCompletion = {
-      resource: resource._id,
-      githubLink,
-      deployedLink,
-      description,
-      score: 0, // Score to be updated by mentor later
-      submittedOn: new Date(),
-    };
-
-    // Check if already completed
-    const existing = mentee.completedResources.find(
-      (c) => c.resource.toString() === resource._id.toString()
-    );
-
-    if (existing) {
-      existing.githubLink = githubLink;
-      existing.deployedLink = deployedLink;
-      existing.description = description;
-      existing.submittedOn = new Date();
-      existing.score = 0;
-    } else {
-      mentee.completedResources.push(projectCompletion);
-    }
-    await mentee.save();
-
-    res.json({ message: 'Project submitted successfully!' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-
-// Helper: Calculate rank (example: based on total score)
-async function calculateRank(menteeId) {
-  const me = await Mentee.findById(menteeId)
-    .select('streak lastActiveDate completedResources.score')
-    .lean();
-
-  if (!me) return null;
-
-  const myScore = (me.completedResources || [])
-    .reduce((s, c) => s + (c?.score || 0), 0);
-  const myStreak = me.streak || 0;
-  const myLast   = me.lastActiveDate || new Date(0);
-
-  // Count how many are strictly "better" in the same sort order
-  const better = await Mentee.aggregate([
-    {
-      $project: {
-        streak: { $ifNull: ['$streak', 0] },
-        lastActiveDate: 1,
-        totalScore: {
-          $sum: {
-            $map: {
-              input: { $ifNull: ['$completedResources', []] },
-              as: 'cr',
-              in: { $ifNull: ['$$cr.score', 0] }
-            }
-          }
-        }
-      }
-    },
-    {
-      $match: {
-        $or: [
-          { totalScore: { $gt: myScore } },
-          { totalScore: myScore, streak: { $gt: myStreak } },
-          { totalScore: myScore, streak: myStreak, lastActiveDate: { $gt: myLast } }
-        ]
-      }
-    },
-    { $count: 'cnt' }
-  ]);
-
-  return (better[0]?.cnt || 0) + 1;
-}
-
-// Helper: Update streak
-async function updateStreak(mentee) {
+// Streak: +1 for each consecutive day with activity
+function updateStreak(mentee) {
   const today = new Date().toDateString();
-  const lastActive = mentee.lastActiveDate?.toDateString();
-
-  if (lastActive !== today) {
-    mentee.streak = lastActive === new Date(Date.now() - 86400000).toDateString() 
-      ? mentee.streak + 1 
-      : 1;
+  const last = mentee.lastActiveDate ? new Date(mentee.lastActiveDate).toDateString() : null;
+  if (last !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    mentee.streak = last === yesterday ? (mentee.streak || 0) + 1 : 1;
     mentee.lastActiveDate = new Date();
   }
 }
 
-// --- Public Leaderboard --- //
-// --- Public Leaderboard (same calc as dashboard) --- //
-router.get('/leaderboard', async (req, res) => {
-  try {
-    const limit = Math.min(parseInt(req.query.limit || '50', 10), 200);
-    const skip  = Math.max(parseInt(req.query.skip  || '0', 10), 0);
+function quizStatus(meta, submitted) {
+  if (submitted) return 'submitted';
+  const now = Date.now();
+  if (meta.startTime && now < new Date(meta.startTime).getTime()) return 'upcoming';
+  if (meta.endTime && now > new Date(meta.endTime).getTime()) return 'closed';
+  return 'open';
+}
 
-    // Compute totalScore = sum(completedResources.score)
-    const rows = await Mentee.aggregate([
-      {
-        $project: {
-          name: 1,
-          streak: { $ifNull: ['$streak', 0] },
-          lastActiveDate: 1,
-          totalScore: {
-            $sum: {
-              $map: {
-                input: { $ifNull: ['$completedResources', []] },
-                as: 'cr',
-                in: { $ifNull: ['$$cr.score', 0] }
-              }
-            }
-          }
-        }
-      },
-      // same ordering everywhere: score desc, streak desc, lastActive desc, _id asc (stable)
-      { $sort: { totalScore: -1, streak: -1, lastActiveDate: -1, _id: 1 } },
-      { $skip: skip },
-      { $limit: limit }
-    ]);
+// GET /api/m/dashboard
+router.get('/dashboard', menteeAuth, async (req, res) => {
+  const facts = await getMenteeFacts(req.user._id);
+  if (!facts) return res.status(404).json({ error: 'Mentee not found' });
 
-    // Attach 1-based rank consistent with global order + skip
-    const leaderboard = rows.map((m, i) => ({
-      rank: skip + i + 1,
-      name: m.name,
-      totalScore: m.totalScore || 0,
-      streak: m.streak || 0
-    }));
+  const upcoming = facts.pending
+    .filter((p) => p.type === 'quiz' && p.deadline)
+    .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))[0] || null;
 
-    res.json(leaderboard);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
-  }
+  res.json({
+    name: facts.mentee.name,
+    enrollmentNumber: facts.mentee.enrollmentNumber,
+    avatar: facts.mentee.avatar || '',
+    streak: facts.streak,
+    totalPoints: facts.totalPoints,
+    bestRank: facts.bestRank,
+    cohorts: facts.cohorts.map((c) => ({
+      _id: c.programId,
+      name: c.name,
+      points: c.points,
+      rank: c.rank,
+      of: c.of,
+      quizzesCompleted: c.quizzesCompleted,
+      totalQuizzes: c.totalQuizzes,
+      videosCompleted: c.videosCompleted,
+      totalVideos: c.totalVideos,
+    })),
+    pending: facts.pending.slice(0, 8),
+    nextDeadline: upcoming,
+  });
 });
 
+// GET /api/m/cohorts/:id  - syllabus, videos, quizzes and standings for one cohort
+router.get('/cohorts/:id', menteeAuth, async (req, res) => {
+  if (!isEnrolled(req.user, req.params.id)) {
+    return res.status(403).json({ error: 'You are not enrolled in this cohort' });
+  }
+  const data = await loadCohortData(req.params.id);
+  if (!data) return res.status(404).json({ error: 'Cohort not found' });
 
+  const me = await Mentee.findById(req.user._id).select('completedResources').lean();
+  const done = new Map((me.completedResources || []).map((c) => [String(c.resource), c]));
+  const mySubs = new Map(
+    data.submissions.filter((s) => String(s.mentee) === String(req.user._id)).map((s) => [String(s.resource), s])
+  );
+  const metaByResource = new Map([...data.quizMeta.values()].map((m) => [String(m.resourceId), m]));
+
+  const resources = data.resources
+    .filter((r) => r.type === 'video' || r.type === 'quiz')
+    .map((r) => {
+      const base = { _id: r._id, title: r.title, type: r.type, createdAt: r.createdAt };
+      if (r.type === 'video') {
+        return { ...base, url: r.url, completed: done.has(String(r._id)), points: POINTS.VIDEO };
+      }
+      const meta = metaByResource.get(String(r._id));
+      if (!meta) return null;
+      const sub = mySubs.get(String(r._id));
+      return {
+        ...base,
+        status: quizStatus(meta, !!sub),
+        startTime: meta.startTime,
+        endTime: meta.endTime,
+        maxScore: meta.max,
+        result: sub
+          ? { score: sub.score, max: sub.maxScore, ...quizPoints(sub.score, sub.maxScore, sub.onTime) }
+          : null,
+      };
+    })
+    .filter(Boolean);
+
+  const mentors = await Mentor.find({ _id: { $in: data.program.mentors || [] } }).select('name').lean();
+  const board = data.rows.map((r) => ({
+    rank: r.rank,
+    name: r.name,
+    avatar: r.avatar,
+    points: r.points,
+    quizzesCompleted: r.quizzesCompleted,
+    isMe: r.menteeId === String(req.user._id),
+  }));
+  const mine = board.find((r) => r.isMe) || null;
+
+  res.json({
+    cohort: {
+      _id: data.program._id,
+      name: data.program.name,
+      description: data.program.description || '',
+      syllabus: data.program.syllabus || '',
+    },
+    mentors: mentors.map((m) => m.name),
+    resources,
+    leaderboard: board,
+    me: mine ? { rank: mine.rank, points: mine.points, of: board.length } : null,
+  });
+});
+
+// POST /api/m/resources/:id/complete  - mark a lecture video as watched
+router.post('/resources/:id/complete', menteeAuth, async (req, res) => {
+  const resource = await Resource.findById(req.params.id);
+  if (!resource) return res.status(404).json({ error: 'Resource not found' });
+  if (resource.type !== 'video') return res.status(400).json({ error: 'Only videos can be marked complete' });
+  if (resource.isLocked) return res.status(403).json({ error: 'Resource is locked' });
+  if (!isEnrolled(req.user, resource.program)) return res.status(403).json({ error: 'You are not enrolled in this cohort' });
+
+  const mentee = await Mentee.findById(req.user._id);
+  const already = mentee.completedResources.some((c) => String(c.resource) === String(resource._id));
+  if (already) return res.json({ message: 'Already completed', points: 0 });
+
+  mentee.completedResources.push({ resource: resource._id, score: POINTS.VIDEO, completedOn: new Date() });
+  updateStreak(mentee);
+  await mentee.save();
+  res.json({ message: `Video completed! +${POINTS.VIDEO} points`, points: POINTS.VIDEO });
+});
+
+// GET /api/m/resources/:id/quiz  - quiz questions (never includes the answers)
+router.get('/resources/:id/quiz', menteeAuth, async (req, res) => {
+  const resource = await Resource.findById(req.params.id).lean();
+  if (!resource || resource.type !== 'quiz') return res.status(404).json({ error: 'Quiz not found' });
+  if (!isEnrolled(req.user, resource.program)) return res.status(403).json({ error: 'You are not enrolled in this cohort' });
+
+  const quiz = await Quiz.findOne({ resource: resource._id }).lean();
+  if (!quiz) return res.status(404).json({ error: 'Quiz not found' });
+
+  const max = quizTotalMarks(quiz);
+  const existing = await QuizSubmission.findOne({ quiz: quiz._id, mentee: req.user._id }).lean();
+  const status = quizStatus(quiz, !!existing);
+  const head = { title: resource.title, status, startTime: quiz.startTime, endTime: quiz.endTime, maxScore: max };
+
+  if (existing) {
+    return res.json({ ...head, submitted: true, result: { score: existing.score, max, ...quizPoints(existing.score, max, existing.onTime) } });
+  }
+  if (status !== 'open') return res.json({ ...head, questions: [] });
+
+  res.json({
+    ...head,
+    questions: quiz.questions.map((q) => ({
+      id: q._id,
+      questionText: q.questionText,
+      options: q.options,
+      marks: q.marks || 1,
+    })),
+  });
+});
+
+// POST /api/m/resources/:id/quiz/submit  - one submission per quiz, scored on the server
+router.post('/resources/:id/quiz/submit', menteeAuth, async (req, res) => {
+  const resource = await Resource.findById(req.params.id).lean();
+  if (!resource || resource.type !== 'quiz') return res.status(404).json({ error: 'Quiz not found' });
+  if (resource.isLocked) return res.status(403).json({ error: 'Quiz is locked' });
+  if (!isEnrolled(req.user, resource.program)) return res.status(403).json({ error: 'You are not enrolled in this cohort' });
+
+  const quiz = await Quiz.findOne({ resource: resource._id }).lean();
+  if (!quiz) return res.status(404).json({ error: 'Quiz not found' });
+
+  const now = new Date();
+  if (quiz.startTime && now < new Date(quiz.startTime)) return res.status(403).json({ error: 'This quiz has not started yet' });
+  if (quiz.endTime && now > new Date(quiz.endTime)) return res.status(403).json({ error: 'The deadline for this quiz has passed' });
+
+  const answers = Array.isArray(req.body.answers) ? req.body.answers : [];
+  const byQuestion = new Map(answers.map((a) => [String(a.questionId), Number(a.selectedOptionIndex)]));
+
+  let score = 0;
+  const stored = [];
+  quiz.questions.forEach((q, index) => {
+    const selected = byQuestion.has(String(q._id)) ? byQuestion.get(String(q._id)) : -1;
+    if (selected === q.correctOptionIndex) score += q.marks || 1;
+    stored.push({ questionIndex: index, selectedOptionIndex: selected });
+  });
+  const max = quizTotalMarks(quiz);
+
+  try {
+    await QuizSubmission.create({
+      quiz: quiz._id,
+      resource: resource._id,
+      mentee: req.user._id,
+      answers: stored,
+      score,
+      onTime: true, // submissions after the deadline are rejected above
+      submittedAt: now,
+    });
+  } catch (err) {
+    if (err.code === 11000) return res.status(409).json({ error: 'You have already submitted this quiz' });
+    throw err;
+  }
+
+  const mentee = await Mentee.findById(req.user._id);
+  if (!mentee.completedResources.some((c) => String(c.resource) === String(resource._id))) {
+    mentee.completedResources.push({ resource: resource._id, score, completedOn: now });
+  }
+  updateStreak(mentee);
+  await mentee.save();
+
+  const pts = quizPoints(score, max, true);
+  res.status(201).json({
+    message: 'Quiz submitted!',
+    score,
+    max,
+    points: pts.base + pts.bonus,
+    breakdown: pts,
+  });
+});
+
+// GET /api/m/profile  - AI Profile (rule-based stats + cached AI summary)
+router.get('/profile', menteeAuth, async (req, res) => {
+  const out = await buildProfile(req.user._id);
+  if (!out) return res.status(404).json({ error: 'Mentee not found' });
+  res.json(out);
+});
+
+// POST /api/m/profile/refresh  - force a new AI summary
+router.post('/profile/refresh', menteeAuth, async (req, res) => {
+  const out = await buildProfile(req.user._id, { force: true });
+  if (!out) return res.status(404).json({ error: 'Mentee not found' });
+  res.json(out);
+});
+
+// PUT /api/m/avatar
+router.put('/avatar', menteeAuth, async (req, res) => {
+  const { avatar } = req.body;
+  if (!AVATARS.includes(avatar)) return res.status(400).json({ error: 'Invalid avatar' });
+  await Mentee.updateOne({ _id: req.user._id }, { $set: { avatar } });
+  res.json({ avatar });
+});
 
 module.exports = router;

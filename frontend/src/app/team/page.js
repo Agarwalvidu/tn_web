@@ -1,9 +1,6 @@
-import MeetOurTeam from "@/components/Team/team";
+import { redirect } from 'next/navigation';
 
-export default function TeamsPage() {
-  return (
-    <div>
-      <MeetOurTeam />
-    </div>
-  );
+// The team section now lives on the homepage.
+export default function TeamRedirect() {
+  redirect('/#team');
 }

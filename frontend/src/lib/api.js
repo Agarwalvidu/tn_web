@@ -1,122 +1,71 @@
-const BASE_URL = 'https://tn-backend-1.onrender.com'; // Replace with your actual backend URL
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
-export async function createProgram(name) {
-  const res = await fetch(`${BASE_URL}/api/programs`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name }),
-  });
-  return res.json();
-}
+async function request(path, { method = 'GET', body, token } = {}) {
+  const headers = {};
+  if (body !== undefined) headers['Content-Type'] = 'application/json';
+  if (token) headers['x-auth-token'] = token;
 
-export async function createMentor(data) {
-  const res = await fetch(`${BASE_URL}/api/mentors`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  return res.json();
-}
-
-export async function addMentorToProgram(programId, mentorId) {
-  const res = await fetch(`${BASE_URL}/api/programs/${programId}/add-mentor`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ mentorId }),
-  });
-  return res.json();
-}
-
-export async function getAllPrograms() {
-    const res = await fetch(`${BASE_URL}/api/programs`);
-    return res.json();
-}
-  
-export async function getAllMentors() {
-    const res = await fetch(`${BASE_URL}/api/mentors`);
-    return res.json();
-}
-  
-export async function mentorLogin(email, password) {
-  console.log(email,password);
-    const res = await fetch(`${BASE_URL}/api/mentors/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+  let res;
+  try {
+    res = await fetch(`${BASE_URL}${path}`, {
+      method,
+      headers,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
     });
-  
-    if (!res.ok) throw new Error('Login failed');
-    return res.json(); // returns { token }
-}
-  
-export async function addMentee(token, { email, name, enrollmentNumber, programId }) {
-    const res = await fetch(`${BASE_URL}/api/mentees`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-         'x-auth-token': token
-      },
-      body: JSON.stringify({ email, name, enrollmentNumber, programId }),
-    });
-  
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Failed to add mentee');
-    }
-    return res.json(); // returns { mentee, tempPassword }
-}
-
-export async function addResource(token, resourceData, isQuiz = false) {
-  const endpoint = isQuiz ? '/api/resources/quiz' : '/api/resources';
-
-  const res = await fetch(`${BASE_URL}${endpoint}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-auth-token': token,
-    },
-    body: JSON.stringify(resourceData),
-  });
-
+  } catch {
+    throw new Error('Cannot reach the server. Please check your connection.');
+  }
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.error || 'Failed to add resource');
+    const err = new Error(data.error || data.message || `Request failed (${res.status})`);
+    err.status = res.status;
+    throw err;
   }
-
-  return res.json(); // returns resource or quiz object
+  return data;
 }
 
-  
-export async function getMentorDetails(token) {
-    const res = await fetch(`${BASE_URL}/api/mentors/me`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-  
-    if (!res.ok) throw new Error('Failed to fetch mentor details');
-    return res.json(); // returns mentor object
-  }
+// ───────── Auth ─────────
+export const login = (email, password, role) => request('/api/auth/login', { method: 'POST', body: { email, password, role } });
+export const changePassword = (token, currentPassword, newPassword) =>
+  request('/api/auth/change-password', { method: 'POST', token, body: { currentPassword, newPassword } });
+export const submitMentorRequest = (data) => request('/api/mentor-requests', { method: 'POST', body: data });
 
+// ───────── Public ─────────
+export const getPublicCohorts = () => request('/api/public/cohorts');
+export const getPublicLeaderboard = (cohortId) => request(`/api/public/leaderboard/${cohortId}`);
 
-  export async function getProgramMentees(programId, token) {
-    const res = await fetch(`${BASE_URL}/api/${programId}/mentees`, {
-      headers: {
-      'x-auth-token': token
-      }
-    });
-    if (!res.ok) throw new Error('Failed to fetch mentees');
-    return res.json();
-  }
+// ───────── Admin ─────────
+export const getAdminStats = (token) => request('/api/admin/stats', { token });
+export const getMentorRequests = (token) => request('/api/admin/mentor-requests', { token });
+export const approveMentorRequest = (token, id) => request(`/api/admin/mentor-requests/${id}/approve`, { method: 'POST', token });
+export const rejectMentorRequest = (token, id) => request(`/api/admin/mentor-requests/${id}/reject`, { method: 'POST', token });
+export const getAdminCohorts = (token) => request('/api/admin/cohorts', { token });
+export const createCohort = (token, data) => request('/api/admin/cohorts', { method: 'POST', token, body: data });
+export const updateCohort = (token, id, data) => request(`/api/admin/cohorts/${id}`, { method: 'PUT', token, body: data });
+export const deleteCohort = (token, id) => request(`/api/admin/cohorts/${id}`, { method: 'DELETE', token });
+export const assignMentor = (token, cohortId, mentorId) =>
+  request(`/api/admin/cohorts/${cohortId}/assign-mentor`, { method: 'POST', token, body: { mentorId } });
+export const removeMentor = (token, cohortId, mentorId) =>
+  request(`/api/admin/cohorts/${cohortId}/remove-mentor`, { method: 'POST', token, body: { mentorId } });
+export const getCohortAnalytics = (token, cohortId) => request(`/api/admin/cohorts/${cohortId}/analytics`, { token });
+export const getAdminMentors = (token) => request('/api/admin/mentors', { token });
 
-  export async function getProgramResources(programId, token) {
-    const res = await fetch(`${BASE_URL}/api/${programId}/resources`, {
-      headers: {
-        'x-auth-token': token
-      }
-    });
-    if (!res.ok) throw new Error('Failed to fetch resources');
-    return res.json();
-  }
-  
+// ───────── Mentor ─────────
+export const getMentorCohorts = (token) => request('/api/mentor/cohorts', { token });
+export const getMentorOverview = (token, cohortId) => request(`/api/mentor/cohorts/${cohortId}/overview`, { token });
+export const addMenteesBulk = (token, cohortId, lines) =>
+  request('/api/mentor/mentees/bulk', { method: 'POST', token, body: { cohortId, lines } });
+export const addVideo = (token, data) => request('/api/mentor/videos', { method: 'POST', token, body: data });
+export const createQuiz = (token, data) => request('/api/mentor/quizzes', { method: 'POST', token, body: data });
+export const getMenteeProfileAsMentor = (token, menteeId) => request(`/api/mentor/mentees/${menteeId}/profile`, { token });
+
+// ───────── Mentee ─────────
+export const getMenteeDashboard = (token) => request('/api/m/dashboard', { token });
+export const getMenteeCohort = (token, cohortId) => request(`/api/m/cohorts/${cohortId}`, { token });
+export const completeVideo = (token, resourceId) => request(`/api/m/resources/${resourceId}/complete`, { method: 'POST', token });
+export const getQuiz = (token, resourceId) => request(`/api/m/resources/${resourceId}/quiz`, { token });
+export const submitQuiz = (token, resourceId, answers) =>
+  request(`/api/m/resources/${resourceId}/quiz/submit`, { method: 'POST', token, body: { answers } });
+export const getMyProfile = (token) => request('/api/m/profile', { token });
+export const refreshMyProfile = (token) => request('/api/m/profile/refresh', { method: 'POST', token });
+export const setAvatar = (token, avatar) => request('/api/m/avatar', { method: 'PUT', token, body: { avatar } });

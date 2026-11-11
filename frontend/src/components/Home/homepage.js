@@ -10,6 +10,9 @@ import CrazyCubes from '../animation/CrazyCubes';
 import Mentorship from './mentorship';
 import Glimpse from './glimpse';
 import ParticleAnimation from '../heroanimation/hero';
+import Link from 'next/link';
+import Roadmap from './roadmap';
+import MeetOurTeam from '../Team/team';
 
 function Homepage() {
   
@@ -28,14 +31,16 @@ function Homepage() {
             </p>
             <div className="home-btn">
               <button type="button" id="Know"><a href="#about">Know more</a></button>
-              <button type="button" id="Get"><a href="#Mentorship">Get Started</a></button>
+              <button type="button" id="Get"><Link href="/cohorts">Get Started</Link></button>
             </div>
           </div>
           
         </div>
+        <Roadmap/>
         <About/>
         <Mentorship/>
         <Glimpse/>
+        <div id="team"><MeetOurTeam/></div>
         <Testimonials/>
       </div>
     </>

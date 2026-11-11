@@ -1,9 +1,5 @@
-import MentorPanel from '@/components/mentor/mentorPanel';
+import MentorPanel from '@/components/mentor/MentorPanel';
 
-export default function Mentorpage() {
-  return (
-    <div>
-      <MentorPanel />
-    </div>
-  );
+export default function MentorPage() {
+  return <MentorPanel />;
 }

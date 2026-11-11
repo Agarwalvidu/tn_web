@@ -1,9 +1,5 @@
-import MenteeDashboard from '@/components/mentee/dashboard';
+import MenteeDashboard from '@/components/mentee/MenteeDashboard';
 
-export default function Menteepage() {
-  return (
-    <div>
-      <MenteeDashboard/>
-    </div>
-  );
+export default function DashboardPage() {
+  return <MenteeDashboard />;
 }
