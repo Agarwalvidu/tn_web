@@ -1,5 +1,17 @@
 const mongoose = require('mongoose');
 
+const aiProfileSchema = new mongoose.Schema({
+  summary: { type: String },
+  strengths: [String],
+  improvements: [String],
+  recommendations: [{
+    title: { type: String },
+    reason: { type: String }
+  }],
+  generatedAt: { type: Date },
+  statsSnapshot: { type: String }
+}, { _id: false });
+
 const MenteeSchema = new mongoose.Schema({
   email: { type: String, required: true},
   name: { type: String, required: true },
@@ -28,7 +40,12 @@ const MenteeSchema = new mongoose.Schema({
   createdBy: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'Mentor',
-  }
+  },
+
+  role: { type: String, default: 'mentee' },
+  mustChangePassword: { type: Boolean, default: true },
+  avatar: { type: String, default: '' },
+  aiProfile: { type: aiProfileSchema, default: () => ({}) }
 }, { timestamps: true });
 
 MenteeSchema.index({ email: 1, enrollmentNumber: 1 }, { unique: true });

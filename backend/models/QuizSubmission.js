@@ -11,6 +11,7 @@ const QuizSubmissionSchema = new mongoose.Schema({
   resource: { type: mongoose.Schema.Types.ObjectId, ref: 'Resource', required: true },
   answers: [AnswerSchema],
   score: { type: Number, default: 0 },
+  onTime: { type: Boolean, default: true },
   submittedAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 

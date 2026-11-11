@@ -7,19 +7,22 @@ const Resource = require('../models/Resource');
 const Mentee = require('../models/Mentee');
 const Quiz = require('../models/Quiz');
 const { authenticate } = require('../middleware/authMentor');
+const { requireRole } = require('../middleware/requireRole');
 const router = express.Router();
 
 
-// Create Mentor (Directly via Thunder Client)
-router.post('/mentors', async (req, res) => {
+// Create Mentor (Admin only)
+router.post('/mentors', requireRole('admin'), async (req, res) => {
   try {
-    console.log("Creating mentor...")
+    console.log("Creating mentor...");
     const { name, email, password } = req.body;
     const salt = await bcrypt.genSalt(10);
     const mentor = new Mentor({
       name,
       email,
-      password: await bcrypt.hash(password, salt)
+      password: await bcrypt.hash(password, salt),
+      role: 'mentor',
+      status: 'approved'
     });
     await mentor.save();
     res.status(201).json(mentor);
@@ -48,7 +51,7 @@ router.get('/programs', async (req, res) => {
   }
 });
 
-// Mentor Login
+// Mentor Login (legacy — kept for backward compat)
 router.post('/mentors/login', async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -56,7 +59,11 @@ router.post('/mentors/login', async (req, res) => {
     if (!mentor || !(await bcrypt.compare(password, mentor.password))) {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
-    const token = jwt.sign({ id: mentor._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(
+      { id: mentor._id, role: 'mentor', name: mentor.name },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
     res.json({ token, mentor });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -68,7 +75,7 @@ router.post('/mentors/login', async (req, res) => {
 router.post('/programs', async (req, res) => {
   try {
     const program = new Program({
-      name: req.body.name // Auto-assign creator as mentor
+      name: req.body.name
     });
     await program.save();
     
@@ -171,7 +178,8 @@ router.post('/resources/quiz', authenticate, async (req, res) => {
 // Mentor adds a mentee (with auto-generated credentials)
 router.post('/mentees', authenticate, async (req, res) => {
   try {
-    const { email, name, enrollmentNumber, programId } = req.body;
+    const { email, name, programId } = req.body;
+    let { enrollmentNumber } = req.body;
     const mentor = req.mentor;
 
     // Check if mentor is assigned to the program
@@ -180,15 +188,24 @@ router.post('/mentees', authenticate, async (req, res) => {
       return res.status(403).json({ error: 'Not authorized for this program' });
     }
 
-    // Generate a random password (or let mentor set one)
-    const tempPassword = Math.random().toString(36).slice(-8); // Example: "x7f9d2y"
+    // Auto-generate enrollment number if not provided
+    if (!enrollmentNumber) {
+      const count = await Mentee.countDocuments();
+      enrollmentNumber = `TN26-${String(count + 1).padStart(4, '0')}`;
+    }
+
+    // Generate a random password
+    const tempPassword = Math.random().toString(36).slice(-8);
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
     
     const mentee = new Mentee({
       email,
       name,
       enrollmentNumber,
-      password: tempPassword,
-      programs: [programId]
+      password: hashedPassword,
+      programs: [programId],
+      mustChangePassword: true,
+      createdBy: mentor._id
     });
     await mentee.save();
 
@@ -316,5 +333,79 @@ router.get('/unverified-projects', authenticate, async (req, res) => {
   }
 });
 
+// --- New Mentor Routes (TechNeeds 2.0) ---
+
+// GET /api/mentor/me
+router.get('/mentor/me', requireRole('mentor'), async (req, res) => {
+  try {
+    const mentor = await Mentor.findById(req.user._id).select('-password').populate('programs');
+    res.json(mentor);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/mentor/cohorts
+router.get('/mentor/cohorts', requireRole('mentor'), async (req, res) => {
+  try {
+    const programs = await Program.find({ mentors: req.user._id }).populate('mentors', '-password');
+    res.json(programs);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/mentor/mentees/bulk
+// Body: { cohortId, lines: "name,email\nname,email" }
+router.post('/mentor/mentees/bulk', requireRole('mentor'), async (req, res) => {
+  try {
+    const { cohortId, lines } = req.body;
+    if (!cohortId || !lines) {
+      return res.status(400).json({ error: 'cohortId and lines are required' });
+    }
+
+    const program = await Program.findById(cohortId);
+    if (!program) return res.status(404).json({ error: 'Cohort not found' });
+    if (!program.mentors.map(m => m.toString()).includes(req.user._id.toString())) {
+      return res.status(403).json({ error: 'Not authorized for this cohort' });
+    }
+
+    const rows = lines.trim().split('\n').map(l => l.trim()).filter(Boolean);
+    const results = [];
+    let count = await Mentee.countDocuments();
+
+    for (const row of rows) {
+      const parts = row.split(',').map(s => s.trim());
+      const name = parts[0];
+      const email = parts[1];
+      if (!name || !email) continue;
+
+      count++;
+      const enrollmentNumber = `TN26-${String(count).padStart(4, '0')}`;
+      const tempPassword = Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+      try {
+        const mentee = new Mentee({
+          name,
+          email,
+          enrollmentNumber,
+          password: hashedPassword,
+          programs: [cohortId],
+          mustChangePassword: true,
+          createdBy: req.user._id
+        });
+        await mentee.save();
+        results.push({ name, email, enrollmentNumber, tempPassword });
+      } catch (saveErr) {
+        results.push({ name, email, error: saveErr.message });
+      }
+    }
+
+    res.status(201).json(results);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 module.exports = router;
