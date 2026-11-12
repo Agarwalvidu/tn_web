@@ -1,4 +1,4 @@
-const BASE_URL = "https://techneeds-backend.onrender.com/api" || 'http://localhost:5000';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 async function request(path, { method = 'GET', body, token } = {}) {
   const headers = {};
