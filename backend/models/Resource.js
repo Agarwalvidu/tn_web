@@ -15,7 +15,11 @@ const ResourceSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Quiz'
   },
-  isLocked: { type: Boolean, default: false }
+  isLocked: { type: Boolean, default: false },
+  addedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Mentor'
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Resource', ResourceSchema);

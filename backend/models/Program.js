@@ -9,7 +9,10 @@ const ProgramSchema = new mongoose.Schema({
   resources: [{ 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'Resource' 
-  }]
+  }],
+  description: { type: String },
+  syllabus: { type: String },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Program', ProgramSchema);

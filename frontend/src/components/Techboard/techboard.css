@@ -1,69 +1,12 @@
-/* Global styles for the container */
-.tech-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  /* Styling the techboard div */
-  .techboard {
-    background: linear-gradient(to right, #b3d4e6, #FFFFFF, #b3d4e6);
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 40px;
-    max-width: 500px;
-    text-align: center;
-    transition: all 0.3s ease;
-    margin-top:100px;
-    margin-bottom:100px;
-  }
-  
-  /* Heading styling */
-  .heading {
-    font-size: 1.8rem;
-    color: #333;
-    margin-bottom: 20px;
-    font-weight: bold;
-  }
-  
-  /* Subheading styling */
-  .subheading {
-    font-size: 1.1rem;
-    color: #555;
-    margin-bottom: 20px;
-  }
-  
-  /* Button container */
-  .button-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  /* Button styling */
-  .role-button {
-    background: linear-gradient(135deg, #296c9e 0%, #3e86b5 50%, #5078c8 100%);
-    color: white;
-    padding: 12px 20px;
-    font-size: 1rem;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    width: 100%;
-  }
-  
-  .role-button:hover {
-    background-color: #45a049;
-  }
-  
-  .role-button:focus {
-    outline: none;
-  }
-  
-  /* Optional loading text */
-  .loading {
-    font-size: 1.2rem;
-    color: #888;
-  }
-  
+.tb-wrap { padding-top: 2.5rem; }
+.tb-head { text-align: center; margin-bottom: 2.5rem; }
+.tb-head h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 800; margin: 0.6rem 0 0.5rem; }
+.tb-head p { color: var(--tn-muted); font-size: 1.05rem; }
+.tb-grid { display: grid; gap: 1.3rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.tb-card { display: block; margin: 0; padding: 2rem 1.8rem; text-align: left; }
+.tb-icon { width: 58px; height: 58px; border-radius: 18px; display: grid; place-items: center; font-size: 1.4rem; color: #fff; background: var(--tn-grad); margin-bottom: 1.2rem; }
+.tb-card h2 { font-size: 1.25rem; margin-bottom: 0.4rem; }
+.tb-card p { color: var(--tn-muted); line-height: 1.6; margin-bottom: 1.2rem; }
+.tb-cta { color: var(--tn-blue); font-weight: 700; }
+.tb-cta i { margin-left: 0.3rem; transition: margin 0.15s; }
+.tb-card:hover .tb-cta i { margin-left: 0.6rem; }

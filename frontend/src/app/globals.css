@@ -1,41 +1,54 @@
+/* TechNeeds design tokens + base. Loaded AFTER bootstrap so these resets win. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --tn-ink: #0f1c2e;
+  --tn-text: #2a3a4f;
+  --tn-muted: #64748b;
+  --tn-line: #e4e9f0;
+  --tn-bg: #f5f7fb;
+  --tn-card: #ffffff;
+  --tn-navy: #0a2540;
+  --tn-navy-2: #12355f;
+  --tn-blue: #2563c9;
+  --tn-blue-700: #1d4ea3;
+  --tn-teal: #0fa3a3;
+  --tn-coral: #ff7a59;
+  --tn-amber: #f5b301;
+  --tn-green: #16a34a;
+  --tn-red: #dc2626;
+  --tn-grad: linear-gradient(135deg, #2563c9 0%, #0fa3a3 100%);
+  --tn-radius: 16px;
+  --tn-shadow-sm: 0 1px 2px rgba(15, 28, 46, 0.06), 0 1px 3px rgba(15, 28, 46, 0.05);
+  --tn-shadow: 0 8px 24px rgba(15, 28, 46, 0.08);
+  --tn-shadow-lg: 0 24px 60px rgba(15, 28, 46, 0.16);
+  --tn-nav-h: 68px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+*, *::before, *::after { box-sizing: border-box; }
+* { padding: 0; margin: 0; }
 
-html,
+html { max-width: 100vw; scroll-behavior: smooth; color-scheme: light; scroll-padding-top: calc(var(--tn-nav-h) + 12px); }
+
 body {
   max-width: 100vw;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+  /* --font-geist-sans is defined on <body> by next/font, so it must be used here, not on :root */
+  font-family: var(--font-geist-sans), system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: var(--tn-text);
+  background: var(--tn-bg);
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
+h1, h2, h3, h4, h5, h6 { color: var(--tn-ink); line-height: 1.2; letter-spacing: -0.02em; font-weight: 700; }
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; }
+button { font-family: inherit; }
+ul, ol { list-style: none; }
+::selection { background: rgba(37, 99, 201, 0.22); }
+:focus-visible { outline: 3px solid rgba(37, 99, 201, 0.45); outline-offset: 2px; border-radius: 6px; }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
