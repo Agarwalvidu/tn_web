@@ -6,6 +6,7 @@ const { requireRole } = require('../middleware/requireRole');
 const Program = require('../models/Program');
 const MentorFeedback = require('../models/MentorFeedback');
 
+const isId = (v) => /^[a-f\d]{24}$/i.test(String(v));
 const menteeAuth = requireRole('mentee');
 const mentorAuth = requireRole('mentor');
 const adminAuth = requireRole('admin');
@@ -14,6 +15,7 @@ const adminAuth = requireRole('admin');
 router.get('/mentor/:cohortId', mentorAuth, async (req, res) => {
   try {
     const { cohortId } = req.params;
+    if (!isId(cohortId)) return res.status(400).json({ error: 'Invalid cohort id' });
 
     const program = await Program.findOne({
       _id: cohortId,
@@ -51,14 +53,15 @@ router.get('/mentor/:cohortId', mentorAuth, async (req, res) => {
   }
 });
 
-// Get all mentor feedback (admin only)
+// Get all mentor feedback (admin only). Feedback is ANONYMOUS: the mentee's identity is never sent.
 router.get('/admin/all', adminAuth, async (req, res) => {
   try {
     const feedback = await MentorFeedback.find()
-      .populate('mentee', 'name email enrollmentNumber')
+      .select('-mentee') // keep the mentee out of the response entirely
       .populate('mentor', 'name email')
       .populate('cohort', 'name')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.json({ feedback });
   } catch (err) {
@@ -72,6 +75,7 @@ router.get('/:cohortId', menteeAuth, async (req, res) => {
   try {
     const mentee = req.user;
     const { cohortId } = req.params;
+    if (!isId(cohortId)) return res.status(400).json({ error: 'Invalid cohort id' });
 
     const isEnrolled = (mentee.programs || []).some(
       programId => String(programId) === String(cohortId)
@@ -116,7 +120,7 @@ router.post('/:cohortId', menteeAuth, async (req, res) => {
     const { cohortId } = req.params;
     const { mentorId, rating, comment } = req.body;
 
-    if (!mentorId || !Number.isInteger(rating) || rating < 1 || rating > 5) {
+    if (!isId(cohortId) || !isId(mentorId) || !Number.isInteger(rating) || rating < 1 || rating > 5) {
       return res.status(400).json({ error: 'Please provide a valid mentor and rating (1-5)' });
     }
 

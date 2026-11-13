@@ -239,7 +239,7 @@ export default function CohortView() {
         {tab === 'feedback' && (
           <div className="tn-card">
             <h2>Mentor Feedback</h2>
-            <p>Rate your mentor and share your experience.</p>
+            <p className="tn-muted" style={{ marginBottom: '1rem' }}>Rate your mentor and share your experience. Your feedback is anonymous: your mentor and the admin will not see your name.</p>
 
             {feedbackLoading && <Spinner />}
 
@@ -250,14 +250,14 @@ export default function CohortView() {
             )}
 
             {feedbackMentors.map((mentor) => (
-              <div key={mentor._id} className="tn-video-row">
-                <h3>{mentor.name}</h3>
+              <div key={mentor._id} style={{ padding: '1.2rem 0', borderBottom: '1px solid #eef2f7' }}>
+                <h3 style={{ marginBottom: '0.5rem' }}><i className="fas fa-chalkboard-user" style={{ color: 'var(--tn-blue)', marginRight: 8 }} />{mentor.name}</h3>
 
                 {mentor.hasSubmitted ? (
                   <p className="tn-muted">You have already submitted feedback.</p>
                 ) : (
                   <>
-                    <p>How would you rate this mentor?</p>
+                    <p className="tn-muted">How would you rate this mentor?</p>
 
                     <div style={{ display: 'flex', gap: '0.5rem', margin: '1rem 0' }}>
                       {[1, 2, 3, 4, 5].map((star) => (
@@ -282,6 +282,8 @@ export default function CohortView() {
                     </div>
 
                     <textarea
+                      className="tn-textarea"
+                      aria-label={`Feedback for ${mentor.name}`}
                       placeholder="Write your feedback..."
                       value={comments[mentor._id] || ''}
                       onChange={(e) => setComments(prev => ({
@@ -289,7 +291,7 @@ export default function CohortView() {
                         [mentor._id]: e.target.value
                       }))}
                       rows={3}
-                      style={{ width: '100%', padding: '0.75rem', borderRadius: 8 }}
+                      style={{ minHeight: 90 }}
                     />
 
                     <button

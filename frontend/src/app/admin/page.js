@@ -55,6 +55,16 @@ export default function AdminPage() {
 
   if (!ready) return <div className="tn-page"><Spinner /></div>;
 
+  const feedbackSummary = (() => {
+    const map = new Map();
+    (feedback || []).forEach((f) => {
+      const key = `${idOf(f.mentor || {})}-${idOf(f.cohort || {})}`;
+      const cur = map.get(key) || { key, mentor: f.mentor?.name || '-', cohort: f.cohort?.name || '-', sum: 0, count: 0 };
+      cur.sum += f.rating || 0; cur.count += 1; map.set(key, cur);
+    });
+    return [...map.values()].map((s) => ({ ...s, avg: s.sum / s.count })).sort((a, b) => b.avg - a.avg);
+  })();
+
   const pending = (requests || []).filter((r) => !r.status || r.status === 'pending');
 
   const approve = (r) => guard(async () => {
@@ -251,53 +261,54 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* ───── Mentor Feedback ───── */}
+        {/* ───── Mentor Feedback (anonymous) ───── */}
         {tab === 'feedback' && (
-          <div className="tn-card">
-            <h2>Mentor Feedback</h2>
-
-            {!feedback ? (
-              <Spinner />
-            ) : feedback.length === 0 ? (
-              <Empty icon="fa-star">No feedback submitted yet.</Empty>
+          <>
+            <Alert type="info"><i className="fas fa-user-secret" /><span>Feedback is anonymous. You can see the rating and comment, but not which mentee wrote it.</span></Alert>
+            {!feedback ? <Spinner /> : feedback.length === 0 ? (
+              <div className="tn-card"><Empty icon="fa-star">No feedback submitted yet.</Empty></div>
             ) : (
-              <div className="tn-table-wrap">
-                <table className="tn-table">
-                  <thead>
-                    <tr>
-                      <th>Mentee</th>
-                      <th>Mentor</th>
-                      <th>Cohort</th>
-                      <th>Rating</th>
-                      <th>Comment</th>
-                      <th>Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {feedback.map((f) => (
-                      <tr key={idOf(f)}>
-                        <td>
-                          <strong>{f.mentee?.name || '-'}</strong>
-                          <div className="tn-muted">{f.mentee?.email || '-'}</div>
-                        </td>
-                        <td>{f.mentor?.name || '-'}</td>
-                        <td>{f.cohort?.name || '-'}</td>
-                        <td style={{ whiteSpace: 'nowrap' }}>
-                          <span style={{ color: '#f5b301' }}>
-                            {'★'.repeat(f.rating || 0)}
-                          </span>
-                          {' '}
-                          {f.rating}/5
-                        </td>
-                        <td>{f.comment}</td>
-                        <td>{when(f.createdAt)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <>
+                <div className="tn-card">
+                  <h2>Average rating per mentor</h2>
+                  <div className="tn-table-wrap">
+                    <table className="tn-table">
+                      <thead><tr><th>Mentor</th><th>Cohort</th><th>Average</th><th>Reviews</th></tr></thead>
+                      <tbody>
+                        {feedbackSummary.map((s) => (
+                          <tr key={s.key}>
+                            <td><strong>{s.mentor}</strong></td>
+                            <td>{s.cohort}</td>
+                            <td style={{ whiteSpace: 'nowrap' }}><span style={{ color: '#f5b301' }}>★</span> <strong>{s.avg.toFixed(1)}</strong> / 5</td>
+                            <td>{s.count}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div className="tn-card">
+                  <h2>All feedback</h2>
+                  <div className="tn-table-wrap">
+                    <table className="tn-table">
+                      <thead><tr><th>Mentor</th><th>Cohort</th><th>Rating</th><th>Comment</th><th>Date</th></tr></thead>
+                      <tbody>
+                        {feedback.map((f) => (
+                          <tr key={idOf(f)}>
+                            <td>{f.mentor?.name || '-'}</td>
+                            <td>{f.cohort?.name || '-'}</td>
+                            <td style={{ whiteSpace: 'nowrap' }}><span style={{ color: '#f5b301' }}>{'★'.repeat(f.rating || 0)}</span> {f.rating}/5</td>
+                            <td style={{ maxWidth: 380 }}>{f.comment}</td>
+                            <td>{when(f.createdAt)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </>
             )}
-          </div>
+          </>
         )}
       </div>
 
