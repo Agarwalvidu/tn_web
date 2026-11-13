@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { useRoleGuard, handleAuthError } from '../../lib/useAuth';
-import { getMenteeCohort, completeVideo } from '../../lib/api';
+import { getMenteeCohort, completeVideo, getCohortMentorsForFeedback, submitMentorFeedback } from '../../lib/api';
 import { toEmbedUrl, formatDateTime } from '../../lib/video';
 import Avatar from '../ui/Avatar';
 import { Spinner, Alert, Empty, RankBadge, HowPoints } from '../ui/Common';
@@ -16,6 +16,7 @@ const TABS = [
   ['videos', 'Videos', 'fa-circle-play'],
   ['quizzes', 'Quizzes', 'fa-pen-to-square'],
   ['leaderboard', 'Leaderboard', 'fa-ranking-star'],
+  ['feedback', 'Mentor Feedback', 'fa-star'],
 ];
 
 export default function CohortView() {
@@ -28,6 +29,11 @@ export default function CohortView() {
   const [openVideo, setOpenVideo] = useState(null);
   const [quizId, setQuizId] = useState(null);
   const [toast, setToast] = useState('');
+  const [feedbackMentors, setFeedbackMentors] = useState([]);
+  const [ratings, setRatings] = useState({});
+  const [comments, setComments] = useState({});
+  const [feedbackError, setFeedbackError] = useState('');
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
 
   const load = useCallback(() => {
     getMenteeCohort(token, id)
@@ -48,6 +54,52 @@ export default function CohortView() {
       setToast(e.message);
     }
   };
+
+  const loadFeedback = async () => {
+    setFeedbackLoading(true);
+    setFeedbackError('');
+
+    try {
+      const res = await getCohortMentorsForFeedback(token, id);
+      setFeedbackMentors(res.mentors);
+    } catch (err) {
+      setFeedbackError(err.message);
+    } finally {
+      setFeedbackLoading(false);
+    }
+  };
+
+  const handleFeedbackSubmit = async (mentorId) => {
+    setFeedbackError('');
+
+    try {
+      await submitMentorFeedback(
+        token,
+        id,
+        mentorId,
+        ratings[mentorId],
+        comments[mentorId]
+      );
+
+      setFeedbackMentors(prev =>
+        prev.map(mentor =>
+          mentor._id === mentorId
+            ? { ...mentor, hasSubmitted: true }
+            : mentor
+        )
+      );
+
+      setToast('Feedback submitted successfully!');
+    } catch (err) {
+      setFeedbackError(err.message);
+    }
+  };
+
+  useEffect(() => {
+    if (ready && tab === 'feedback') {
+      loadFeedback();
+    }
+  }, [ready, tab, token, id]);
 
   if (!ready || (!data && !error)) return <div className="tn-page"><Spinner /></div>;
 
@@ -182,6 +234,76 @@ export default function CohortView() {
                 </tbody>
               </table>
             </div>
+          </div>
+        )}
+        {tab === 'feedback' && (
+          <div className="tn-card">
+            <h2>Mentor Feedback</h2>
+            <p>Rate your mentor and share your experience.</p>
+
+            {feedbackLoading && <Spinner />}
+
+            {feedbackError && <Alert>{feedbackError}</Alert>}
+
+            {!feedbackLoading && feedbackMentors.length === 0 && (
+              <Empty icon="fa-star">No mentors assigned to this cohort yet.</Empty>
+            )}
+
+            {feedbackMentors.map((mentor) => (
+              <div key={mentor._id} className="tn-video-row">
+                <h3>{mentor.name}</h3>
+
+                {mentor.hasSubmitted ? (
+                  <p className="tn-muted">You have already submitted feedback.</p>
+                ) : (
+                  <>
+                    <p>How would you rate this mentor?</p>
+
+                    <div style={{ display: 'flex', gap: '0.5rem', margin: '1rem 0' }}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setRatings(prev => ({
+                            ...prev,
+                            [mentor._id]: star
+                          }))}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontSize: '2rem',
+                            color: star <= (ratings[mentor._id] || 0) ? '#f5b50a' : '#ccc'
+                          }}
+                        >
+                          ★
+                        </button>
+                      ))}
+                    </div>
+
+                    <textarea
+                      placeholder="Write your feedback..."
+                      value={comments[mentor._id] || ''}
+                      onChange={(e) => setComments(prev => ({
+                        ...prev,
+                        [mentor._id]: e.target.value
+                      }))}
+                      rows={3}
+                      style={{ width: '100%', padding: '0.75rem', borderRadius: 8 }}
+                    />
+
+                    <button
+                      className="tn-btn"
+                      style={{ marginTop: '0.75rem' }}
+                      disabled={!ratings[mentor._id] || !comments[mentor._id]?.trim()}
+                      onClick={() => handleFeedbackSubmit(mentor._id)}
+                    >
+                      Submit Feedback
+                    </button>
+                  </>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>

@@ -5,7 +5,7 @@ import { useRoleGuard } from '../../lib/useAuth';
 import {
   getAdminStats, getMentorRequests, approveMentorRequest, rejectMentorRequest,
   getAdminCohorts, createCohort, updateCohort, deleteCohort, assignMentor, removeMentor,
-  getCohortAnalytics, getAdminMentors,
+  getCohortAnalytics, getAdminMentors, getAdminMentorFeedback,
 } from '../../lib/api';
 import { Spinner, Alert, Empty } from '../../components/ui/Common';
 import '../../components/ui/tn.css';
@@ -24,6 +24,7 @@ export default function AdminPage() {
   const [requests, setRequests] = useState(null);
   const [cohorts, setCohorts] = useState(null);
   const [mentors, setMentors] = useState(null);
+  const [feedback, setFeedback] = useState(null);
 
   const [approved, setApproved] = useState(null); // { name, email, password }
   const [busyId, setBusyId] = useState(null);
@@ -42,11 +43,15 @@ export default function AdminPage() {
   const loadRequests = useCallback(() => guard(async () => setRequests(toList(await getMentorRequests(token), 'requests'))), [token]);
   const loadCohorts = useCallback(() => guard(async () => setCohorts(toList(await getAdminCohorts(token), 'cohorts'))), [token]);
   const loadMentors = useCallback(() => guard(async () => setMentors(toList(await getAdminMentors(token), 'mentors'))), [token]);
+  const loadFeedback = useCallback(() => guard(async () => {
+    const data = await getAdminMentorFeedback(token);
+    setFeedback(Array.isArray(data) ? data : data.feedback || []);
+  }), [token]);
 
   useEffect(() => {
     if (!ready) return;
-    loadStats(); loadRequests(); loadCohorts(); loadMentors();
-  }, [ready, loadStats, loadRequests, loadCohorts, loadMentors]);
+    loadStats(); loadRequests(); loadCohorts(); loadMentors(); loadFeedback();
+  }, [ready, loadStats, loadRequests, loadCohorts, loadMentors, loadFeedback]);
 
   if (!ready) return <div className="tn-page"><Spinner /></div>;
 
@@ -104,6 +109,7 @@ export default function AdminPage() {
     ['requests', `Mentor requests${pending.length ? ` (${pending.length})` : ''}`, 'fa-user-clock'],
     ['cohorts', 'Cohorts', 'fa-layer-group'],
     ['mentors', 'Mentors', 'fa-chalkboard-user'],
+    ['feedback', 'Mentor Feedback', 'fa-star'],
   ];
 
   return (
@@ -241,6 +247,55 @@ export default function AdminPage() {
                   <tr key={idOf(m)}><td><strong>{m.name}</strong><div className="tn-muted">{m.email}</div></td>
                     <td>{(m.programs || []).length ? m.programs.map((p) => <span key={idOf(p)} className="tn-chip">{p.name}</span>) : <span className="tn-muted">Not assigned</span>}</td></tr>
                 ))}</tbody></table></div>
+            )}
+          </div>
+        )}
+
+        {/* ───── Mentor Feedback ───── */}
+        {tab === 'feedback' && (
+          <div className="tn-card">
+            <h2>Mentor Feedback</h2>
+
+            {!feedback ? (
+              <Spinner />
+            ) : feedback.length === 0 ? (
+              <Empty icon="fa-star">No feedback submitted yet.</Empty>
+            ) : (
+              <div className="tn-table-wrap">
+                <table className="tn-table">
+                  <thead>
+                    <tr>
+                      <th>Mentee</th>
+                      <th>Mentor</th>
+                      <th>Cohort</th>
+                      <th>Rating</th>
+                      <th>Comment</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {feedback.map((f) => (
+                      <tr key={idOf(f)}>
+                        <td>
+                          <strong>{f.mentee?.name || '-'}</strong>
+                          <div className="tn-muted">{f.mentee?.email || '-'}</div>
+                        </td>
+                        <td>{f.mentor?.name || '-'}</td>
+                        <td>{f.cohort?.name || '-'}</td>
+                        <td style={{ whiteSpace: 'nowrap' }}>
+                          <span style={{ color: '#f5b301' }}>
+                            {'★'.repeat(f.rating || 0)}
+                          </span>
+                          {' '}
+                          {f.rating}/5
+                        </td>
+                        <td>{f.comment}</td>
+                        <td>{when(f.createdAt)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         )}

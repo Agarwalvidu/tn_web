@@ -49,6 +49,7 @@ export const removeMentor = (token, cohortId, mentorId) =>
   request(`/api/admin/cohorts/${cohortId}/remove-mentor`, { method: 'POST', token, body: { mentorId } });
 export const getCohortAnalytics = (token, cohortId) => request(`/api/admin/cohorts/${cohortId}/analytics`, { token });
 export const getAdminMentors = (token) => request('/api/admin/mentors', { token });
+export const getAdminMentorFeedback = (token) => request('/api/mentor-feedback/admin/all', { token });
 
 // ───────── Mentor ─────────
 export const getMentorCohorts = (token) => request('/api/mentor/cohorts', { token });
@@ -58,6 +59,7 @@ export const addMenteesBulk = (token, cohortId, lines) =>
 export const addVideo = (token, data) => request('/api/mentor/videos', { method: 'POST', token, body: data });
 export const createQuiz = (token, data) => request('/api/mentor/quizzes', { method: 'POST', token, body: data });
 export const getMenteeProfileAsMentor = (token, menteeId) => request(`/api/mentor/mentees/${menteeId}/profile`, { token });
+export const getMentorFeedback = (token, cohortId) => request(`/api/mentor-feedback/mentor/${cohortId}`, { token });
 
 // ───────── Mentee ─────────
 export const getMenteeDashboard = (token) => request('/api/m/dashboard', { token });
@@ -69,3 +71,12 @@ export const submitQuiz = (token, resourceId, answers) =>
 export const getMyProfile = (token) => request('/api/m/profile', { token });
 export const refreshMyProfile = (token) => request('/api/m/profile/refresh', { method: 'POST', token });
 export const setAvatar = (token, avatar) => request('/api/m/avatar', { method: 'PUT', token, body: { avatar } });
+export const getCohortMentorsForFeedback = (token, cohortId) =>
+  request(`/api/mentor-feedback/${cohortId}`, { token });
+
+export const submitMentorFeedback = (token, cohortId, mentorId, rating, comment) => request(`/api/mentor-feedback/${cohortId}`, 
+  {
+    method: 'POST',
+    token,
+    body: { mentorId, rating, comment }
+  });

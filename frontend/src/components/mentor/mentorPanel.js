@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { mentorLogin, addMentee, addResource, getAllPrograms, getProgramMentees, getProgramResources } from '../../lib/api';
+import { login, addMenteesBulk, addVideo, createQuiz, getMentorCohorts, getMentorOverview, getMentorFeedback } from '../../lib/api';
 import UnverifiedProjects from './projects';
 import './mentor.css'
 
@@ -22,6 +22,8 @@ export default function MentorPanel() {
   const [mentees, setMentees] = useState([]);
   const [resources, setResources] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [mentorFeedback, setMentorFeedback] = useState(null);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
 
 
   const [startTime, setStartTime] = useState('');
@@ -63,39 +65,26 @@ export default function MentorPanel() {
       setLoggedIn(true);
   
       // Optional: load programs here
-      getAllPrograms().then(allPrograms => {
-        const mentorPrograms = allPrograms.filter(program =>
-          savedMentor.programs.some(programId =>
-            programId.toString() === program._id.toString()
-          )
-        );
+      getMentorCohorts(savedToken).then(mentorPrograms => {
         setPrograms(mentorPrograms);
         if (savedProgram) {
-          setSelectedProgram(savedProgram); // 👈 Restore
-          handleProgramSelect(savedProgram); // 👈 Load its data
+          setSelectedProgram(savedProgram);
+          handleProgramSelect(savedProgram);
         }
-      }).catch(err => {
-        console.error("Failed to load programs", err);
-      });
+      }).catch(err => console.error("Failed to load programs", err));
     }
   }, []);
   
   const handleLogin = async () => {
     try {
-      const { token, mentor } = await mentorLogin(email, password);
+      const { token, user } = await login(email, password, 'mentor');
       setToken(token);
       setLoggedIn(true);
 
       localStorage.setItem('token', token);
-      localStorage.setItem('mentor', JSON.stringify(mentor));
+      localStorage.setItem('mentor', JSON.stringify(user));
 
-      const allPrograms = await getAllPrograms();
-      const mentorPrograms = allPrograms.filter(program => 
-        mentor.programs.some(programId => 
-          programId.toString() === program._id.toString()
-        )
-      );
-  
+      const mentorPrograms = await getMentorCohorts(token);
       setPrograms(mentorPrograms);
     } catch (err) {
       alert(err.message);
@@ -113,13 +102,13 @@ export default function MentorPanel() {
 
   const handleAddMentee = async () => {
     try {
-      const result = await addMentee(token, {
-        email: menteeEmail,
-        name: menteeName,
-        enrollmentNumber,
-        programId: selectedProgram,
-      });
-      alert(`Mentee added!`);
+      await addMenteesBulk(
+        token,
+        selectedProgram,
+        `${menteeName},${menteeEmail}`
+      );
+
+      alert('Mentee added!');
       window.location.reload();
     } catch (err) {
       alert(err.message);
@@ -129,53 +118,68 @@ export default function MentorPanel() {
   const handleProgramSelect = async (programId) => {
     setSelectedProgram(programId);
     localStorage.setItem('selectedProgram', programId);
+    setFeedbackLoading(true);
+
     try {
-      const [menteesData, resourcesData] = await Promise.all([
-        getProgramMentees(programId, token),
-        getProgramResources(programId, token)
+      const [overviewData, feedbackData] = await Promise.all([
+        getMentorOverview(token, programId),
+        getMentorFeedback(token, programId)
       ]);
-      setMentees(menteesData);
-      setResources(resourcesData);
+
+      setMentees(overviewData.mentees || []);
+      setResources(overviewData.resources || []);
+      setMentorFeedback(feedbackData);
     } catch (err) {
       console.error('Failed to load program data:', err);
-      // Handle error (show toast/message)
+    } finally {
+      setFeedbackLoading(false);
     }
   };
 
   const handleAddResource = async () => {
     try {
-      let resourceData = {
-        title: resourceTitle,
-        type: resourceType,
-        program: selectedProgram,
-      };
-  
-      let isQuiz = false;
-  
-      if (resourceType === 'quiz') {
-        isQuiz = true;
-        const maxScore = questions.reduce((sum, q) => sum + Number(q.marks || 1), 0);
-        resourceData = {
-          ...resourceData,
+      if (!selectedProgram) {
+        alert('Please select a program first.');
+        return;
+      }
+
+      if (!resourceTitle.trim()) {
+        alert('Please enter a resource title.');
+        return;
+      }
+
+      if (resourceType === 'video') {
+        await addVideo(token, {
+          cohortId: selectedProgram,
+          title: resourceTitle,
+          url: resourceURL
+        });
+      } 
+      else if (resourceType === 'quiz') {
+        if (!endTime || questions.length === 0) {
+          alert('Please enter an end time and add at least one question.');
+          return;
+        }
+
+        await createQuiz(token, {
+          cohortId: selectedProgram,
+          title: resourceTitle,
           questions,
           startTime,
-          endTime,
-          revealScores,
-          maxScore
-        };
-      } else {
-        resourceData.url = resourceURL;
+          endTime
+        });
+      } 
+      else {
+        alert('Project creation is not supported by the current backend.');
+        return;
       }
-  
-      const result = await addResource(token, resourceData, isQuiz);
+
       alert('Resource added!');
       window.location.reload();
     } catch (err) {
       alert(err.message);
     }
   };
-  
-  
 
   return (
     <>
@@ -346,6 +350,23 @@ export default function MentorPanel() {
                   </tbody>
                 </table>
               ) : <p>No resources in this program</p>}
+              <h3>Mentor Rating</h3>
+
+              {feedbackLoading ? (
+                <p>Loading ratings...</p>
+              ) : mentorFeedback ? (
+                <div>
+                  <h2>
+                    {mentorFeedback.totalRatings > 0
+                      ? `${Number(mentorFeedback.averageRating).toFixed(1)} / 5 ★`
+                      : 'No ratings yet'}
+                  </h2>
+
+                  <p>Total ratings: {mentorFeedback.totalRatings}</p>
+                </div>
+              ) : (
+                <p>No rating information available.</p>
+              )}
             </div>
           )}
         <UnverifiedProjects />
