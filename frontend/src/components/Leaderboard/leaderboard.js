@@ -44,7 +44,8 @@ export default function Leaderboard() {
       <div className="tn-container">
         <div className="tn-hero">
           <div>
-            <h1><i className="fas fa-ranking-star" /> Leaderboard</h1>
+            <span className="tn-eyebrow"><i className="fas fa-ranking-star" /> Live rankings</span>
+            <h1>Leaderboard</h1>
             <p>Rule-based points, updated automatically after every quiz.</p>
           </div>
           {cohorts.length > 0 && (
@@ -61,6 +62,22 @@ export default function Leaderboard() {
           {rows === null && !error ? <Spinner /> : rows && rows.length === 0 ? (
             <Empty icon="fa-users">No mentees in this cohort yet.</Empty>
           ) : rows && (
+            <>
+            {rows.length >= 3 && rows[0].points > 0 && (
+              <div className="tn-podium">
+                {[rows[1], rows[0], rows[2]].map((r, i) => {
+                  const place = [2, 1, 3][i];
+                  return (
+                    <div key={r.rank} className={`tn-podium-item p${place}`}>
+                      <span className="tn-podium-medal"><RankBadge rank={place} /></span>
+                      <div style={{ display: 'flex', justifyContent: 'center' }}><Avatar avatarKey={r.avatar} name={r.name} size={place === 1 ? 64 : 52} /></div>
+                      <div className="tn-podium-name">{r.name}</div>
+                      <div className="tn-podium-pts">{r.points} <small>pts</small></div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
             <div className="tn-table-wrap">
               <table className="tn-table">
                 <thead><tr><th>Rank</th><th>Name</th><th>Quizzes</th><th>Streak</th><th>Points</th></tr></thead>
@@ -77,6 +94,7 @@ export default function Leaderboard() {
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </div>
       </div>

@@ -36,28 +36,29 @@ export default function MenteeDashboard() {
         {data && (
           <>
             <div className="tn-hero">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <Avatar avatarKey={data.avatar} name={data.name} size={60} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.1rem' }}>
+                <span style={{ borderRadius: '50%', boxShadow: '0 0 0 4px rgba(255,255,255,0.25)', display: 'inline-flex' }}><Avatar avatarKey={data.avatar} name={data.name} size={64} /></span>
                 <div>
-                  <h1>Welcome, {data.name.split(' ')[0]}</h1>
-                  <p>{data.enrollmentNumber}</p>
+                  <h1>Welcome back, {data.name.split(' ')[0]}</h1>
+                  <p>{data.enrollmentNumber} &middot; keep the streak going</p>
                 </div>
               </div>
-              <Link href="/profile" className="tn-btn-outline" style={{ background: 'rgba(255,255,255,0.12)', color: '#fff', borderColor: '#fff' }}>
-                <i className="fas fa-id-badge" /> My AI Profile
-              </Link>
+              <div className="tn-hero-actions">
+                <Link href="/profile" className="tn-btn-ghost"><i className="fas fa-id-badge" /> My AI Profile</Link>
+                <Link href="/leaderboard" className="tn-btn-ghost"><i className="fas fa-ranking-star" /> Leaderboard</Link>
+              </div>
             </div>
 
             <div className="tn-grid-stats">
-              <div className="tn-stat"><div className="tn-stat-label">Total points</div><div className="tn-stat-value">{data.totalPoints}</div></div>
-              <div className="tn-stat"><div className="tn-stat-label">Best rank</div><div className="tn-stat-value">{data.bestRank ? `#${data.bestRank}` : '-'}</div></div>
-              <div className="tn-stat"><div className="tn-stat-label">Day streak</div><div className="tn-stat-value">{data.streak} <i className="fas fa-fire" style={{ color: '#f39c12', fontSize: '1.3rem' }} /></div></div>
-              <div className="tn-stat"><div className="tn-stat-label">Cohorts</div><div className="tn-stat-value">{data.cohorts.length}</div></div>
+              <div className="tn-stat"><span className="tn-stat-icon"><i className="fas fa-star" /></span><div><div className="tn-stat-label">Total points</div><div className="tn-stat-value">{data.totalPoints}</div></div></div>
+              <div className="tn-stat"><span className="tn-stat-icon amber"><i className="fas fa-trophy" /></span><div><div className="tn-stat-label">Best rank</div><div className="tn-stat-value">{data.bestRank ? `#${data.bestRank}` : '-'}</div></div></div>
+              <div className="tn-stat"><span className="tn-stat-icon coral"><i className="fas fa-fire" /></span><div><div className="tn-stat-label">Day streak</div><div className="tn-stat-value">{data.streak}</div></div></div>
+              <div className="tn-stat"><span className="tn-stat-icon violet"><i className="fas fa-layer-group" /></span><div><div className="tn-stat-label">Cohorts</div><div className="tn-stat-value">{data.cohorts.length}</div></div></div>
             </div>
 
             {data.nextDeadline && (
               <Alert type="warn">
-                <i className="fas fa-hourglass-half" /> Next quiz deadline: <strong>{data.nextDeadline.title}</strong> ({data.nextDeadline.cohort}) closes {formatDateTime(data.nextDeadline.deadline)}.
+                <i className="fas fa-hourglass-half" style={{ marginTop: 3 }} /><span>Next quiz deadline: <strong>{data.nextDeadline.title}</strong> ({data.nextDeadline.cohort}) closes {formatDateTime(data.nextDeadline.deadline)}.</span>
               </Alert>
             )}
 
@@ -74,13 +75,15 @@ export default function MenteeDashboard() {
                     const done = c.quizzesCompleted + c.videosCompleted;
                     const total = c.totalQuizzes + c.totalVideos;
                     return (
-                      <div key={c._id} className="tn-card" style={{ margin: 0, border: '1px solid #e3eaf1', boxShadow: 'none' }}>
-                        <h3>{c.name}</h3>
-                        <div className="tn-muted" style={{ marginBottom: '0.6rem' }}>
-                          Rank <strong>#{c.rank}</strong> of {c.of} &middot; <strong>{c.points}</strong> pts
+                      <div key={c._id} className="tn-card lift" style={{ margin: 0, background: '#fbfdff' }}>
+                        <div style={{ display: 'flex', gap: '0.9rem', alignItems: 'center', marginBottom: '0.9rem' }}>
+                          <div className="tn-ring" style={{ '--p': pct(done, total) }}><span>{pct(done, total)}%</span></div>
+                          <div><h3 style={{ margin: 0 }}>{c.name}</h3><div className="tn-muted">{done} of {total} activities done</div></div>
                         </div>
-                        <div className="tn-progress"><div style={{ width: `${pct(done, total)}%` }} /></div>
-                        <div className="tn-muted" style={{ margin: '0.4rem 0 0.9rem' }}>{done} of {total} activities done</div>
+                        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+                          <span className="tn-chip"><i className="fas fa-trophy" /> Rank #{c.rank} of {c.of}</span>
+                          <span className="tn-chip"><i className="fas fa-star" /> {c.points} pts</span>
+                        </div>
                         <Link href={`/cohort/${c._id}`} className="tn-btn tn-btn-sm">Open cohort <i className="fas fa-arrow-right" /></Link>
                       </div>
                     );
@@ -92,14 +95,14 @@ export default function MenteeDashboard() {
             {data.pending.length > 0 && (
               <div className="tn-card">
                 <h2>Up next</h2>
-                <ul className="tn-list">
-                  {data.pending.map((p, i) => (
-                    <li key={i}>
-                      <i className={`fas ${p.type === 'quiz' ? 'fa-pen-to-square' : 'fa-circle-play'}`} style={{ color: '#296c9e', marginRight: 6 }} />
-                      {p.type === 'quiz' ? 'Take' : 'Watch'} <strong>{p.title}</strong> <span className="tn-muted">({p.cohort})</span>
-                    </li>
-                  ))}
-                </ul>
+                {data.pending.map((p, i) => (
+                  <div key={i} className="tn-video-row">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                      <span className="tn-video-icon"><i className={`fas ${p.type === 'quiz' ? 'fa-pen-to-square' : 'fa-circle-play'}`} /></span>
+                      <div><strong>{p.type === 'quiz' ? 'Take' : 'Watch'} {p.title}</strong><div className="tn-muted">{p.cohort}{p.deadline ? ` · closes ${formatDateTime(p.deadline)}` : ''}</div></div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </>

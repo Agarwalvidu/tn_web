@@ -1,722 +1,303 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { requireAuth, getToken } from '../../lib/auth';
+import { useRoleGuard } from '../../lib/useAuth';
 import {
-  getAdminStats,
-  getMentorRequests,
-  approveMentorRequest,
-  rejectMentorRequest,
-  getAdminCohorts,
-  createCohort,
-  updateCohort,
-  deleteCohort,
-  assignMentor,
-  getCohortAnalytics,
-  getAdminMentors,
+  getAdminStats, getMentorRequests, approveMentorRequest, rejectMentorRequest,
+  getAdminCohorts, createCohort, updateCohort, deleteCohort, assignMentor, removeMentor,
+  getCohortAnalytics, getAdminMentors,
 } from '../../lib/api';
+import { Spinner, Alert, Empty } from '../../components/ui/Common';
+import '../../components/ui/tn.css';
+
+const toList = (d, key) => (Array.isArray(d) ? d : d[key] || []);
+const idOf = (o) => o._id || o.id;
+const when = (d) => (d ? new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '-');
 
 export default function AdminPage() {
-  const router = useRouter();
-  const [token, setToken] = useState(null);
-  const [authChecked, setAuthChecked] = useState(false);
+  const { ready, token, user } = useRoleGuard('admin');
+  const [tab, setTab] = useState('dashboard');
+  const [error, setError] = useState('');
+  const [toast, setToast] = useState('');
 
-  // Tab state
-  const [activeTab, setActiveTab] = useState('dashboard');
-
-  // Dashboard stats
   const [stats, setStats] = useState(null);
-  const [statsLoading, setStatsLoading] = useState(false);
-  const [statsError, setStatsError] = useState('');
+  const [requests, setRequests] = useState(null);
+  const [cohorts, setCohorts] = useState(null);
+  const [mentors, setMentors] = useState(null);
 
-  // Mentor requests
-  const [mentorRequests, setMentorRequests] = useState([]);
-  const [requestsLoading, setRequestsLoading] = useState(false);
-  const [requestsError, setRequestsError] = useState('');
-  const [approvedPassword, setApprovedPassword] = useState(null);
-  const [approvingId, setApprovingId] = useState(null);
-  const [rejectingId, setRejectingId] = useState(null);
+  const [approved, setApproved] = useState(null); // { name, email, password }
+  const [busyId, setBusyId] = useState(null);
+  const [cohortModal, setCohortModal] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState({ title: '', description: '', syllabus: '' });
+  const [formError, setFormError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [analytics, setAnalytics] = useState(null); // { cohort, data }
+  const [assignFor, setAssignFor] = useState(null);
+  const [mentorPick, setMentorPick] = useState('');
 
-  // Cohorts
-  const [cohorts, setCohorts] = useState([]);
-  const [cohortsLoading, setCohortsLoading] = useState(false);
-  const [cohortsError, setCohortsError] = useState('');
-  const [showCohortModal, setShowCohortModal] = useState(false);
-  const [editingCohort, setEditingCohort] = useState(null);
-  const [cohortForm, setCohortForm] = useState({ title: '', description: '', syllabus: '' });
-  const [cohortSaving, setCohortSaving] = useState(false);
-  const [cohortFormError, setCohortFormError] = useState('');
+  const guard = async (fn) => { setError(''); try { return await fn(); } catch (e) { setError(e.message || 'Something went wrong'); } };
 
-  // Analytics
-  const [analyticsModal, setAnalyticsModal] = useState(null);
-  const [analyticsData, setAnalyticsData] = useState(null);
-  const [analyticsLoading, setAnalyticsLoading] = useState(false);
-
-  // Mentors
-  const [mentors, setMentors] = useState([]);
-  const [mentorsLoading, setMentorsLoading] = useState(false);
-  const [mentorsError, setMentorsError] = useState('');
-
-  // Assign mentor dropdown
-  const [assigningCohortId, setAssigningCohortId] = useState(null);
-  const [selectedMentorId, setSelectedMentorId] = useState('');
-  const [assignLoading, setAssignLoading] = useState(false);
+  const loadStats = useCallback(() => guard(async () => setStats(await getAdminStats(token))), [token]);
+  const loadRequests = useCallback(() => guard(async () => setRequests(toList(await getMentorRequests(token), 'requests'))), [token]);
+  const loadCohorts = useCallback(() => guard(async () => setCohorts(toList(await getAdminCohorts(token), 'cohorts'))), [token]);
+  const loadMentors = useCallback(() => guard(async () => setMentors(toList(await getAdminMentors(token), 'mentors'))), [token]);
 
   useEffect(() => {
-    if (!requireAuth(router, 'admin')) return;
-    const t = getToken();
-    setToken(t);
-    setAuthChecked(true);
-  }, [router]);
+    if (!ready) return;
+    loadStats(); loadRequests(); loadCohorts(); loadMentors();
+  }, [ready, loadStats, loadRequests, loadCohorts, loadMentors]);
 
-  const fetchStats = useCallback(async (t) => {
-    setStatsLoading(true);
-    setStatsError('');
+  if (!ready) return <div className="tn-page"><Spinner /></div>;
+
+  const pending = (requests || []).filter((r) => !r.status || r.status === 'pending');
+
+  const approve = (r) => guard(async () => {
+    setBusyId(idOf(r));
     try {
-      const data = await getAdminStats(t);
-      setStats(data);
-    } catch (err) {
-      setStatsError(err.message || 'Failed to load stats');
-    } finally {
-      setStatsLoading(false);
-    }
-  }, []);
-
-  const fetchMentorRequests = useCallback(async (t) => {
-    setRequestsLoading(true);
-    setRequestsError('');
-    try {
-      const data = await getMentorRequests(t);
-      setMentorRequests(Array.isArray(data) ? data : data.requests || []);
-    } catch (err) {
-      setRequestsError(err.message || 'Failed to load mentor requests');
-    } finally {
-      setRequestsLoading(false);
-    }
-  }, []);
-
-  const fetchCohorts = useCallback(async (t) => {
-    setCohortsLoading(true);
-    setCohortsError('');
-    try {
-      const data = await getAdminCohorts(t);
-      setCohorts(Array.isArray(data) ? data : data.cohorts || []);
-    } catch (err) {
-      setCohortsError(err.message || 'Failed to load cohorts');
-    } finally {
-      setCohortsLoading(false);
-    }
-  }, []);
-
-  const fetchMentors = useCallback(async (t) => {
-    setMentorsLoading(true);
-    setMentorsError('');
-    try {
-      const data = await getAdminMentors(t);
-      setMentors(Array.isArray(data) ? data : data.mentors || []);
-    } catch (err) {
-      setMentorsError(err.message || 'Failed to load mentors');
-    } finally {
-      setMentorsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!authChecked || !token) return;
-    if (activeTab === 'dashboard') fetchStats(token);
-    if (activeTab === 'requests') fetchMentorRequests(token);
-    if (activeTab === 'cohorts') { fetchCohorts(token); fetchMentors(token); }
-    if (activeTab === 'mentors') fetchMentors(token);
-  }, [authChecked, token, activeTab, fetchStats, fetchMentorRequests, fetchCohorts, fetchMentors]);
-
-  const handleApprove = async (id) => {
-    setApprovingId(id);
-    try {
-      const data = await approveMentorRequest(token, id);
-      setApprovedPassword({ id, password: data.tempPassword || data.password || 'Check email' });
-      await fetchMentorRequests(token);
-      await fetchStats(token);
-    } catch (err) {
-      alert(err.message || 'Failed to approve request');
-    } finally {
-      setApprovingId(null);
-    }
+      const d = await approveMentorRequest(token, idOf(r));
+      setApproved({ name: r.name, email: r.email, password: d.tempPassword || d.password });
+      await Promise.all([loadRequests(), loadStats(), loadMentors()]);
+    } finally { setBusyId(null); }
+  });
+  const reject = (r) => {
+    if (!confirm(`Reject the request from ${r.name}?`)) return;
+    return guard(async () => { setBusyId(idOf(r)); try { await rejectMentorRequest(token, idOf(r)); await Promise.all([loadRequests(), loadStats()]); } finally { setBusyId(null); } });
   };
 
-  const handleReject = async (id) => {
-    if (!confirm('Are you sure you want to reject this request?')) return;
-    setRejectingId(id);
+  const openCohort = (c) => {
+    setEditing(c || null);
+    setForm({ title: c ? c.name || c.title || '' : '', description: c?.description || '', syllabus: c?.syllabus || '' });
+    setFormError(''); setCohortModal(true);
+  };
+  const saveCohort = async (e) => {
+    e.preventDefault(); setSaving(true); setFormError('');
     try {
-      await rejectMentorRequest(token, id);
-      await fetchMentorRequests(token);
-    } catch (err) {
-      alert(err.message || 'Failed to reject request');
-    } finally {
-      setRejectingId(null);
-    }
+      if (editing) await updateCohort(token, idOf(editing), form); else await createCohort(token, form);
+      setCohortModal(false);
+      setToast(editing ? 'Cohort updated' : 'Cohort created');
+      await Promise.all([loadCohorts(), loadStats()]);
+    } catch (err) { setFormError(err.message); } finally { setSaving(false); }
+  };
+  const removeCohort = (c) => {
+    if (!confirm(`Delete "${c.name}"? This cannot be undone.`)) return;
+    return guard(async () => { await deleteCohort(token, idOf(c)); setToast('Cohort deleted'); await Promise.all([loadCohorts(), loadStats()]); });
+  };
+  const showAnalytics = async (c) => {
+    setAnalytics({ cohort: c, data: null });
+    try { setAnalytics({ cohort: c, data: await getCohortAnalytics(token, idOf(c)) }); }
+    catch (e) { setAnalytics({ cohort: c, data: { error: e.message } }); }
+  };
+  const doAssign = (c) => guard(async () => {
+    if (!mentorPick) return;
+    await assignMentor(token, idOf(c), mentorPick);
+    setAssignFor(null); setMentorPick(''); setToast('Mentor assigned');
+    await Promise.all([loadCohorts(), loadMentors()]);
+  });
+  const doRemoveMentor = (c, m) => {
+    if (!confirm(`Remove ${m.name} from ${c.name}?`)) return;
+    return guard(async () => { await removeMentor(token, idOf(c), idOf(m)); setToast('Mentor removed'); await Promise.all([loadCohorts(), loadMentors()]); });
   };
 
-  const openCreateCohort = () => {
-    setEditingCohort(null);
-    setCohortForm({ title: '', description: '', syllabus: '' });
-    setCohortFormError('');
-    setShowCohortModal(true);
-  };
-
-  const openEditCohort = (cohort) => {
-    setEditingCohort(cohort);
-    setCohortForm({ title: cohort.name || cohort.title || '', description: cohort.description || '', syllabus: cohort.syllabus || '' });
-    setCohortFormError('');
-    setShowCohortModal(true);
-  };
-
-  const handleCohortSubmit = async (e) => {
-    e.preventDefault();
-    setCohortFormError('');
-    setCohortSaving(true);
-    try {
-      if (editingCohort) {
-        await updateCohort(token, editingCohort._id || editingCohort.id, cohortForm);
-      } else {
-        await createCohort(token, cohortForm);
-      }
-      setShowCohortModal(false);
-      await fetchCohorts(token);
-      await fetchStats(token);
-    } catch (err) {
-      setCohortFormError(err.message || 'Failed to save cohort');
-    } finally {
-      setCohortSaving(false);
-    }
-  };
-
-  const handleDeleteCohort = async (id) => {
-    if (!confirm('Are you sure you want to delete this cohort?')) return;
-    try {
-      await deleteCohort(token, id);
-      await fetchCohorts(token);
-      await fetchStats(token);
-    } catch (err) {
-      alert(err.message || 'Failed to delete cohort');
-    }
-  };
-
-  const handleViewAnalytics = async (cohort) => {
-    setAnalyticsModal(cohort);
-    setAnalyticsLoading(true);
-    setAnalyticsData(null);
-    try {
-      const data = await getCohortAnalytics(token, cohort._id || cohort.id);
-      setAnalyticsData(data);
-    } catch (err) {
-      setAnalyticsData({ error: err.message });
-    } finally {
-      setAnalyticsLoading(false);
-    }
-  };
-
-  const handleAssignMentor = async (cohortId) => {
-    if (!selectedMentorId) return;
-    setAssignLoading(true);
-    try {
-      await assignMentor(token, cohortId, selectedMentorId);
-      setAssigningCohortId(null);
-      setSelectedMentorId('');
-      await fetchCohorts(token);
-    } catch (err) {
-      alert(err.message || 'Failed to assign mentor');
-    } finally {
-      setAssignLoading(false);
-    }
-  };
-
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard!'));
-  };
-
-  if (!authChecked) return null;
-
-  const statCards = [
-    { label: 'Total Cohorts', value: stats?.cohorts ?? stats?.totalCohorts ?? '—', icon: 'fa-layer-group', color: '#296c9e' },
-    { label: 'Total Mentors', value: stats?.mentors ?? stats?.totalMentors ?? '—', icon: 'fa-chalkboard-teacher', color: '#167F92' },
-    { label: 'Total Mentees', value: stats?.mentees ?? stats?.totalMentees ?? '—', icon: 'fa-user-graduate', color: '#64a0cc' },
-    { label: 'Pending Requests', value: stats?.pendingRequests ?? stats?.pending ?? '—', icon: 'fa-clock', color: '#e67e22' },
+  const TABS = [
+    ['dashboard', 'Overview', 'fa-gauge-high'],
+    ['requests', `Mentor requests${pending.length ? ` (${pending.length})` : ''}`, 'fa-user-clock'],
+    ['cohorts', 'Cohorts', 'fa-layer-group'],
+    ['mentors', 'Mentors', 'fa-chalkboard-user'],
   ];
 
   return (
-    <>
-      <style>{`
-        .admin-wrapper { min-height: 100vh; background: #f0f4f8; padding: 2rem 1rem; }
-        .admin-header { background: linear-gradient(135deg, #1a3a5c, #296c9e); color: #fff; border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; }
-        .admin-header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; }
-        .admin-header p { margin: 0; opacity: 0.8; font-size: 0.9rem; }
-        .nav-tabs .nav-link { color: #296c9e; font-weight: 600; border: none; border-bottom: 3px solid transparent; padding: 0.75rem 1.25rem; }
-        .nav-tabs .nav-link.active { color: #1a3a5c; border-bottom-color: #296c9e; background: transparent; }
-        .nav-tabs .nav-link:hover:not(.active) { border-bottom-color: #64a0cc; }
-        .nav-tabs { border-bottom: 2px solid #dee2e6; margin-bottom: 2rem; }
-        .stat-card { border: none; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); transition: transform 0.2s; }
-        .stat-card:hover { transform: translateY(-3px); }
-        .stat-card .card-body { padding: 1.5rem; }
-        .stat-icon { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0.15; position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); font-size: 1.5rem; }
-        .stat-value { font-size: 2.5rem; font-weight: 800; line-height: 1; }
-        .stat-label { color: #6c757d; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        .section-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); padding: 1.5rem; }
-        .table th { background: #f8f9fa; font-weight: 700; color: #333; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
-        .badge-pending { background: #fff3cd; color: #856404; }
-        .badge-approved { background: #d1e7dd; color: #0a3622; }
-        .badge-rejected { background: #f8d7da; color: #842029; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 1rem; }
-        .modal-box { background: #fff; border-radius: 16px; padding: 2rem; max-width: 520px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
-        .modal-title { color: #296c9e; font-weight: 700; font-size: 1.3rem; margin-bottom: 1rem; }
-        .modal-close { background: none; border: none; font-size: 1.5rem; color: #6c757d; cursor: pointer; float: right; line-height: 1; }
-        .btn-approve { background: #198754; border-color: #198754; color: #fff; }
-        .btn-approve:hover { background: #157347; border-color: #157347; color: #fff; }
-        .btn-reject { background: #dc3545; border-color: #dc3545; color: #fff; }
-        .btn-reject:hover { background: #bb2d3b; border-color: #bb2d3b; color: #fff; }
-        .btn-primary-custom { background: linear-gradient(135deg, #296c9e, #167F92); border: none; color: #fff; }
-        .btn-primary-custom:hover { opacity: 0.9; color: #fff; }
-        .empty-state { text-align: center; padding: 3rem 1rem; color: #6c757d; }
-        .empty-state i { font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 1rem; }
-        .password-display { background: #f0f7ff; border: 1px solid #c8e1f8; border-radius: 8px; padding: 1rem; font-family: monospace; font-size: 1.1rem; letter-spacing: 2px; text-align: center; color: #296c9e; font-weight: 700; }
-        .form-control:focus, .form-select:focus { border-color: #296c9e; box-shadow: 0 0 0 0.2rem rgba(41,108,158,0.25); }
-        .analytics-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #f0f0f0; }
-        .analytics-row:last-child { border-bottom: none; }
-        .analytics-label { color: #6c757d; font-weight: 600; }
-        .analytics-value { font-weight: 700; color: #296c9e; }
-      `}</style>
-
-      <div className="admin-wrapper">
-        <div className="container-fluid" style={{ maxWidth: '1400px', margin: '0 auto' }}>
-          {/* Header */}
-          <div className="admin-header">
-            <div>
-              <h1><i className="fas fa-tachometer-alt me-2"></i>Admin Panel</h1>
-              <p>TechNeeds Administration Dashboard</p>
-            </div>
+    <div className="tn-page">
+      <div className="tn-container">
+        <div className="tn-hero">
+          <div>
+            <span className="tn-eyebrow"><i className="fas fa-shield-halved" /> Admin panel</span>
+            <h1>Hello, {user?.name || 'Admin'}</h1>
+            <p>Approve mentors, run cohorts and keep an eye on progress.</p>
           </div>
+          <div className="tn-hero-actions">
+            <button className="tn-btn-ghost" onClick={() => { setTab('cohorts'); openCohort(null); }}><i className="fas fa-plus" /> New cohort</button>
+          </div>
+        </div>
 
-          {/* Tabs */}
-          <ul className="nav nav-tabs">
-            {[
-              { id: 'dashboard', icon: 'fa-chart-pie', label: 'Dashboard' },
-              { id: 'requests', icon: 'fa-user-check', label: 'Mentor Requests' },
-              { id: 'cohorts', icon: 'fa-layer-group', label: 'Cohorts' },
-              { id: 'mentors', icon: 'fa-chalkboard-teacher', label: 'Mentors' },
-            ].map((tab) => (
-              <li className="nav-item" key={tab.id}>
-                <button
-                  className={`nav-link${activeTab === tab.id ? ' active' : ''}`}
-                  onClick={() => setActiveTab(tab.id)}
-                  type="button"
-                >
-                  <i className={`fas ${tab.icon} me-2`}></i>{tab.label}
-                </button>
-              </li>
-            ))}
-          </ul>
+        {error && <Alert>{error}</Alert>}
+        {toast && <Alert type="success"><i className="fas fa-circle-check" /><span style={{ flex: 1 }}>{toast}</span><button onClick={() => setToast('')} aria-label="Dismiss" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.1rem' }}>×</button></Alert>}
 
-          {/* Dashboard Tab */}
-          {activeTab === 'dashboard' && (
-            <div>
-              {statsError && (
-                <div className="alert alert-danger"><i className="fas fa-exclamation-circle me-2"></i>{statsError}</div>
+        <div className="tn-tabs" role="tablist">
+          {TABS.map(([k, l, i]) => (
+            <button key={k} role="tab" aria-selected={tab === k} className={`tn-tab${tab === k ? ' active' : ''}`} onClick={() => setTab(k)}><i className={`fas ${i}`} /> {l}</button>
+          ))}
+        </div>
+
+        {/* ───── Overview ───── */}
+        {tab === 'dashboard' && (
+          <>
+            {!stats ? <Spinner /> : (
+              <div className="tn-grid-stats">
+                <div className="tn-stat"><span className="tn-stat-icon"><i className="fas fa-layer-group" /></span><div><div className="tn-stat-label">Cohorts</div><div className="tn-stat-value">{stats.cohorts}</div></div></div>
+                <div className="tn-stat"><span className="tn-stat-icon violet"><i className="fas fa-chalkboard-user" /></span><div><div className="tn-stat-label">Mentors</div><div className="tn-stat-value">{stats.mentors}</div></div></div>
+                <div className="tn-stat"><span className="tn-stat-icon amber"><i className="fas fa-user-graduate" /></span><div><div className="tn-stat-label">Mentees</div><div className="tn-stat-value">{stats.mentees}</div></div></div>
+                <div className="tn-stat"><span className="tn-stat-icon coral"><i className="fas fa-user-clock" /></span><div><div className="tn-stat-label">Pending requests</div><div className="tn-stat-value">{stats.pendingRequests}</div></div></div>
+              </div>
+            )}
+            {pending.length > 0 && (
+              <Alert type="warn"><i className="fas fa-bell" /><span style={{ flex: 1 }}><strong>{pending.length}</strong> mentor request{pending.length > 1 ? 's' : ''} waiting for your review.</span><button className="tn-btn tn-btn-sm" onClick={() => setTab('requests')}>Review</button></Alert>
+            )}
+            <div className="tn-card">
+              <h2>Cohorts at a glance</h2>
+              {!cohorts ? <Spinner /> : cohorts.length === 0 ? <Empty icon="fa-layer-group">No cohorts yet. Create your first one.</Empty> : (
+                <div className="tn-table-wrap"><table className="tn-table">
+                  <thead><tr><th>Cohort</th><th>Mentors</th><th>Mentees</th><th /></tr></thead>
+                  <tbody>{cohorts.map((c) => (
+                    <tr key={idOf(c)}><td><strong>{c.name}</strong></td><td>{c.mentors?.length || 0}</td><td>{c.menteeCount ?? 0}</td>
+                      <td style={{ textAlign: 'right' }}><button className="tn-btn-outline tn-btn-sm" onClick={() => showAnalytics(c)}><i className="fas fa-chart-simple" /> Analytics</button></td></tr>
+                  ))}</tbody></table></div>
               )}
-              {statsLoading ? (
-                <div className="text-center py-5">
-                  <div className="spinner-border" style={{ color: '#296c9e' }} role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                  <p className="mt-2 text-muted">Loading statistics…</p>
-                </div>
-              ) : (
-                <div className="row g-4">
-                  {statCards.map((card) => (
-                    <div className="col-sm-6 col-xl-3" key={card.label}>
-                      <div className="card stat-card h-100" style={{ borderLeft: `4px solid ${card.color}` }}>
-                        <div className="card-body position-relative">
-                          <div className="stat-label mb-2">{card.label}</div>
-                          <div className="stat-value" style={{ color: card.color }}>{card.value}</div>
-                          <div className="stat-icon" style={{ background: card.color, opacity: 0.1 }}>
-                            <i className={`fas ${card.icon}`} style={{ color: card.color, opacity: 1 }}></i>
+            </div>
+          </>
+        )}
+
+        {/* ───── Mentor requests ───── */}
+        {tab === 'requests' && (
+          <div className="tn-card">
+            <h2>Mentor requests</h2>
+            {!requests ? <Spinner /> : requests.length === 0 ? <Empty icon="fa-inbox">No requests yet.</Empty> : (
+              <div className="tn-table-wrap"><table className="tn-table">
+                <thead><tr><th>Applicant</th><th>Reason</th><th>Date</th><th>Status</th><th /></tr></thead>
+                <tbody>{requests.map((r) => {
+                  const st = r.status || 'pending';
+                  return (
+                    <tr key={idOf(r)}>
+                      <td><strong>{r.name}</strong><div className="tn-muted">{r.email}</div></td>
+                      <td style={{ maxWidth: 320 }}><span title={r.reason}>{r.reason?.length > 90 ? r.reason.slice(0, 90) + '…' : r.reason}</span></td>
+                      <td>{when(r.createdAt)}</td>
+                      <td><span className={`tn-pill ${st === 'approved' ? 'done' : st === 'rejected' ? 'closed' : 'upcoming'}`}>{st}</span></td>
+                      <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                        {st === 'pending' && <>
+                          <button className="tn-btn tn-btn-sm" disabled={busyId === idOf(r)} onClick={() => approve(r)}><i className="fas fa-check" /> Approve</button>{' '}
+                          <button className="tn-btn-danger" disabled={busyId === idOf(r)} onClick={() => reject(r)}>Reject</button>
+                        </>}
+                      </td>
+                    </tr>
+                  );
+                })}</tbody></table></div>
+            )}
+          </div>
+        )}
+
+        {/* ───── Cohorts ───── */}
+        {tab === 'cohorts' && (
+          <>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '1rem', flexWrap: 'wrap' }}>
+              <h2 style={{ fontSize: '1.2rem' }}>All cohorts</h2>
+              <button className="tn-btn" onClick={() => openCohort(null)}><i className="fas fa-plus" /> Create cohort</button>
+            </div>
+            {!cohorts ? <Spinner /> : cohorts.length === 0 ? <div className="tn-card"><Empty icon="fa-layer-group">No cohorts yet.</Empty></div> : (
+              <div className="tn-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))' }}>
+                {cohorts.map((c, i) => (
+                  <div key={idOf(c)} className="tn-cohort">
+                    <div className={`tn-cohort-top c${(i % 5) + 1}`}><span className="tn-cohort-icon"><i className="fas fa-layer-group" /></span></div>
+                    <div className="tn-cohort-body">
+                      <h2>{c.name}</h2>
+                      <p>{c.description || 'No description yet.'}</p>
+                      <div className="tn-cohort-meta"><span><i className="fas fa-user-graduate" />{c.menteeCount ?? 0} mentees</span></div>
+                      <div style={{ marginBottom: '0.9rem' }}>
+                        <div className="tn-label">Mentors</div>
+                        {(c.mentors || []).length === 0 ? <span className="tn-muted">None assigned</span> : c.mentors.map((m) => (
+                          <span key={idOf(m)} className="tn-chip">{m.name}<button onClick={() => doRemoveMentor(c, m)} aria-label={`Remove ${m.name}`} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0 }}><i className="fas fa-xmark" /></button></span>
+                        ))}
+                        {assignFor === idOf(c) ? (
+                          <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.5rem' }}>
+                            <select className="tn-select" value={mentorPick} onChange={(e) => setMentorPick(e.target.value)} aria-label="Choose mentor">
+                              <option value="">Select a mentor</option>
+                              {(mentors || []).filter((m) => !(c.mentors || []).some((x) => idOf(x) === idOf(m))).map((m) => <option key={idOf(m)} value={idOf(m)}>{m.name}</option>)}
+                            </select>
+                            <button className="tn-btn tn-btn-sm" disabled={!mentorPick} onClick={() => doAssign(c)}>Add</button>
+                            <button className="tn-btn-outline tn-btn-sm" onClick={() => { setAssignFor(null); setMentorPick(''); }}>×</button>
                           </div>
-                        </div>
+                        ) : <div><button className="tn-btn-outline tn-btn-sm" onClick={() => setAssignFor(idOf(c))}><i className="fas fa-user-plus" /> Assign mentor</button></div>}
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        <button className="tn-btn-outline tn-btn-sm" onClick={() => showAnalytics(c)}><i className="fas fa-chart-simple" /> Analytics</button>
+                        <button className="tn-btn-outline tn-btn-sm" onClick={() => openCohort(c)}><i className="fas fa-pen" /> Edit</button>
+                        <button className="tn-btn-danger" onClick={() => removeCohort(c)}><i className="fas fa-trash" /></button>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Mentor Requests Tab */}
-          {activeTab === 'requests' && (
-            <div className="section-card">
-              <div className="d-flex justify-content-between align-items-center mb-3">
-                <h5 className="mb-0 fw-bold" style={{ color: '#296c9e' }}>
-                  <i className="fas fa-user-check me-2"></i>Mentor Requests
-                </h5>
-                <button className="btn btn-sm btn-outline-secondary" onClick={() => fetchMentorRequests(token)}>
-                  <i className="fas fa-sync-alt me-1"></i>Refresh
-                </button>
+                  </div>
+                ))}
               </div>
+            )}
+          </>
+        )}
 
-              {requestsError && (
-                <div className="alert alert-danger"><i className="fas fa-exclamation-circle me-2"></i>{requestsError}</div>
-              )}
-
-              {requestsLoading ? (
-                <div className="text-center py-4">
-                  <div className="spinner-border" style={{ color: '#296c9e' }} role="status"></div>
-                  <p className="mt-2 text-muted">Loading requests…</p>
-                </div>
-              ) : mentorRequests.length === 0 ? (
-                <div className="empty-state">
-                  <i className="fas fa-inbox"></i>
-                  <p>No pending requests at this time.</p>
-                </div>
-              ) : (
-                <div className="table-responsive">
-                  <table className="table table-hover align-middle">
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Reason</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {mentorRequests.map((req) => (
-                        <tr key={req._id || req.id}>
-                          <td className="fw-semibold">{req.name}</td>
-                          <td>{req.email}</td>
-                          <td style={{ maxWidth: '220px' }}>
-                            <span title={req.reason}>{req.reason?.substring(0, 80)}{req.reason?.length > 80 ? '…' : ''}</span>
-                          </td>
-                          <td style={{ whiteSpace: 'nowrap' }}>
-                            {req.createdAt ? new Date(req.createdAt).toLocaleDateString() : '—'}
-                          </td>
-                          <td>
-                            <span className={`badge badge-${req.status || 'pending'}`} style={{ padding: '0.4em 0.7em', borderRadius: '20px' }}>
-                              {req.status || 'pending'}
-                            </span>
-                          </td>
-                          <td>
-                            {(!req.status || req.status === 'pending') && (
-                              <div className="d-flex gap-2">
-                                <button
-                                  className="btn btn-sm btn-approve"
-                                  onClick={() => handleApprove(req._id || req.id)}
-                                  disabled={approvingId === (req._id || req.id)}
-                                >
-                                  {approvingId === (req._id || req.id)
-                                    ? <span className="spinner-border spinner-border-sm" role="status"></span>
-                                    : <><i className="fas fa-check me-1"></i>Approve</>
-                                  }
-                                </button>
-                                <button
-                                  className="btn btn-sm btn-reject"
-                                  onClick={() => handleReject(req._id || req.id)}
-                                  disabled={rejectingId === (req._id || req.id)}
-                                >
-                                  {rejectingId === (req._id || req.id)
-                                    ? <span className="spinner-border spinner-border-sm" role="status"></span>
-                                    : <><i className="fas fa-times me-1"></i>Reject</>
-                                  }
-                                </button>
-                              </div>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Cohorts Tab */}
-          {activeTab === 'cohorts' && (
-            <div className="section-card">
-              <div className="d-flex justify-content-between align-items-center mb-3">
-                <h5 className="mb-0 fw-bold" style={{ color: '#296c9e' }}>
-                  <i className="fas fa-layer-group me-2"></i>Cohorts
-                </h5>
-                <button className="btn btn-primary-custom" onClick={openCreateCohort}>
-                  <i className="fas fa-plus me-2"></i>Create Cohort
-                </button>
-              </div>
-
-              {cohortsError && (
-                <div className="alert alert-danger"><i className="fas fa-exclamation-circle me-2"></i>{cohortsError}</div>
-              )}
-
-              {cohortsLoading ? (
-                <div className="text-center py-4">
-                  <div className="spinner-border" style={{ color: '#296c9e' }} role="status"></div>
-                  <p className="mt-2 text-muted">Loading cohorts…</p>
-                </div>
-              ) : cohorts.length === 0 ? (
-                <div className="empty-state">
-                  <i className="fas fa-layer-group"></i>
-                  <p>No cohorts yet. Create your first cohort!</p>
-                </div>
-              ) : (
-                <div className="table-responsive">
-                  <table className="table table-hover align-middle">
-                    <thead>
-                      <tr>
-                        <th>Title</th>
-                        <th>Description</th>
-                        <th># Mentors</th>
-                        <th># Mentees</th>
-                        <th>Assign Mentor</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {cohorts.map((cohort) => (
-                        <tr key={cohort._id || cohort.id}>
-                          <td className="fw-semibold">{cohort.name || cohort.title}</td>
-                          <td style={{ maxWidth: '200px' }}>
-                            <span title={cohort.description}>{cohort.description?.substring(0, 60)}{cohort.description?.length > 60 ? '…' : ''}</span>
-                          </td>
-                          <td>{cohort.mentors?.length ?? cohort.mentorCount ?? 0}</td>
-                          <td>{cohort.mentees?.length ?? cohort.menteeCount ?? 0}</td>
-                          <td style={{ minWidth: '200px' }}>
-                            {assigningCohortId === (cohort._id || cohort.id) ? (
-                              <div className="d-flex gap-2 align-items-center">
-                                <select
-                                  className="form-select form-select-sm"
-                                  value={selectedMentorId}
-                                  onChange={(e) => setSelectedMentorId(e.target.value)}
-                                >
-                                  <option value="">Select mentor…</option>
-                                  {mentors.map((m) => (
-                                    <option key={m._id || m.id} value={m._id || m.id}>{m.name}</option>
-                                  ))}
-                                </select>
-                                <button
-                                  className="btn btn-sm btn-approve"
-                                  onClick={() => handleAssignMentor(cohort._id || cohort.id)}
-                                  disabled={assignLoading || !selectedMentorId}
-                                >
-                                  {assignLoading ? <span className="spinner-border spinner-border-sm"></span> : '✓'}
-                                </button>
-                                <button className="btn btn-sm btn-outline-secondary" onClick={() => { setAssigningCohortId(null); setSelectedMentorId(''); }}>✕</button>
-                              </div>
-                            ) : (
-                              <button className="btn btn-sm btn-outline-primary" onClick={() => { setAssigningCohortId(cohort._id || cohort.id); setSelectedMentorId(''); }}>
-                                <i className="fas fa-user-plus me-1"></i>Assign
-                              </button>
-                            )}
-                          </td>
-                          <td>
-                            <div className="d-flex gap-1 flex-wrap">
-                              <button className="btn btn-sm btn-outline-secondary" onClick={() => openEditCohort(cohort)}>
-                                <i className="fas fa-edit me-1"></i>Edit
-                              </button>
-                              <button className="btn btn-sm btn-outline-info" onClick={() => handleViewAnalytics(cohort)}>
-                                <i className="fas fa-chart-bar me-1"></i>Analytics
-                              </button>
-                              <button className="btn btn-sm btn-reject" onClick={() => handleDeleteCohort(cohort._id || cohort.id)}>
-                                <i className="fas fa-trash me-1"></i>Delete
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Mentors Tab */}
-          {activeTab === 'mentors' && (
-            <div className="section-card">
-              <div className="d-flex justify-content-between align-items-center mb-3">
-                <h5 className="mb-0 fw-bold" style={{ color: '#296c9e' }}>
-                  <i className="fas fa-chalkboard-teacher me-2"></i>Approved Mentors
-                </h5>
-                <button className="btn btn-sm btn-outline-secondary" onClick={() => fetchMentors(token)}>
-                  <i className="fas fa-sync-alt me-1"></i>Refresh
-                </button>
-              </div>
-
-              {mentorsError && (
-                <div className="alert alert-danger"><i className="fas fa-exclamation-circle me-2"></i>{mentorsError}</div>
-              )}
-
-              {mentorsLoading ? (
-                <div className="text-center py-4">
-                  <div className="spinner-border" style={{ color: '#296c9e' }} role="status"></div>
-                  <p className="mt-2 text-muted">Loading mentors…</p>
-                </div>
-              ) : mentors.length === 0 ? (
-                <div className="empty-state">
-                  <i className="fas fa-chalkboard-teacher"></i>
-                  <p>No approved mentors yet.</p>
-                </div>
-              ) : (
-                <div className="table-responsive">
-                  <table className="table table-hover align-middle">
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Cohorts Assigned</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {mentors.map((mentor) => (
-                        <tr key={mentor._id || mentor.id}>
-                          <td className="fw-semibold">
-                            <i className="fas fa-user-circle me-2 text-muted"></i>
-                            {mentor.name}
-                          </td>
-                          <td>{mentor.email}</td>
-                          <td>
-                            {mentor.cohorts?.length > 0
-                              ? mentor.cohorts.map((c, i) => (
-                                  <span key={i} className="badge bg-secondary me-1" style={{ background: '#296c9e !important' }}>{c.name || c.title || c}</span>
-                                ))
-                              : <span className="text-muted">None</span>
-                            }
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+        {/* ───── Mentors ───── */}
+        {tab === 'mentors' && (
+          <div className="tn-card">
+            <h2>Approved mentors</h2>
+            {!mentors ? <Spinner /> : mentors.length === 0 ? <Empty icon="fa-chalkboard-user">No mentors yet. Approve a request to add one.</Empty> : (
+              <div className="tn-table-wrap"><table className="tn-table">
+                <thead><tr><th>Mentor</th><th>Cohorts</th></tr></thead>
+                <tbody>{mentors.map((m) => (
+                  <tr key={idOf(m)}><td><strong>{m.name}</strong><div className="tn-muted">{m.email}</div></td>
+                    <td>{(m.programs || []).length ? m.programs.map((p) => <span key={idOf(p)} className="tn-chip">{p.name}</span>) : <span className="tn-muted">Not assigned</span>}</td></tr>
+                ))}</tbody></table></div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Approved Password Modal */}
-      {approvedPassword && (
-        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setApprovedPassword(null); }}>
-          <div className="modal-box">
-            <button className="modal-close" onClick={() => setApprovedPassword(null)}>×</button>
-            <div className="text-center mb-3">
-              <i className="fas fa-check-circle text-success" style={{ fontSize: '2.5rem' }}></i>
+      {/* ───── Modals ───── */}
+      {approved && (
+        <div className="tn-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setApproved(null); }}>
+          <div className="tn-modal" style={{ maxWidth: 460 }}>
+            <h2><i className="fas fa-circle-check" style={{ color: '#16a34a' }} /> Mentor approved</h2>
+            <p className="tn-muted" style={{ marginBottom: '1rem' }}>Share these login details with <strong>{approved.name}</strong>. The password is shown only once.</p>
+            <div className="tn-card" style={{ background: '#f4f8fc', boxShadow: 'none' }}>
+              <div className="tn-label">Email</div><code>{approved.email}</code>
+              <div className="tn-label" style={{ marginTop: '0.8rem' }}>Temporary password</div><code style={{ fontSize: '1.1rem' }}>{approved.password}</code>
             </div>
-            <h5 className="modal-title text-center">Mentor Approved!</h5>
-            <p className="text-muted text-center mb-3">The mentor&apos;s temporary password has been generated. Please share it securely.</p>
-            <div className="password-display mb-3">{approvedPassword.password}</div>
-            <div className="d-flex gap-2 justify-content-center">
-              <button className="btn btn-primary-custom" onClick={() => copyToClipboard(approvedPassword.password)}>
-                <i className="fas fa-copy me-2"></i>Copy to Clipboard
-              </button>
-              <button className="btn btn-outline-secondary" onClick={() => setApprovedPassword(null)}>Close</button>
+            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+              <button className="tn-btn-outline" onClick={() => navigator.clipboard.writeText(`Email: ${approved.email}\nPassword: ${approved.password}`).then(() => setToast('Copied to clipboard'))}><i className="fas fa-copy" /> Copy</button>
+              <button className="tn-btn" onClick={() => setApproved(null)}>Done</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Cohort Form Modal */}
-      {showCohortModal && (
-        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowCohortModal(false); }}>
-          <div className="modal-box">
-            <button className="modal-close" onClick={() => setShowCohortModal(false)}>×</button>
-            <h5 className="modal-title">{editingCohort ? 'Edit Cohort' : 'Create New Cohort'}</h5>
-            <form onSubmit={handleCohortSubmit} noValidate>
-              {cohortFormError && (
-                <div className="alert alert-danger py-2"><i className="fas fa-exclamation-circle me-2"></i>{cohortFormError}</div>
-              )}
-              <div className="mb-3">
-                <label className="form-label fw-semibold" htmlFor="cohortTitle">Title</label>
-                <input
-                  id="cohortTitle"
-                  type="text"
-                  className="form-control"
-                  placeholder="Cohort title"
-                  value={cohortForm.title}
-                  onChange={(e) => setCohortForm({ ...cohortForm, title: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label fw-semibold" htmlFor="cohortDescription">Description</label>
-                <textarea
-                  id="cohortDescription"
-                  className="form-control"
-                  rows={3}
-                  placeholder="Brief description of this cohort"
-                  value={cohortForm.description}
-                  onChange={(e) => setCohortForm({ ...cohortForm, description: e.target.value })}
-                />
-              </div>
-              <div className="mb-4">
-                <label className="form-label fw-semibold" htmlFor="cohortSyllabus">Syllabus</label>
-                <textarea
-                  id="cohortSyllabus"
-                  className="form-control"
-                  rows={5}
-                  placeholder="Outline the syllabus topics…"
-                  value={cohortForm.syllabus}
-                  onChange={(e) => setCohortForm({ ...cohortForm, syllabus: e.target.value })}
-                />
-              </div>
-              <div className="d-flex justify-content-end gap-2">
-                <button type="button" className="btn btn-outline-secondary" onClick={() => setShowCohortModal(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary-custom" disabled={cohortSaving}>
-                  {cohortSaving
-                    ? <><span className="spinner-border spinner-border-sm me-2"></span>Saving…</>
-                    : <><i className="fas fa-save me-2"></i>{editingCohort ? 'Update' : 'Create'} Cohort</>
-                  }
-                </button>
-              </div>
-            </form>
-          </div>
+      {cohortModal && (
+        <div className="tn-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setCohortModal(false); }}>
+          <form className="tn-modal" onSubmit={saveCohort}>
+            <h2>{editing ? 'Edit cohort' : 'Create cohort'}</h2>
+            <Alert>{formError}</Alert>
+            <div className="tn-field"><label htmlFor="ct">Name</label><input id="ct" className="tn-input" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Web Development" required /></div>
+            <div className="tn-field"><label htmlFor="cd">Description</label><textarea id="cd" className="tn-textarea" style={{ minHeight: 80 }} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="What will mentees learn?" /></div>
+            <div className="tn-field"><label htmlFor="cs">Syllabus</label><textarea id="cs" className="tn-textarea" value={form.syllabus} onChange={(e) => setForm({ ...form, syllabus: e.target.value })} placeholder={'Week 1: HTML & CSS\nWeek 2: JavaScript basics'} /></div>
+            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+              <button type="button" className="tn-btn-outline" onClick={() => setCohortModal(false)}>Cancel</button>
+              <button className="tn-btn" disabled={saving}>{saving ? 'Saving...' : editing ? 'Save changes' : 'Create cohort'}</button>
+            </div>
+          </form>
         </div>
       )}
 
-      {/* Analytics Modal */}
-      {analyticsModal && (
-        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setAnalyticsModal(null); }}>
-          <div className="modal-box">
-            <button className="modal-close" onClick={() => setAnalyticsModal(null)}>×</button>
-            <h5 className="modal-title">
-              <i className="fas fa-chart-bar me-2"></i>Analytics: {analyticsModal.name || analyticsModal.title}
-            </h5>
-            {analyticsLoading ? (
-              <div className="text-center py-4">
-                <div className="spinner-border" style={{ color: '#296c9e' }} role="status"></div>
-                <p className="mt-2 text-muted">Loading analytics…</p>
-              </div>
-            ) : analyticsData?.error ? (
-              <div className="alert alert-danger">{analyticsData.error}</div>
-            ) : analyticsData ? (
-              <div>
-                <div className="analytics-row">
-                  <span className="analytics-label"><i className="fas fa-user-graduate me-2"></i>Mentee Count</span>
-                  <span className="analytics-value">{analyticsData.menteeCount ?? analyticsData.mentees ?? '—'}</span>
+      {analytics && (
+        <div className="tn-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setAnalytics(null); }}>
+          <div className="tn-modal" style={{ maxWidth: 560 }}>
+            <h2>Analytics: {analytics.cohort.name}</h2>
+            {!analytics.data ? <Spinner /> : analytics.data.error ? <Alert>{analytics.data.error}</Alert> : (
+              <>
+                <div className="tn-grid-stats" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+                  <div className="tn-stat" style={{ flexDirection: 'column', alignItems: 'flex-start' }}><div className="tn-stat-label">Mentees</div><div className="tn-stat-value">{analytics.data.menteeCount}</div></div>
+                  <div className="tn-stat" style={{ flexDirection: 'column', alignItems: 'flex-start' }}><div className="tn-stat-label">Avg quiz score</div><div className="tn-stat-value">{analytics.data.avgQuizScore}%</div></div>
+                  <div className="tn-stat" style={{ flexDirection: 'column', alignItems: 'flex-start' }}><div className="tn-stat-label">Completion</div><div className="tn-stat-value">{analytics.data.completionRate}%</div></div>
                 </div>
-                <div className="analytics-row">
-                  <span className="analytics-label"><i className="fas fa-star me-2"></i>Avg Quiz Score</span>
-                  <span className="analytics-value">
-                    {analyticsData.avgQuizScore !== undefined ? `${analyticsData.avgQuizScore}%` : '—'}
-                  </span>
-                </div>
-                <div className="analytics-row">
-                  <span className="analytics-label"><i className="fas fa-tasks me-2"></i>Completion Rate</span>
-                  <span className="analytics-value">
-                    {analyticsData.completionRate !== undefined ? `${analyticsData.completionRate}%` : '—'}
-                  </span>
-                </div>
-              </div>
-            ) : null}
+                {analytics.data.topMentee && <p className="tn-muted"><i className="fas fa-trophy" style={{ color: '#f5b301' }} /> Top mentee: <strong>{analytics.data.topMentee.name}</strong> with {analytics.data.topMentee.points} points.</p>}
+              </>
+            )}
+            <div style={{ textAlign: 'right', marginTop: '1rem' }}><button className="tn-btn" onClick={() => setAnalytics(null)}>Close</button></div>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

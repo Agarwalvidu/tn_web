@@ -1,46 +1,17 @@
-"use client";
-import ParticleAnimation from "@/components/heroanimation/hero";
+import Link from 'next/link';
+import '@/components/ui/tn.css';
 
-export default function ComingSoon() {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        color: '#296c9e',
-        padding: '1rem',
-        textAlign: 'center'
-      }}>
+export const metadata = { title: 'Events | TechNeeds' };
 
-        <ParticleAnimation/>
-        <h1 style={{
-          fontSize: '3rem',
-          fontWeight: 'bold',
-          animation: 'pulse 2s infinite'
-        }}>
-          Coming Soon...
-        </h1>
-        <p style={{
-          fontSize: '1.2rem',
-          opacity: 0.85,
-          maxWidth: '600px',
-          marginTop: '1rem'
-        }}>
-          We're working hard to bring you something amazing. Stay tuned!
-        </p>
-        <style jsx>{`
-          @keyframes pulse {
-            0%, 100% {
-              opacity: 1;
-            }
-            50% {
-              opacity: 0.7;
-            }
-          }
-        `}</style>
+export default function EventsPage() {
+  return (
+    <div className="tn-page" style={{ display: 'grid', placeItems: 'center' }}>
+      <div className="tn-card" style={{ maxWidth: 520, textAlign: 'center', padding: '3rem 2rem' }}>
+        <span className="tn-stat-icon" style={{ margin: '0 auto 1.2rem', width: 64, height: 64, fontSize: '1.6rem', borderRadius: 18 }}><i className="fas fa-calendar-days" /></span>
+        <h1 style={{ fontSize: '1.9rem', marginBottom: '0.6rem' }}>Events are coming soon</h1>
+        <p className="tn-muted" style={{ fontSize: '1rem', marginBottom: '1.5rem' }}>We&apos;re putting together hackathons, speaker sessions and more. Stay tuned!</p>
+        <Link href="/" className="tn-btn">Back to home</Link>
       </div>
-    );
-  }
-  
+    </div>
+  );
+}

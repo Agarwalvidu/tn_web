@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from 'recharts';
 import Avatar, { AVATAR_KEYS } from '../ui/Avatar';
 import { Alert, Empty } from '../ui/Common';
 import { formatDateTime } from '../../lib/video';
@@ -20,15 +19,15 @@ export default function ProfileView({ profile, ai, onRefresh, onAvatar, busy }) 
   return (
     <>
       <div className="tn-hero">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <Avatar avatarKey={profile.avatar} name={profile.name} size={72} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.1rem' }}>
+          <span style={{ borderRadius: '50%', boxShadow: '0 0 0 4px rgba(255,255,255,0.25)', display: 'inline-flex' }}><Avatar avatarKey={profile.avatar} name={profile.name} size={78} /></span>
           <div>
             <h1>{profile.name}</h1>
             <p>{profile.enrollmentNumber} &middot; {profile.cohorts.map((c) => c.name).join(', ') || 'No cohort yet'}</p>
           </div>
         </div>
         {onAvatar && (
-          <button className="tn-btn-outline" style={{ background: 'rgba(255,255,255,0.12)', color: '#fff', borderColor: '#fff' }} onClick={() => setPicker(!picker)}>
+          <button className="tn-btn-ghost" onClick={() => setPicker(!picker)}>
             <i className="fas fa-palette" /> Change avatar
           </button>
         )}
@@ -49,10 +48,10 @@ export default function ProfileView({ profile, ai, onRefresh, onAvatar, busy }) 
       )}
 
       <div className="tn-grid-stats">
-        <div className="tn-stat"><div className="tn-stat-label">Total points</div><div className="tn-stat-value">{profile.totalPoints}</div></div>
-        <div className="tn-stat"><div className="tn-stat-label">Best rank</div><div className="tn-stat-value">{profile.bestRank ? `#${profile.bestRank}` : '-'}</div></div>
-        <div className="tn-stat"><div className="tn-stat-label">Day streak</div><div className="tn-stat-value">{profile.streak}</div></div>
-        <div className="tn-stat"><div className="tn-stat-label">Badges</div><div className="tn-stat-value">{earned.length}/{profile.badges.length}</div></div>
+        <div className="tn-stat"><span className="tn-stat-icon"><i className="fas fa-star" /></span><div><div className="tn-stat-label">Total points</div><div className="tn-stat-value">{profile.totalPoints}</div></div></div>
+        <div className="tn-stat"><span className="tn-stat-icon amber"><i className="fas fa-trophy" /></span><div><div className="tn-stat-label">Best rank</div><div className="tn-stat-value">{profile.bestRank ? `#${profile.bestRank}` : '-'}</div></div></div>
+        <div className="tn-stat"><span className="tn-stat-icon coral"><i className="fas fa-fire" /></span><div><div className="tn-stat-label">Day streak</div><div className="tn-stat-value">{profile.streak}</div></div></div>
+        <div className="tn-stat"><span className="tn-stat-icon violet"><i className="fas fa-medal" /></span><div><div className="tn-stat-label">Badges</div><div className="tn-stat-value">{earned.length}/{profile.badges.length}</div></div></div>
       </div>
 
       <div className="tn-card">
@@ -87,8 +86,8 @@ export default function ProfileView({ profile, ai, onRefresh, onAvatar, busy }) 
         <h2><i className="fas fa-compass" style={{ color: '#296c9e' }} /> What to learn next</h2>
         <div className="tn-grid">
           {ai.recommendations.map((r, i) => (
-            <div key={i} style={{ background: '#f4f8fc', borderRadius: 10, padding: '0.9rem 1rem' }}>
-              <div style={{ fontWeight: 700, color: '#1a3a5c', marginBottom: 4 }}>{i + 1}. {r.title}</div>
+            <div key={i} className="tn-rec">
+              <div style={{ fontWeight: 700, color: 'var(--tn-ink)', marginBottom: 6 }}><span className="tn-rec-n">{i + 1}</span>{r.title}</div>
               <div className="tn-muted">{r.reason}</div>
             </div>
           ))}
@@ -100,19 +99,16 @@ export default function ProfileView({ profile, ai, onRefresh, onAvatar, busy }) 
         {chartData.length === 0 ? (
           <Empty icon="fa-chart-column">No quizzes taken yet. Your scores will appear here.</Empty>
         ) : (
-          <div style={{ width: '100%', height: 260 }}>
-            <ResponsiveContainer>
-              <BarChart data={chartData} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 12 }} />
-                <Tooltip formatter={(v) => [`${v}%`, 'Score']} labelFormatter={(_, p) => (p && p[0] ? p[0].payload.full : '')} />
-                <Bar dataKey="pct" radius={[6, 6, 0, 0]}>
-                  {chartData.map((d, i) => <Cell key={i} fill={d.pct >= 75 ? '#167F92' : d.pct >= 50 ? '#296c9e' : '#e67e22'} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          <>
+            <div className="tn-bars" role="img" aria-label="Quiz scores in percent">
+              {chartData.map((d, k) => (
+                <div className="tn-bar" key={k} title={`${d.full}: ${d.pct}%`}>
+                  <div className={`tn-bar-fill${d.pct >= 75 ? '' : d.pct >= 50 ? ' mid' : ' low'}`} style={{ height: `${Math.max(d.pct, 8)}%` }}>{d.pct}%</div>
+                </div>
+              ))}
+            </div>
+            <div className="tn-bar-labels">{chartData.map((d, k) => <span key={k} title={d.full}>{d.name}</span>)}</div>
+          </>
         )}
       </div>
 

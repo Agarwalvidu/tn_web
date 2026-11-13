@@ -20,6 +20,9 @@ npm run dev                 # http://localhost:3000
 ```
 `npm run seed` deletes every collection first. Never run it against real data.
 
+## Frontend design
+Shared design tokens live in `frontend/src/app/globals.css`; reusable component styles (`tn-*` classes) in `frontend/src/components/ui/tn.css`. The landing page is `components/Home/` (hero, roadmap, roles, features, cohorts, team, testimonials). Charts are pure CSS, so there is no chart library to install.
+
 ## Demo logins
 | Role | Login | Password |
 |---|---|---|
@@ -30,6 +33,13 @@ npm run dev                 # http://localhost:3000
 | Mentee | TN26-0002 (Diya, Web Dev) | Pass@1234 |
 | Mentee | TN26-0003 ... TN26-0010 | Pass@1234 (forced password change on first login) |
 
+## Demo script (3 minutes)
+1. Home: zigzag roadmap, team section, **Get Started** -> Cohorts -> **Login to join**.
+2. Request mentor access on the login page, then log in as **Admin**: approve the request (temp password shown once), create a cohort, assign a mentor.
+3. Log in as **Mentor** (Priya): add mentees (credentials table + CSV), add a video, create a quiz with a deadline.
+4. Log in as **Mentee** (TN26-0001): dashboard, cohort page (syllabus, video, quiz), take the quiz, see points.
+5. **Leaderboard** updates; open **My AI Profile** (avatar, badges, chart, summary, 3 recommendations).
+6. Back as Mentor: open a mentee's AI Profile (read-only).
 
 ## Points (rule-based, in `backend/utils/points.js`)
 Quiz `round(score/max*100)` + 10 on-time bonus per quiz, +5 per completed video, up to 100 per verified project.

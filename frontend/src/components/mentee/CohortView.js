@@ -68,13 +68,20 @@ export default function CohortView() {
       <div className="tn-container">
         <div className="tn-hero">
           <div>
-            <h1>{data.cohort.name}</h1>
+            <Link href="/dashboard" className="tn-eyebrow" style={{ color: '#7ee6e0' }}><i className="fas fa-arrow-left" /> Dashboard</Link>
+            <h1 style={{ marginTop: '0.4rem' }}>{data.cohort.name}</h1>
             <p>{data.cohort.description}{data.mentors.length > 0 && ` · Mentor${data.mentors.length > 1 ? 's' : ''}: ${data.mentors.join(', ')}`}</p>
           </div>
           {data.me && (
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '1.8rem', fontWeight: 700 }}>#{data.me.rank} <span style={{ fontSize: '0.9rem', opacity: 0.8 }}>of {data.me.of}</span></div>
-              <div style={{ opacity: 0.85 }}>{data.me.points} points</div>
+            <div style={{ display: 'flex', gap: '0.8rem' }}>
+              <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: 16, padding: '0.7rem 1.2rem', textAlign: 'center' }}>
+                <div style={{ fontSize: '1.7rem', fontWeight: 800, lineHeight: 1.1 }}>#{data.me.rank}</div>
+                <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>of {data.me.of}</div>
+              </div>
+              <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: 16, padding: '0.7rem 1.2rem', textAlign: 'center' }}>
+                <div style={{ fontSize: '1.7rem', fontWeight: 800, lineHeight: 1.1 }}>{data.me.points}</div>
+                <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>points</div>
+              </div>
             </div>
           )}
         </div>
@@ -103,11 +110,11 @@ export default function CohortView() {
               const embed = toEmbedUrl(v.url);
               const isOpen = openVideo === v._id;
               return (
-                <div key={v._id} style={{ borderBottom: '1px solid #eef1f5', padding: '0.85rem 0' }}>
+                <div key={v._id} className="tn-video-row" style={{ display: 'block' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
-                    <div>
-                      <strong>{v.title}</strong>{' '}
-                      {v.completed && <span className="tn-pill done"><i className="fas fa-check" /> Completed</span>}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                      <span className={`tn-video-icon${v.completed ? ' done' : ''}`}><i className={`fas ${v.completed ? 'fa-check' : 'fa-play'}`} /></span>
+                      <div><strong>{v.title}</strong>{v.completed && <div><span className="tn-pill done">Completed</span></div>}</div>
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                       {embed ? (

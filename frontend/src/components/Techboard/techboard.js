@@ -1,74 +1,56 @@
-"use client";
+'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { getUser } from '../../lib/auth';
+import { Spinner } from '../ui/Common';
+import '../ui/tn.css';
 import './techboard.css';
 
-const Tech = () => {
+const HOME = { admin: '/admin', mentor: '/mentor', mentee: '/dashboard' };
+
+// The portal entry point: signed-in people go straight to their own home, everyone else picks a path.
+export default function Techboard() {
   const router = useRouter();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [role, setRole] = useState(null);
-  const [showRoleSelection, setShowRoleSelection] = useState(false);
-  const [shouldRedirect, setShouldRedirect] = useState(false);
+  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    // Check if there is a mentee or mentor token in localStorage
-    const menteeToken = localStorage.getItem('menteeToken');
-    const mentorToken = localStorage.getItem('token');
-
-    if (menteeToken) {
-      setIsLoggedIn(true);
-      setRole('mentee');
-      setShouldRedirect(true);
-    } else if (mentorToken) {
-      setIsLoggedIn(true);
-      setRole('mentor');
-      setShouldRedirect(true);
-    } else {
-      setIsLoggedIn(false);
-      setShowRoleSelection(true);
+    const user = getUser();
+    if (user && HOME[user.role]) {
+      router.replace(HOME[user.role]);
+      return;
     }
-  }, []);
+    setChecked(true);
+  }, [router]);
 
-  useEffect(() => {
-    if (shouldRedirect) {
-      if (role === 'mentor') {
-        router.push('/mentor');
-      } else if (role === 'mentee') {
-        router.push('/dashboard');
-      }
-    }
-  }, [shouldRedirect, role, router]);
+  if (!checked) return <div className="tn-page"><Spinner /></div>;
 
-  const handleRoleSelection = (selectedRole) => {
-    if (selectedRole === 'mentee') {
-      router.push('/mentee');
-    } else if (selectedRole === 'mentor') {
-      router.push('/mentor');
-    } else if (selectedRole === 'new') {
-      router.push('/home');
-    }
-  };
-
-  if (!showRoleSelection && !shouldRedirect) {
-    return <p>Loading...</p>;
-  }
+  const paths = [
+    { href: '/login', icon: 'fa-user-graduate', title: 'I am a mentee', text: 'Log in with the enrollment number your mentor gave you.', cta: 'Mentee login' },
+    { href: '/login', icon: 'fa-chalkboard-user', title: 'I am a mentor', text: 'Log in, or request mentor access from the admin.', cta: 'Mentor login' },
+    { href: '/cohorts', icon: 'fa-compass', title: 'I am new here', text: 'Explore cohorts and find the track that fits you.', cta: 'Browse cohorts' },
+  ];
 
   return (
-    <div className="tech-container">
-      {showRoleSelection && (
-        <div className="techboard">
-          <h2 className="heading">Oops, you are not associated with TechNeeds yet.</h2>
-          <p className="subheading">Already Joined? / Want to Join?</p>
-          <div className="button-container">
-            <button className="role-button" onClick={() => handleRoleSelection('mentee')}>Mentee</button>
-            <button className="role-button" onClick={() => handleRoleSelection('mentor')}>Mentor</button>
-            <button className="role-button" onClick={() => handleRoleSelection('new')}>New Person</button>
-          </div>
+    <div className="tn-page">
+      <div className="tn-container tb-wrap">
+        <div className="tb-head">
+          <span className="tn-eyebrow"><i className="fas fa-microchip" /> Techboard</span>
+          <h1>Welcome to the TechNeeds portal</h1>
+          <p>Let&apos;s get you to the right place.</p>
         </div>
-      )}
+        <div className="tb-grid">
+          {paths.map((p) => (
+            <Link key={p.title} href={p.href} className="tn-card lift tb-card">
+              <span className="tb-icon"><i className={`fas ${p.icon}`} /></span>
+              <h2>{p.title}</h2>
+              <p>{p.text}</p>
+              <span className="tb-cta">{p.cta} <i className="fas fa-arrow-right" /></span>
+            </Link>
+          ))}
+        </div>
+      </div>
     </div>
   );
-};
-
-export default Tech;
+}
